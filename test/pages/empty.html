@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Hyper-JSON Engine</title>
+    <script src="../../dist/index.js" />
+    <script>
+        console.info("Hje", Hje);
+    </script>
+</head>
+
+<body>
+    <h1>Hyper-JSON Engine</h1>
+
+    <div id="demo-container"></div>
+    <script>
+        Hje.render("demo-container", {
+            attr: {
+                type: "circle",
+            },
+            style: {
+                "color": "#808080",
+                "font-size": "14px"
+            },
+            on: {
+                click(ev) {
+                    console.log("ul click", ev);
+                }
+            },
+            children: [
+                {
+                    tagName: "ul",
+                    children: [
+                        { tagName: "li", children: "ABCDEFG" },
+                        { tagName: "li", children: "HIJKLMN" },
+                        { tagName: "li", children: "OPQ RST" },
+                        { tagName: "li", children: "UVW XYZ" },
+                    ]
+                }
+            ]
+        });
+    </script>
+</body>
+
+</html>
