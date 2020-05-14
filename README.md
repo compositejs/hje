@@ -10,13 +10,15 @@ You can install this by [npm](https://www.npmjs.com/package/hje).
 npm i hje
 ```
 
-And you can also insert the [JavaScript bundled file](./dist/index.js) by `script` tag into your web page directly and use `Hje` namespace to access.
+And you can also insert the [JavaScript bundled file](https://github.com/compositejs/hje/raw/master/dist/index.js) by `script` tag into your web page directly and use `Hje` namespace to access.
 
 [Click here](https://github.com/compositejs/hje/wiki/installation) to read more.
 
 ## Features
 
 You can use JSON to generate HTML.
+
+- [JSON → HTML](https://github.com/compositejs/hje/wiki/tohtml)
 
 ## Building / Testing
 
