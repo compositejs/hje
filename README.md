@@ -16,7 +16,7 @@ And you can also insert the [JavaScript bundled file](https://github.com/composi
 
 ## Features
 
-You can use JSON to generate HTML.
+Hyper-Json Engine (Hje) provides a way to describe the view by JavaScript with event and binding. It can render to HTML or customized view by the description model.
 
 - [JSON → HTML](https://github.com/compositejs/hje/wiki/tohtml)
 

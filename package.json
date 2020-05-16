@@ -16,7 +16,9 @@
     "html",
     "mvvm",
     "template",
-    "view"
+    "view",
+    "mvc",
+    "render"
   ],
   "author": "Kingcean Tuan <kingcean@live.com> (http://kingcean.org)",
   "license": "MIT",

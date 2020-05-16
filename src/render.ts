@@ -14,6 +14,11 @@ export interface DescriptionContract {
     tagName?: string;
 
     /**
+     * The key.
+     */
+    key?: string;
+
+    /**
      * The class name of style.
      */
     styleRefs?: string[];
@@ -84,6 +89,11 @@ export interface RenderingOptions {
      * @param context  The context.
      */
     onLoad?(context: ViewGeneratingContextContract<any>): void;
+
+    /**
+     * Gets or sets the property.
+     */
+    [property: string]: any;
 }
 
 /**
@@ -113,19 +123,19 @@ export interface ViewGeneratingContextContract<T> {
     removeDisposable(...items: DisposableContract[]): number;
 
     /**
-     * Gets or sets the additional context data.
+     * Gets or sets the additional information.
      * @param key  The property key.
      */
-    context: {
+    info: {
         /**
-         * Gets or sets the additional context data.
+         * Gets or sets the additional information.
          * @param key  The property key.
          * @param value  The value of property to set.
          */
         <T = any>(key: string, value?: T): T;
 
         /**
-         * Checks if contains the context key.
+         * Checks if contains the context information key.
          * @param key  The property key.
          */
         contain(key: string): boolean;
@@ -135,7 +145,36 @@ export interface ViewGeneratingContextContract<T> {
          */
         keys(): string[];
     };
-    
+  
+    /**
+     * Gets the child context by specific key.
+     * @param key  The key of context cached.
+     */
+    childContext: {
+        /**
+         * Gets the child context by specific key.
+         * @param key  The key of child declared in description.
+         */
+        (key: string): ViewGeneratingContextContract<T> | undefined;
+
+        /**
+         * Checks if contains the child context key.
+         * @param key  The key of child declared in description.
+         */
+        contain(key: string): boolean;
+
+        /**
+         * Gets all keys.
+         */
+        keys(): string[];
+
+        /**
+         * Remove a specific child context.
+         * @param key  The key of child declared in description.
+         */
+        remove(key: string): boolean;
+    };
+  
     /**
      * Checks whether the element is still in the document.
      */
@@ -217,6 +256,12 @@ export interface ViewGeneratorContract<T> {
     bindAttr?(context: ViewGeneratingContextContract<T>, keys: BindAttrKeyInfoContract): void;
 
     /**
+     * Occurs when the view is initialized.
+     * @param context  The context
+     */
+    onInit(context: ViewGeneratingContextContract<T>): void;
+
+    /**
      * Binds an event handler.
      * @param context  The context.
      * @param key  The event key.
@@ -225,10 +270,45 @@ export interface ViewGeneratorContract<T> {
     on(context: ViewGeneratingContextContract<T>, key: string, handler: (ev: any) => void): void;
 }
 
-// export interface ComponentContract {
-//     defaultTagName: string;
-//     render(context: ViewGeneratingContextContract<any>): DescriptionContract;
-// }
+export interface VisualControlContract {
+    defaultTagName?: string;
+    onInit(context: ViewGeneratingContextContract<any>): DescriptionContract;
+    onLoad(): void;
+}
+
+export class VisualControl {
+    private readonly _bag = {
+        element: undefined as any,
+        keyRefs: {} as any
+    };
+    constructor(element: any) {
+        this._bag.element = element;
+    }
+    protected render(key: string, model: DescriptionContract) {
+        let options: RenderingOptions = {
+            keyRefs: this._bag.keyRefs
+        };
+        if (!key || key as any === true) {
+            return render(this._bag.element, model, options);
+        }
+
+        let context = this.getChildContext(key);
+        if (!context || typeof context.element !== "function") return undefined;
+        let element = context.element();
+        if (!element) return undefined;
+        return render(element, model, options);
+    }
+    protected getChildContext(key: string): ViewGeneratingContextContract<any> | undefined {
+        return key && typeof key === "string" ? this._bag.keyRefs[key] : undefined;
+    }
+    protected removeChildContext(key: string) {
+        if (!key || typeof key !== "string")
+        delete this._bag.keyRefs[key];
+    }
+    element() {
+        return this._bag.element;
+    }
+}
 
 let viewGen: ViewGeneratorContract<any>;
 let htmlGen: HtmlGenerator;
@@ -292,6 +372,8 @@ export class HtmlGenerator implements ViewGeneratorContract<HTMLElement> {
             });
         });
     }
+    onInit(context: ViewGeneratingContextContract<HTMLElement>) {
+    }
     on(context: ViewGeneratingContextContract<HTMLElement>, key: string, handler: (ev: any) => void) {
         let element = context.element();
         if (!element) return;
@@ -310,6 +392,7 @@ function formatGenerator(h: ViewGeneratorContract<any>) {
     if (typeof h.alive !== "function") h.alive = e => e !== null;
     if (typeof h.append !== "function") h.append = (p, e) => {};
     if (typeof h.on !== "function") h.on = (c, k, v) => {};
+    if (typeof h.onInit !== "function") h.onInit = c => {};
     if (typeof h.setAttr !== "function") h.setAttr = (c, k, v) => {};
     if (typeof h.setStyle !== "function") h.setStyle = (c, s, r) => {};
     if (typeof h.setTextValue !== "function") h.setTextValue = (c, v) => {};
@@ -352,7 +435,7 @@ function isObservable(value: any): boolean {
  * @param model  The instance of view description.
  * @param options  Additional options.
  */
-export function render<T = any>(target: T, model: DescriptionContract, options?: RenderingOptions): (T | undefined) {
+export function render<T = any>(target: T, model: DescriptionContract, options?: RenderingOptions | "html"): (T | undefined) {
     let h: ViewGeneratorContract<T>;
     if (arguments.length > 3 && arguments[3]) {
         let h2 = arguments[3] as ViewGeneratorContract<any>;
@@ -361,19 +444,32 @@ export function render<T = any>(target: T, model: DescriptionContract, options?:
 
     if (!h) h = viewGenerator();
     if (!model || !h) return undefined;
-    if (!options) options = {};
+    if (!options) {
+        options = {};
+    } else if (typeof options === "string") {
+        if (options.toLowerCase() === "html") h = getHtmlGen() as any;
+        options = {};
+    }
+
     let appendMode = options.appendMode;
+    let inheritRefs = options.keyRefs && typeof options.keyRefs === "object";
+    let regKey = model.key;
+    if (!regKey || typeof regKey !== "string") regKey = undefined;
     let bag = {
         element: appendMode ? undefined : target,
-        info: {} as any
+        info: {} as any,
+        keyRefs: inheritRefs ? options.keyRefs : {}
     };
     let disposable = new DisposableArray();
     function assertElement() {
         let element = bag.element;
         if (!element) return false;
         if (h.alive(element)) return true;
+        delete bag.element;
+        bag.info = {};
+        if (!inheritRefs) bag.keyRefs = {};
+        else if (regKey) delete bag.keyRefs[regKey];
         h.unmount(element);
-        bag.element = undefined;
         disposable.dispose();
         return false;
     }
@@ -391,7 +487,7 @@ export function render<T = any>(target: T, model: DescriptionContract, options?:
         removeDisposable(...items: DisposableContract[]) {
             return disposable.remove(...items);
         },
-        context(key: string, value: any) {
+        info(key: string, value: any) {
             if (arguments.length > 1) {
                 if (value === undefined) delete bag.info[key];
                 else bag.info[key] = value;
@@ -399,15 +495,27 @@ export function render<T = any>(target: T, model: DescriptionContract, options?:
 
             return bag.info[key];
         },
+        childContext(key: string) {
+            return key && typeof key === "string" ? bag.keyRefs[key] : undefined;
+        },
         alive() {
             return assertElement();
         }
     } as any;
-    context.context.contain = (key: string) => {
+    context.info.contain = key => {
         return Object.keys(bag.info).indexOf(key) >= 0;
     };
-    context.context.keys = () => {
+    context.info.keys = () => {
         return Object.keys(bag.info);
+    };
+    context.childContext.contain = key => {
+        return Object.keys(bag.keyRefs).indexOf(key) >= 0;
+    };
+    context.childContext.keys = () => {
+        return Object.keys(bag.keyRefs);
+    };
+    context.childContext.remove = key => {
+        return delete bag.keyRefs[key];
     };
 
     bag.element = h.initView(context, model.tagName);
@@ -498,16 +606,21 @@ export function render<T = any>(target: T, model: DescriptionContract, options?:
     });
 
     if (appendMode) h.append(target, bag.element);
+    h.onInit(context);
     if (typeof options.onInit === "function") options.onInit(context);
     if (typeof model.onInit === "function") model.onInit(context);
 
     if (model.children) {
         if (model.children instanceof Array) model.children.forEach(child => {
+            if (!child) return;
             render<T>(undefined, child, {
                 onInit: context2 => {
                     let element = context2.element();
-                    if (element) h.append(bag.element, element);
-                }
+                    if (!element) return;
+                    h.append(bag.element, element);
+                    if (child.key && typeof child.key === "string") bag.keyRefs[child.key] = context2;
+                },
+                keyRefs: bag.keyRefs
             });
         });
         else if (typeof model.children === "string") h.setTextValue(context, model.children);
@@ -515,16 +628,7 @@ export function render<T = any>(target: T, model: DescriptionContract, options?:
 
     if (typeof model.onLoad === "function") model.onLoad(context);
     if (typeof options.onLoad === "function") options.onLoad(context);
-}
-
-/**
- * Renders.
- * @param target  The target element to present the view.
- * @param model  The instance of view description.
- * @param options  Additional options.
- */
-export function renderHtml(target: HTMLElement | string, value: DescriptionContract, options?: RenderingOptions): any {
-    return (render as Function)(target, value, options, getHtmlGen());
+    return context.element();
 }
 
 }

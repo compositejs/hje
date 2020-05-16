@@ -324,6 +324,10 @@ declare namespace Hje {
          */
         tagName?: string;
         /**
+         * The key.
+         */
+        key?: string;
+        /**
          * The class name of style.
          */
         styleRefs?: string[];
@@ -384,6 +388,10 @@ declare namespace Hje {
          * @param context  The context.
          */
         onLoad?(context: ViewGeneratingContextContract<any>): void;
+        /**
+         * Gets or sets the property.
+         */
+        [property: string]: any;
     }
     /**
      * The view context during rendering.
@@ -408,18 +416,18 @@ declare namespace Hje {
          */
         removeDisposable(...items: DisposableContract[]): number;
         /**
-         * Gets or sets the additional context data.
+         * Gets or sets the additional information.
          * @param key  The property key.
          */
-        context: {
+        info: {
             /**
-             * Gets or sets the additional context data.
+             * Gets or sets the additional information.
              * @param key  The property key.
              * @param value  The value of property to set.
              */
             <T = any>(key: string, value?: T): T;
             /**
-             * Checks if contains the context key.
+             * Checks if contains the context information key.
              * @param key  The property key.
              */
             contain(key: string): boolean;
@@ -427,6 +435,31 @@ declare namespace Hje {
              * Gets all keys.
              */
             keys(): string[];
+        };
+        /**
+         * Gets the child context by specific key.
+         * @param key  The key of context cached.
+         */
+        childContext: {
+            /**
+             * Gets the child context by specific key.
+             * @param key  The key of child declared in description.
+             */
+            (key: string): ViewGeneratingContextContract<T> | undefined;
+            /**
+             * Checks if contains the child context key.
+             * @param key  The key of child declared in description.
+             */
+            contain(key: string): boolean;
+            /**
+             * Gets all keys.
+             */
+            keys(): string[];
+            /**
+             * Remove a specific child context.
+             * @param key  The key of child declared in description.
+             */
+            remove(key: string): boolean;
         };
         /**
          * Checks whether the element is still in the document.
@@ -498,12 +531,22 @@ declare namespace Hje {
          */
         bindAttr?(context: ViewGeneratingContextContract<T>, keys: BindAttrKeyInfoContract): void;
         /**
+         * Occurs when the view is initialized.
+         * @param context  The context
+         */
+        onInit(context: ViewGeneratingContextContract<T>): void;
+        /**
          * Binds an event handler.
          * @param context  The context.
          * @param key  The event key.
          * @param handler  The event handler to raise.
          */
         on(context: ViewGeneratingContextContract<T>, key: string, handler: (ev: any) => void): void;
+    }
+    interface VisualControlContract {
+        defaultTagName?: string;
+        onInit(context: ViewGeneratingContextContract<any>): DescriptionContract;
+        onLoad(): void;
     }
     class HtmlGenerator implements ViewGeneratorContract<HTMLElement> {
         defaultTagName: string;
@@ -515,6 +558,7 @@ declare namespace Hje {
         setStyle(context: ViewGeneratingContextContract<HTMLElement>, style: any, styleRefs: string[]): void;
         setTextValue(context: ViewGeneratingContextContract<HTMLElement>, value: string): void;
         bindAttr(context: ViewGeneratingContextContract<HTMLElement>, keys: BindAttrKeyInfoContract): void;
+        onInit(context: ViewGeneratingContextContract<HTMLElement>): void;
         on(context: ViewGeneratingContextContract<HTMLElement>, key: string, handler: (ev: any) => void): void;
     }
     function viewGenerator<T = any>(h?: ViewGeneratorContract<T>): ViewGeneratorContract<any>;
@@ -524,12 +568,5 @@ declare namespace Hje {
      * @param model  The instance of view description.
      * @param options  Additional options.
      */
-    function render<T = any>(target: T, model: DescriptionContract, options?: RenderingOptions): (T | undefined);
-    /**
-     * Renders.
-     * @param target  The target element to present the view.
-     * @param model  The instance of view description.
-     * @param options  Additional options.
-     */
-    function renderHtml(target: HTMLElement | string, value: DescriptionContract, options?: RenderingOptions): any;
+    function render<T = any>(target: T, model: DescriptionContract, options?: RenderingOptions | "html"): (T | undefined);
 }
