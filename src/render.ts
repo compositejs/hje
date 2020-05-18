@@ -6,8 +6,6 @@ namespace Hje {
  * The view description model.
  */
 export interface DescriptionContract {
-    // control?: ComponentContract;
-    
     /**
      * The preferred tag name.
      */
@@ -17,6 +15,11 @@ export interface DescriptionContract {
      * The key.
      */
     key?: string;
+
+    /**
+     * The control type to initialize.
+     */
+    control?: typeof BaseComponent;
 
     /**
      * The class name of style.
@@ -29,9 +32,9 @@ export interface DescriptionContract {
     style?: any;
 
     /**
-     * Attributes (props).
+     * Properties (attributes).
      */
-    attr?: {
+    props?: {
         [property: string]: string | any;
     };
 
@@ -111,6 +114,11 @@ export interface ViewGeneratingContextContract<T> {
     model(): DescriptionContract;
 
     /**
+     * Gets the control created if has.
+     */
+    control(): BaseComponent | undefined;
+
+    /**
      * Adds a disposable instance to maintain.
      * @param items  The disposable instance to add.
      */
@@ -172,7 +180,7 @@ export interface ViewGeneratingContextContract<T> {
          * Remove a specific child context.
          * @param key  The key of child declared in description.
          */
-        remove(key: string): boolean;
+        remove(key: string | string[]): void;
     };
   
     /**
@@ -181,7 +189,7 @@ export interface ViewGeneratingContextContract<T> {
     alive(): boolean;
 }
 
-export interface BindAttrKeyInfoContract {
+export interface BindPropKeyInfoContract {
     keys(): string[];
     length(): number;
     get(key: string): any;
@@ -226,12 +234,20 @@ export interface ViewGeneratorContract<T> {
     append(parent: T, child: T): void;
 
     /**
-     * Sets an attribute (or a property).
+     * Sets a property (or an attribute).
      * @param context  The context.
-     * @param key  The attribute (property) key.
+     * @param key  The property (attribute) key.
      * @param value  The value to set.
      */
-    setAttr(context: ViewGeneratingContextContract<T>, key: string, value: any): void;
+    setProp(context: ViewGeneratingContextContract<T>, key: string, value: any): void;
+
+    /**
+     * Gets a property (or an attribute).
+     * @param context  The context.
+     * @param key  The property (attribute) key.
+     * @param value  The value to set.
+     */
+    getProp(context: ViewGeneratingContextContract<T>, key: string): any;
 
     /**
      * Sets the styles.
@@ -240,6 +256,15 @@ export interface ViewGeneratorContract<T> {
      * @param styleRefs  The class name list of style.
      */
     setStyle(context: ViewGeneratingContextContract<T>, style: any, styleRefs: string[]): void;
+
+    /**
+     * Gets the style.
+     * @param context  The context.
+     */
+    getStyle(context: ViewGeneratingContextContract<T>): {
+        inline: any,
+        refs: string[] | undefined
+    }
 
     /**
      * Sets the text into element.
@@ -253,7 +278,7 @@ export interface ViewGeneratorContract<T> {
      * @param context  The context.
      * @param keys  The key will bind.
      */
-    bindAttr?(context: ViewGeneratingContextContract<T>, keys: BindAttrKeyInfoContract): void;
+    bindProp?(context: ViewGeneratingContextContract<T>, keys: BindPropKeyInfoContract): void;
 
     /**
      * Occurs when the view is initialized.
@@ -267,53 +292,96 @@ export interface ViewGeneratorContract<T> {
      * @param key  The event key.
      * @param handler  The event handler to raise.
      */
-    on(context: ViewGeneratingContextContract<T>, key: string, handler: (ev: any) => void): void;
+    on(context: ViewGeneratingContextContract<T>, key: string, handler: (ev: any) => void): DisposableContract;
 }
 
-export interface VisualControlContract {
-    defaultTagName?: string;
-    onInit(context: ViewGeneratingContextContract<any>): DescriptionContract;
-    onLoad(): void;
+interface CreatingBagContract<T> {
+    element: T
+    keyRefs: any,
+    model: DescriptionContract,
+    info: any,
+    c: BaseComponent,
+    dispose(): void;
 }
 
-export class VisualControl {
-    private readonly _bag = {
-        element: undefined as any,
-        keyRefs: {} as any
+function createContext<T = any>(element: T, model: any, assertElement: (bag: CreatingBagContract<T>) => boolean) {
+    let disposable = new DisposableArray();
+    let bag: CreatingBagContract<T> = {
+        element,
+        keyRefs: {},
+        model,
+        info: {},
+        c: undefined,
+        dispose() {
+            disposable.dispose();
+        }
     };
-    constructor(element: any) {
-        this._bag.element = element;
-    }
-    protected render(key: string, model: DescriptionContract) {
-        let options: RenderingOptions = {
-            keyRefs: this._bag.keyRefs
-        };
-        if (!key || key as any === true) {
-            return render(this._bag.element, model, options);
+    let context: ViewGeneratingContextContract<T> = {
+        element() {
+            return bag.element;
+        },
+        model(): any {
+            return bag.model;
+        },
+        control () {
+            return bag.c;
+        },
+        pushDisposable(...items: DisposableContract[]) {
+            return disposable.push(...items);
+        },
+        removeDisposable(...items: DisposableContract[]) {
+            return disposable.remove(...items);
+        },
+        info(key: string, value: any) {
+            if (arguments.length > 1) {
+                if (value === undefined) delete bag.info[key];
+                else bag.info[key] = value;
+            }
+
+            return bag.info[key];
+        },
+        childContext(key: string) {
+            if (!key) return context;
+            return typeof key === "string" ? bag.keyRefs[key] : undefined;
+        },
+        alive() {
+            return assertElement(bag);
+        }
+    } as any;
+    context.info.contain = key => {
+        return Object.keys(bag.info).indexOf(key) >= 0;
+    };
+    context.info.keys = () => {
+        return Object.keys(bag.info);
+    };
+    context.childContext.contain = key => {
+        return Object.keys(bag.keyRefs).indexOf(key) >= 0;
+    };
+    context.childContext.keys = () => {
+        return Object.keys(bag.keyRefs);
+    };
+    context.childContext.remove = key => {
+        if (!key) return;
+        if (typeof key === "string" || typeof key === "symbol") {
+            delete bag.keyRefs[key];
+            return;
         }
 
-        let context = this.getChildContext(key);
-        if (!context || typeof context.element !== "function") return undefined;
-        let element = context.element();
-        if (!element) return undefined;
-        return render(element, model, options);
-    }
-    protected getChildContext(key: string): ViewGeneratingContextContract<any> | undefined {
-        return key && typeof key === "string" ? this._bag.keyRefs[key] : undefined;
-    }
-    protected removeChildContext(key: string) {
-        if (!key || typeof key !== "string")
-        delete this._bag.keyRefs[key];
-    }
-    element() {
-        return this._bag.element;
-    }
+        if (key instanceof Array) for (let i in key) {
+            let s = key[i];
+            if (!s) continue;
+            if (typeof s === "string" || typeof s === "symbol")
+                delete bag.keyRefs[s];
+        }
+    };
+    return {
+        context,
+        bag
+    };
 }
 
 let viewGen: ViewGeneratorContract<any>;
 let htmlGen: HtmlGenerator;
-
-// let components: ComponentContract[] = [];
 
 export class HtmlGenerator implements ViewGeneratorContract<HTMLElement> {
     defaultTagName = "div";
@@ -342,16 +410,38 @@ export class HtmlGenerator implements ViewGeneratorContract<HTMLElement> {
         if (!parent || !child) return;
         parent.appendChild(child);
     }
-    setAttr(context: ViewGeneratingContextContract<HTMLElement>, key: string, value: any) {
-        context.element().setAttribute(key, value);
+    setProp(context: ViewGeneratingContextContract<HTMLElement>, key: string, value: any) {
+        let element = context.element();
+        if (!element) return;
+        if (!value || typeof value === "string") element.setAttribute(key, value);
+        else (element as any)[key] = value;
+    }
+    getProp(context: ViewGeneratingContextContract<HTMLElement>, key: string) {
+        let element = context.element();
+        if (!element) return undefined;
+        return (element as any)[key] || element.getAttribute(key);
     }
     setStyle(context: ViewGeneratingContextContract<HTMLElement>, style: any, styleRefs: string[]) {
         let element = context.element();
         if (!element) return;
-        Object.keys(style).forEach(key => {
+        if (style) Object.keys(style).forEach(key => {
             (element.style as any)[key] = style[key];
         });
-        element.className = styleRefs.join(" ");
+        if (styleRefs) element.className = styleRefs.join(" ");
+    }
+    getStyle(context: ViewGeneratingContextContract<HTMLElement>) {
+        let element = context.element();
+        let result = {
+            inline: undefined as any,
+            refs: [] as string[],
+            computed(pseudoElt?: string): any {
+                return element ? getComputedStyle(element, pseudoElt) : undefined;
+            }
+        };
+        if (!element) return result;
+        result.inline = element.style;
+        result.refs = (element.classList as any) || (element.className || "").split(" ");
+        return result;
     }
     setTextValue(context: ViewGeneratingContextContract<HTMLElement>, value: string) {
         let element = context.element();
@@ -363,7 +453,7 @@ export class HtmlGenerator implements ViewGeneratorContract<HTMLElement> {
         
         element.appendChild(new Text(value));
     }
-    bindAttr(context: ViewGeneratingContextContract<HTMLElement>, keys: BindAttrKeyInfoContract) {
+    bindProp(context: ViewGeneratingContextContract<HTMLElement>, keys: BindPropKeyInfoContract) {
         keys.reg("value", setter => {
             let element = context.element() as HTMLInputElement;
             if (!element) return;
@@ -377,8 +467,21 @@ export class HtmlGenerator implements ViewGeneratorContract<HTMLElement> {
     on(context: ViewGeneratingContextContract<HTMLElement>, key: string, handler: (ev: any) => void) {
         let element = context.element();
         if (!element) return;
-        if (element.addEventListener) element.addEventListener(key, handler, false);
-        else if ((element as any).attachEvent) (element as any).attachEvent("on" + key, handler);
+        if (element.addEventListener) {
+            element.addEventListener(key, handler, false);
+            return {
+                dispose() {
+                    element.removeEventListener(key, handler, false);
+                }
+            };
+        } else if ((element as any).attachEvent) {
+            (element as any).attachEvent("on" + key, handler);
+            return {
+                dispose() {
+                    if ((element as any).detachEvent) (element as any).detachEvent(key, handler, false);
+                }
+            };
+        }
     }
 }
 
@@ -391,9 +494,11 @@ function formatGenerator(h: ViewGeneratorContract<any>) {
     if (!h || typeof h.initView !== "function") return false;
     if (typeof h.alive !== "function") h.alive = e => e !== null;
     if (typeof h.append !== "function") h.append = (p, e) => {};
-    if (typeof h.on !== "function") h.on = (c, k, v) => {};
+    if (typeof h.on !== "function") h.on = (c, k, v) => {
+        return { dispose() {} }
+    };
     if (typeof h.onInit !== "function") h.onInit = c => {};
-    if (typeof h.setAttr !== "function") h.setAttr = (c, k, v) => {};
+    if (typeof h.setProp !== "function") h.setProp = (c, k, v) => {};
     if (typeof h.setStyle !== "function") h.setStyle = (c, s, r) => {};
     if (typeof h.setTextValue !== "function") h.setTextValue = (c, v) => {};
     if (typeof h.unmount !== "function") h.unmount = e => {
@@ -420,13 +525,100 @@ export function viewGenerator<T = any>(h?: ViewGeneratorContract<T>) {
     return viewGen;
 }
 
-// export function regComponent(key: string, handler: ComponentContract) {
-//     components.push(handler);
-// }
-
 function isObservable(value: any): boolean {
     if (!value) return false;
     return typeof value.subscribe === "function";
+}
+
+export class BaseComponent {
+    private readonly _bag: CreatingBagContract<any> & {
+        props: any
+    };
+    protected readonly _context: ViewGeneratingContextContract<any>;
+    constructor(element: any) {
+        let { context, bag } = createContext(element, undefined, b => {
+            let element = b.element;
+            if (!element) return false;
+            let h = viewGenerator();
+            if (h.alive(element)) return true;
+            delete b.element;
+            b.info = {};
+            b.keyRefs = {};
+            h.unmount(element);
+            b.dispose();
+            return false;
+        });
+        this._bag = bag as any;
+        this._bag.props = {};
+        this._context = context;
+    }
+    protected render(key: string, model: DescriptionContract) {
+        let options: RenderingOptions = {
+            keyRefs: this._bag.keyRefs
+        };
+        if (!key || key as any === true) {
+            return render(this._bag.element, model, options);
+        }
+
+        let context = this._context.childContext(key);
+        if (!context || typeof context.element !== "function") return undefined;
+        let element = context.element();
+        if (!element) return undefined;
+        return render(element, model, options);
+    }
+    protected childProps(childKey: string, propKey: string, v?: any) {
+        let h = viewGenerator();
+        let context = this._context.childContext(childKey);
+        if (!context) return undefined;
+        if (arguments.length > 2) h.setProp(context, propKey, v);
+        return h.getProp(context, propKey);
+    }
+    protected childStyle(childKey: string, style?: any, styleRefs?: string[] | boolean) {
+        let h = viewGenerator();
+        let context = this._context.childContext(childKey);
+        if (!context) return undefined;
+        if (arguments.length > 2 && typeof styleRefs !== "boolean") {
+            h.setStyle(context, style, styleRefs);
+            return h.getStyle(context);
+        }
+
+        let styleInfo = h.getStyle(context);
+        if (!styleInfo) styleInfo = {} as any;
+        if (arguments.length > 1) {
+            if (style === true) style = styleInfo.inline;
+            else if (style === false) style = undefined;
+            else if (styleRefs === true && styleInfo.inline) style = { ...styleInfo.inline, ...(style || {}) };
+            h.setStyle(context, style, styleInfo.refs);
+            return h.getStyle(context);
+        }
+
+        return styleInfo;
+    }
+    protected addChildEventListener(childKey: string, eventKey: string, value?: any) {
+        let h = viewGenerator();
+        let context = this._context.childContext(childKey);
+        h.on(context, eventKey, value);
+    }
+    prop(key: string, value?: any) {
+        if (arguments.length > 1) {
+            this._bag.props[key] = value;
+            if (typeof (this as any).onPropChanged === "function") (this as any).onPropChanged(key, value, this.childProps);
+        }
+
+        return this._bag.props[key];
+    }
+    on(key: string, handler?: any) {
+        this.addChildEventListener(null, key, handler);
+    }
+    style(value?: any, refs?: string[]) {
+        return this.childStyle(null, value, refs);
+    }
+    styleRefs(value: string[]) {
+        return this.childStyle(null, true, value);
+    }
+    element() {
+        return this._bag.element;
+    }
 }
 
 /**
@@ -442,6 +634,7 @@ export function render<T = any>(target: T, model: DescriptionContract, options?:
         if (typeof h2.initView === "function" && typeof h2.alive === "function") h = h2;
     }
 
+    // Ensure the arguments are valid.
     if (!h) h = viewGenerator();
     if (!model || !h) return undefined;
     if (!options) {
@@ -451,98 +644,105 @@ export function render<T = any>(target: T, model: DescriptionContract, options?:
         options = {};
     }
 
+    // Get the options information and create a empty internal data store.
     let appendMode = options.appendMode;
     let inheritRefs = options.keyRefs && typeof options.keyRefs === "object";
     let regKey = model.key;
     if (!regKey || typeof regKey !== "string") regKey = undefined;
-    let bag = {
-        element: appendMode ? undefined : target,
-        info: {} as any,
-        keyRefs: inheritRefs ? options.keyRefs : {}
-    };
-    let disposable = new DisposableArray();
-    function assertElement() {
-        let element = bag.element;
+
+    // Create the generating context.
+    let { context, bag } = createContext(appendMode ? undefined : target, model, b => {
+        let element = b.element;
         if (!element) return false;
         if (h.alive(element)) return true;
-        delete bag.element;
-        bag.info = {};
-        if (!inheritRefs) bag.keyRefs = {};
-        else if (regKey) delete bag.keyRefs[regKey];
+        delete b.element;
+        b.info = {};
+        if (!inheritRefs) b.keyRefs = {};
+        else if (regKey) delete b.keyRefs[regKey];
         h.unmount(element);
-        disposable.dispose();
+        b.dispose();
         return false;
-    }
+    });
 
-    let context: ViewGeneratingContextContract<T> = {
-        element() {
-            return bag.element;
-        },
-        model() {
-            return model;
-        },
-        pushDisposable(...items: DisposableContract[]) {
-            return disposable.push(...items);
-        },
-        removeDisposable(...items: DisposableContract[]) {
-            return disposable.remove(...items);
-        },
-        info(key: string, value: any) {
-            if (arguments.length > 1) {
-                if (value === undefined) delete bag.info[key];
-                else bag.info[key] = value;
-            }
-
-            return bag.info[key];
-        },
-        childContext(key: string) {
-            return key && typeof key === "string" ? bag.keyRefs[key] : undefined;
-        },
-        alive() {
-            return assertElement();
-        }
-    } as any;
-    context.info.contain = key => {
-        return Object.keys(bag.info).indexOf(key) >= 0;
-    };
-    context.info.keys = () => {
-        return Object.keys(bag.info);
-    };
-    context.childContext.contain = key => {
-        return Object.keys(bag.keyRefs).indexOf(key) >= 0;
-    };
-    context.childContext.keys = () => {
-        return Object.keys(bag.keyRefs);
-    };
-    context.childContext.remove = key => {
-        return delete bag.keyRefs[key];
-    };
-
+    // Create or update the view.
     bag.element = h.initView(context, model.tagName);
     if (!bag.element) return undefined;
 
-    let attr = model.attr || {};
-    let attrB: string[] = [];
-    if (model.attr && typeof model.attr === "object") {
-        Object.keys(attr).forEach(key => {
+    // Control controlling logic.
+    if (typeof model.control === "function") {
+        if (appendMode) {
+            h.append(target, bag.element);
+            appendMode = false;
+        }
+
+        bag.c = new model.control(bag.element);
+        if (model.props && typeof model.props === "object") {
+            Object.keys(model.props).forEach(key => {
+                if (!key || typeof key !== "string") return;
+                let v = model.props[key];
+                bag.c.prop(key, v);
+            });
+        }
+
+        bag.c.style(model.style, model.styleRefs);
+        if (model.on && typeof model.on === "object") {
+            Object.keys(model.on).forEach(key => {
+                if (!key || typeof key !== "string") return;
+                let h = model.on[key];
+                bag.c.on(key, h);
+            });
+        }
+
+        h.onInit(context);
+        if (typeof options.onInit === "function") options.onInit(context);
+        if (typeof model.onInit === "function") model.onInit(context);
+        if (typeof options.onLoad === "function") options.onLoad(context);
+        if (typeof model.onLoad === "function") model.onLoad(context);
+        return bag.element;
+    }
+
+    // Set properties.
+    let props = model.props || (model as any).attr || {};
+    let propsB: string[] = [];
+    if (typeof props === "object") {
+        Object.keys(props).forEach(key => {
             if (!key || typeof key !== "string") return;
-            let v = attr[key];
+            let v = props[key];
             if (!v || typeof v === "string" || typeof v === "number" || typeof v === "boolean" || typeof v === "symbol") {
-                h.setAttr(context, key, v);
+                h.setProp(context, key, v);
                 return;
             }
 
             if (isObservable(v)) {
-                attrB.push(key);
+                propsB.push(key);
                 let subscribe = (v as ObservableCompatibleContract).subscribe(nv => {
-                    if (assertElement()) h.setAttr(context, key, nv);
+                    if (context.alive()) h.setProp(context, key, nv);
                 });
                 context.pushDisposable(subscribe);
+                return;
+            }
+
+            if (typeof v.then === "function") {
+                v.then((nv: any) => h.setProp(context, key, nv));
+                return;
+            }
+
+            if (!v.source) {
+                if (typeof v === "object") h.setProp(context, key, v);
+                return;
+            }
+
+            switch (v.source) {
+                case "data":
+                    h.setProp(context, key, (model.data || {})[v.value]);
+                    return;
             }
         });
     }
 
-    h.setStyle(context, model.style || {}, model.styleRefs || []);
+    if (model.style || model.styleRefs) h.setStyle(context, model.style, model.styleRefs);
+
+    // Add event listeners.
     if (model.on && typeof model.on === "object") {
         Object.keys(model.on).forEach(key => {
             let handler = model.on[key] as any;
@@ -571,22 +771,22 @@ export function render<T = any>(target: T, model: DescriptionContract, options?:
         });
     }
 
-    if (attrB.length > 0 && h.bindAttr) h.bindAttr(context, {
+    if (propsB.length > 0 && h.bindProp) h.bindProp(context, {
         keys() {
-            return attrB;
+            return propsB;
         },
         length() {
-            return attrB.length;
+            return propsB.length;
         },
         get(key) {
-            return attr[key];
+            return props[key];
         },
         reg(key, then) {
             if (typeof then !== "function") return;
             then(value => {
-                let obs = attr[key] as ObservableCompatibleContract;
+                let obs = props[key] as ObservableCompatibleContract;
                 if (!isObservable(obs)) {
-                    attr[key] = obs;
+                    props[key] = obs;
                     return false;
                 }
     
@@ -598,34 +798,38 @@ export function render<T = any>(target: T, model: DescriptionContract, options?:
             });
         },
         contain(key) {
-            return Object.keys(attr).indexOf(key) >= 0;
+            return Object.keys(props).indexOf(key) >= 0;
         },
         on(key, handler) {
             h.on(context, key, handler);
         }
     });
 
+    // Complete initialization.
     if (appendMode) h.append(target, bag.element);
     h.onInit(context);
     if (typeof options.onInit === "function") options.onInit(context);
     if (typeof model.onInit === "function") model.onInit(context);
 
+    // Appends children.
     if (model.children) {
         if (model.children instanceof Array) model.children.forEach(child => {
             if (!child) return;
-            render<T>(undefined, child, {
+            render<T>(bag.element, child, {
                 onInit: context2 => {
                     let element = context2.element();
                     if (!element) return;
                     h.append(bag.element, element);
                     if (child.key && typeof child.key === "string") bag.keyRefs[child.key] = context2;
                 },
-                keyRefs: bag.keyRefs
+                keyRefs: bag.keyRefs,
+                appendMode: true
             });
         });
         else if (typeof model.children === "string") h.setTextValue(context, model.children);
     }
 
+    // Finish.
     if (typeof model.onLoad === "function") model.onLoad(context);
     if (typeof options.onLoad === "function") options.onLoad(context);
     return context.element();

@@ -15,9 +15,6 @@
     <div id="demo-container"></div>
     <script>
         Hje.render("demo-container", {
-            attr: {
-                type: "circle",
-            },
             style: {
                 "color": "#808080",
                 "font-size": "14px"
@@ -30,6 +27,9 @@
             children: [
                 {
                     tagName: "ul",
+                    props: {
+                        type: "circle",
+                    },
                     children: [
                         { tagName: "li", children: "ABCDEFG" },
                         { tagName: "li", children: "HIJKLMN" },

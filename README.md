@@ -10,7 +10,7 @@ You can install this by [npm](https://www.npmjs.com/package/hje).
 npm i hje
 ```
 
-And you can also insert the [JavaScript bundled file](https://github.com/compositejs/hje/raw/master/dist/index.js) by `script` tag into your web page directly and use `Hje` namespace to access.
+And you can also insert the [JavaScript bundled file](https://unpkg.com/hje/dist/index.js) by `script` tag into your web page directly and use `Hje` namespace to access.
 
 [Click here](https://github.com/compositejs/hje/wiki/installation) to read more.
 
@@ -37,3 +37,9 @@ npm test
 ## Readme in other languages
 
 - [简体中文](https://github.com/compositejs/hje/wiki/shuoming)
+
+## License
+
+This project is [MIT Licensed](./LICENSE).
+
+Please feel free to import this into your project. And you can also clone or fork the repository as you want.

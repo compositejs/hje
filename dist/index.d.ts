@@ -328,6 +328,10 @@ declare namespace Hje {
          */
         key?: string;
         /**
+         * The control type to initialize.
+         */
+        control?: typeof BaseComponent;
+        /**
          * The class name of style.
          */
         styleRefs?: string[];
@@ -336,9 +340,9 @@ declare namespace Hje {
          */
         style?: any;
         /**
-         * Attributes (props).
+         * Properties (attributes).
          */
-        attr?: {
+        props?: {
             [property: string]: string | any;
         };
         /**
@@ -406,6 +410,10 @@ declare namespace Hje {
          */
         model(): DescriptionContract;
         /**
+         * Gets the control created if has.
+         */
+        control(): BaseComponent | undefined;
+        /**
          * Adds a disposable instance to maintain.
          * @param items  The disposable instance to add.
          */
@@ -459,14 +467,14 @@ declare namespace Hje {
              * Remove a specific child context.
              * @param key  The key of child declared in description.
              */
-            remove(key: string): boolean;
+            remove(key: string | string[]): void;
         };
         /**
          * Checks whether the element is still in the document.
          */
         alive(): boolean;
     }
-    interface BindAttrKeyInfoContract {
+    interface BindPropKeyInfoContract {
         keys(): string[];
         length(): number;
         get(key: string): any;
@@ -505,12 +513,19 @@ declare namespace Hje {
          */
         append(parent: T, child: T): void;
         /**
-         * Sets an attribute (or a property).
+         * Sets a property (or an attribute).
          * @param context  The context.
-         * @param key  The attribute (property) key.
+         * @param key  The property (attribute) key.
          * @param value  The value to set.
          */
-        setAttr(context: ViewGeneratingContextContract<T>, key: string, value: any): void;
+        setProp(context: ViewGeneratingContextContract<T>, key: string, value: any): void;
+        /**
+         * Gets a property (or an attribute).
+         * @param context  The context.
+         * @param key  The property (attribute) key.
+         * @param value  The value to set.
+         */
+        getProp(context: ViewGeneratingContextContract<T>, key: string): any;
         /**
          * Sets the styles.
          * @param context  The context.
@@ -518,6 +533,14 @@ declare namespace Hje {
          * @param styleRefs  The class name list of style.
          */
         setStyle(context: ViewGeneratingContextContract<T>, style: any, styleRefs: string[]): void;
+        /**
+         * Gets the style.
+         * @param context  The context.
+         */
+        getStyle(context: ViewGeneratingContextContract<T>): {
+            inline: any;
+            refs: string[] | undefined;
+        };
         /**
          * Sets the text into element.
          * @param context  The context.
@@ -529,7 +552,7 @@ declare namespace Hje {
          * @param context  The context.
          * @param keys  The key will bind.
          */
-        bindAttr?(context: ViewGeneratingContextContract<T>, keys: BindAttrKeyInfoContract): void;
+        bindProp?(context: ViewGeneratingContextContract<T>, keys: BindPropKeyInfoContract): void;
         /**
          * Occurs when the view is initialized.
          * @param context  The context
@@ -541,12 +564,7 @@ declare namespace Hje {
          * @param key  The event key.
          * @param handler  The event handler to raise.
          */
-        on(context: ViewGeneratingContextContract<T>, key: string, handler: (ev: any) => void): void;
-    }
-    interface VisualControlContract {
-        defaultTagName?: string;
-        onInit(context: ViewGeneratingContextContract<any>): DescriptionContract;
-        onLoad(): void;
+        on(context: ViewGeneratingContextContract<T>, key: string, handler: (ev: any) => void): DisposableContract;
     }
     class HtmlGenerator implements ViewGeneratorContract<HTMLElement> {
         defaultTagName: string;
@@ -554,14 +572,45 @@ declare namespace Hje {
         alive(element: HTMLElement): boolean;
         unmount(element: HTMLElement): void;
         append(parent: HTMLElement, child: HTMLElement): void;
-        setAttr(context: ViewGeneratingContextContract<HTMLElement>, key: string, value: any): void;
+        setProp(context: ViewGeneratingContextContract<HTMLElement>, key: string, value: any): void;
+        getProp(context: ViewGeneratingContextContract<HTMLElement>, key: string): any;
         setStyle(context: ViewGeneratingContextContract<HTMLElement>, style: any, styleRefs: string[]): void;
+        getStyle(context: ViewGeneratingContextContract<HTMLElement>): {
+            inline: any;
+            refs: string[];
+            computed(pseudoElt?: string): any;
+        };
         setTextValue(context: ViewGeneratingContextContract<HTMLElement>, value: string): void;
-        bindAttr(context: ViewGeneratingContextContract<HTMLElement>, keys: BindAttrKeyInfoContract): void;
+        bindProp(context: ViewGeneratingContextContract<HTMLElement>, keys: BindPropKeyInfoContract): void;
         onInit(context: ViewGeneratingContextContract<HTMLElement>): void;
-        on(context: ViewGeneratingContextContract<HTMLElement>, key: string, handler: (ev: any) => void): void;
+        on(context: ViewGeneratingContextContract<HTMLElement>, key: string, handler: (ev: any) => void): {
+            dispose(): void;
+        };
     }
     function viewGenerator<T = any>(h?: ViewGeneratorContract<T>): ViewGeneratorContract<any>;
+    class BaseComponent {
+        private readonly _bag;
+        protected readonly _context: ViewGeneratingContextContract<any>;
+        constructor(element: any);
+        protected render(key: string, model: DescriptionContract): any;
+        protected childProps(childKey: string, propKey: string, v?: any): any;
+        protected childStyle(childKey: string, style?: any, styleRefs?: string[] | boolean): {
+            inline: any;
+            refs: string[];
+        };
+        protected addChildEventListener(childKey: string, eventKey: string, value?: any): void;
+        prop(key: string, value?: any): any;
+        on(key: string, handler?: any): void;
+        style(value?: any, refs?: string[]): {
+            inline: any;
+            refs: string[];
+        };
+        styleRefs(value: string[]): {
+            inline: any;
+            refs: string[];
+        };
+        element(): any;
+    }
     /**
      * Renders.
      * @param target  The target element to present the view.
