@@ -309,10 +309,98 @@ declare namespace Hje {
          */
         removeDisposable(...items: DisposableContract[]): number;
         /**
+         * Gets the count.
+         */
+        count(): number;
+        /**
          * Disposes the instance.
          */
         dispose(): void;
     }
+}
+declare namespace Hje {
+    /**
+     * The options on rendering.
+     */
+    interface RenderingOptions {
+        /**
+         * true if append a new element to the target; otherwise, false.
+         */
+        appendMode?: boolean;
+        /**
+         * Occurs on initialization.
+         * @param context  The context.
+         */
+        onInit?(context: ViewGeneratingContextContract<any>): void;
+        /**
+         * Occurs on load completed.
+         * @param context  The context.
+         */
+        onLoad?(context: ViewGeneratingContextContract<any>): void;
+        /**
+         * Gets or sets the property.
+         */
+        [property: string]: any;
+    }
+    class HtmlGenerator implements ViewGeneratorContract<HTMLElement> {
+        defaultTagName: string;
+        initView(context: ViewGeneratingContextContract<HTMLElement>, tagName: string): HTMLElement;
+        alive(element: HTMLElement): boolean;
+        unmount(element: HTMLElement): void;
+        append(parent: HTMLElement, child: HTMLElement): void;
+        setProp(context: ViewGeneratingContextContract<HTMLElement>, key: string, value: any): void;
+        getProp(context: ViewGeneratingContextContract<HTMLElement>, key: string): any;
+        setStyle(context: ViewGeneratingContextContract<HTMLElement>, style: any, styleRefs: string[]): void;
+        getStyle(context: ViewGeneratingContextContract<HTMLElement>): {
+            inline: any;
+            refs: string[];
+            computed(pseudoElt?: string): any;
+        };
+        setTextValue(context: ViewGeneratingContextContract<HTMLElement>, value: string): void;
+        bindProp(context: ViewGeneratingContextContract<HTMLElement>, keys: BindPropKeyInfoContract): void;
+        onInit(context: ViewGeneratingContextContract<HTMLElement>): void;
+        on(context: ViewGeneratingContextContract<HTMLElement>, key: string, handler: (ev: any) => void): {
+            dispose(): void;
+        };
+    }
+    interface MemoryJsonSourceContract {
+        tagName: string;
+        parent?: MemoryJsonSourceContract;
+        props: any;
+        handlers: any;
+        style: any;
+        styleRefs: string[];
+        children: MemoryJsonSourceContract[];
+    }
+    class MemoryJsonGenerator implements ViewGeneratorContract<MemoryJsonSourceContract> {
+        defaultTagName: string;
+        initView(context: ViewGeneratingContextContract<MemoryJsonSourceContract>, tagName: string): MemoryJsonSourceContract;
+        alive(element: MemoryJsonSourceContract): boolean;
+        unmount(element: MemoryJsonSourceContract): void;
+        append(parent: MemoryJsonSourceContract, child: MemoryJsonSourceContract): void;
+        setProp(context: ViewGeneratingContextContract<MemoryJsonSourceContract>, key: string, value: any): void;
+        getProp(context: ViewGeneratingContextContract<MemoryJsonSourceContract>, key: string): any;
+        setStyle(context: ViewGeneratingContextContract<MemoryJsonSourceContract>, style: any, styleRefs: string[]): void;
+        getStyle(context: ViewGeneratingContextContract<MemoryJsonSourceContract>): {
+            inline: any;
+            refs: string[];
+            computed(pseudoElt?: string): any;
+        };
+        setTextValue(context: ViewGeneratingContextContract<MemoryJsonSourceContract>, value: string): void;
+        bindProp(context: ViewGeneratingContextContract<MemoryJsonSourceContract>, keys: BindPropKeyInfoContract): void;
+        onInit(context: ViewGeneratingContextContract<MemoryJsonSourceContract>): void;
+        on(context: ViewGeneratingContextContract<MemoryJsonSourceContract>, key: string, handler: (ev: any) => void): {
+            dispose(): void;
+        };
+    }
+    function viewGenerator<T = any>(h?: ViewGeneratorContract<T>): ViewGeneratorContract<any>;
+    /**
+     * Renders.
+     * @param target  The target element to present the view.
+     * @param model  The instance of view description.
+     * @param options  Additional options.
+     */
+    function render<T = any>(target: T, model: DescriptionContract, options?: RenderingOptions | "html"): (T | undefined);
 }
 declare namespace Hje {
     /**
@@ -373,29 +461,6 @@ declare namespace Hje {
          * @param context  The context.
          */
         onLoad?(context: ViewGeneratingContextContract<any>): void;
-    }
-    /**
-     * The options on rendering.
-     */
-    interface RenderingOptions {
-        /**
-         * true if append a new element to the target; otherwise, false.
-         */
-        appendMode?: boolean;
-        /**
-         * Occurs on initialization.
-         * @param context  The context.
-         */
-        onInit?(context: ViewGeneratingContextContract<any>): void;
-        /**
-         * Occurs on load completed.
-         * @param context  The context.
-         */
-        onLoad?(context: ViewGeneratingContextContract<any>): void;
-        /**
-         * Gets or sets the property.
-         */
-        [property: string]: any;
     }
     /**
      * The view context during rendering.
@@ -473,6 +538,10 @@ declare namespace Hje {
          * Checks whether the element is still in the document.
          */
         alive(): boolean;
+        /**
+         * Refreshes.
+         */
+        refresh(): void;
     }
     interface BindPropKeyInfoContract {
         keys(): string[];
@@ -566,41 +635,24 @@ declare namespace Hje {
          */
         on(context: ViewGeneratingContextContract<T>, key: string, handler: (ev: any) => void): DisposableContract;
     }
-    class HtmlGenerator implements ViewGeneratorContract<HTMLElement> {
-        defaultTagName: string;
-        initView(context: ViewGeneratingContextContract<HTMLElement>, tagName: string): HTMLElement;
-        alive(element: HTMLElement): boolean;
-        unmount(element: HTMLElement): void;
-        append(parent: HTMLElement, child: HTMLElement): void;
-        setProp(context: ViewGeneratingContextContract<HTMLElement>, key: string, value: any): void;
-        getProp(context: ViewGeneratingContextContract<HTMLElement>, key: string): any;
-        setStyle(context: ViewGeneratingContextContract<HTMLElement>, style: any, styleRefs: string[]): void;
-        getStyle(context: ViewGeneratingContextContract<HTMLElement>): {
-            inline: any;
-            refs: string[];
-            computed(pseudoElt?: string): any;
-        };
-        setTextValue(context: ViewGeneratingContextContract<HTMLElement>, value: string): void;
-        bindProp(context: ViewGeneratingContextContract<HTMLElement>, keys: BindPropKeyInfoContract): void;
-        onInit(context: ViewGeneratingContextContract<HTMLElement>): void;
-        on(context: ViewGeneratingContextContract<HTMLElement>, key: string, handler: (ev: any) => void): {
-            dispose(): void;
-        };
+    interface ComponentOptionsContract {
+        children?: string | DescriptionContract[];
+        contextRef?(context: ViewGeneratingContextContract<any>): void;
     }
-    function viewGenerator<T = any>(h?: ViewGeneratorContract<T>): ViewGeneratorContract<any>;
     class BaseComponent {
-        private readonly _bag;
+        private readonly _inner;
         protected readonly _context: ViewGeneratingContextContract<any>;
-        constructor(element: any);
-        protected render(key: string, model: DescriptionContract): any;
+        constructor(element: any, options?: ComponentOptionsContract);
+        protected childContext(key: string): ViewGeneratingContextContract<any>;
+        protected childModel(key: string): DescriptionContract;
+        protected refreshChild(key: string): void;
         protected childProps(childKey: string, propKey: string, v?: any): any;
         protected childStyle(childKey: string, style?: any, styleRefs?: string[] | boolean): {
             inline: any;
             refs: string[];
         };
-        protected addChildEventListener(childKey: string, eventKey: string, value?: any): void;
-        prop(key: string, value?: any): any;
-        on(key: string, handler?: any): void;
+        prop<T = any>(key: string | any, value?: T | any): any;
+        on(key: string, handler: any): DisposableContract;
         style(value?: any, refs?: string[]): {
             inline: any;
             refs: string[];
@@ -610,12 +662,6 @@ declare namespace Hje {
             refs: string[];
         };
         element(): any;
+        dispose(): void;
     }
-    /**
-     * Renders.
-     * @param target  The target element to present the view.
-     * @param model  The instance of view description.
-     * @param options  Additional options.
-     */
-    function render<T = any>(target: T, model: DescriptionContract, options?: RenderingOptions | "html"): (T | undefined);
 }

@@ -1,4 +1,4 @@
-/// <reference path="./models.ts" />
+/// <reference path="./interfaces.ts" />
 
 namespace Hje {
 
@@ -131,6 +131,13 @@ export class DisposableArray {
      */
     public removeDisposable(...items: DisposableContract[]) {
         return this.remove(...items);
+    }
+
+    /**
+     * Gets the count.
+     */
+    public count() {
+        return this._list.length;
     }
 
     /**
