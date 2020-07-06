@@ -32,6 +32,7 @@ export interface RenderingOptions {
 interface CreatingBagContract<T> {
     element: T
     keyRefs: any,
+    inheritRefs: boolean;
     model: DescriptionContract,
     info: any,
     c: BaseComponent,
@@ -60,6 +61,7 @@ function createContext<T = any>(
     let bag: CreatingBagContract<T> = {
         element,
         keyRefs: {},
+        inheritRefs: false,
         model,
         info: {},
         c: undefined,
@@ -212,6 +214,7 @@ export class HtmlGenerator implements ViewGeneratorContract<HTMLElement> {
             return;
         }
         
+        element.innerHTML = "";
         element.appendChild(new Text(value));
     }
     bindProp(context: ViewGeneratingContextContract<HTMLElement>, keys: BindPropKeyInfoContract) {
@@ -406,6 +409,7 @@ function isObservable(value: any): boolean {
 
 function updateContext<T = any>(h: ViewGeneratorContract<T>, bag: CreatingBagContract<T>, context: ViewGeneratingContextContract<T>, options?: RenderingOptions, parent?: T) {
     let model = bag.model;
+    if (!options) options = {};
     let appendMode = options.appendMode;
 
     // Create or update the view.
@@ -592,7 +596,7 @@ function updateContext<T = any>(h: ViewGeneratorContract<T>, bag: CreatingBagCon
  * @param model  The instance of view description.
  * @param options  Additional options.
  */
-export function render<T = any>(target: T, model: DescriptionContract, options?: RenderingOptions | "html"): (T | undefined) {
+export function render<T = any>(target: T, model: DescriptionContract, options?: RenderingOptions | "html"): (ViewGeneratingContextContract<T> | undefined) {
     let h: ViewGeneratorContract<T>;
     if (arguments.length > 3 && arguments[3]) {
         let h2 = arguments[3] as ViewGeneratorContract<any>;
@@ -609,7 +613,7 @@ export function render<T = any>(target: T, model: DescriptionContract, options?:
         options = {};
     }
 
-    // Get the options information and create a empty internal data store.
+    // Get the options information and create an empty internal data store.
     let appendMode = options.appendMode;
     let inheritRefs = options.keyRefs && typeof options.keyRefs === "object";
     let regKey = model.key;
@@ -632,7 +636,14 @@ export function render<T = any>(target: T, model: DescriptionContract, options?:
         updateContext(h, bag, c);
     });
 
-    return updateContext(h, bag, context, options);
+    if (inheritRefs) {
+        bag.keyRefs = options.keyRefs;
+        bag.inheritRefs = true;
+    }
+
+    if (regKey) bag.keyRefs[regKey] = context;
+    updateContext(h, bag, context, options);
+    return context;
 }
 
 }

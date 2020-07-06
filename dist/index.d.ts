@@ -400,7 +400,7 @@ declare namespace Hje {
      * @param model  The instance of view description.
      * @param options  Additional options.
      */
-    function render<T = any>(target: T, model: DescriptionContract, options?: RenderingOptions | "html"): (T | undefined);
+    function render<T = any>(target: T, model: DescriptionContract, options?: RenderingOptions | "html"): (ViewGeneratingContextContract<T> | undefined);
 }
 declare namespace Hje {
     /**
@@ -641,11 +641,13 @@ declare namespace Hje {
     }
     class BaseComponent {
         private readonly _inner;
-        protected readonly _context: ViewGeneratingContextContract<any>;
+        private _context;
         constructor(element: any, options?: ComponentOptionsContract);
+        protected readonly currentContext: ViewGeneratingContextContract<any>;
+        protected currentModel: DescriptionContract;
         protected childContext(key: string): ViewGeneratingContextContract<any>;
-        protected childModel(key: string): DescriptionContract;
-        protected refreshChild(key: string): void;
+        protected childModel(key: string, value?: any, override?: boolean): any;
+        protected refreshChild(key?: string): void;
         protected childProps(childKey: string, propKey: string, v?: any): any;
         protected childStyle(childKey: string, style?: any, styleRefs?: string[] | boolean): {
             inline: any;
@@ -653,7 +655,7 @@ declare namespace Hje {
         };
         prop<T = any>(key: string | any, value?: T | any): any;
         on(key: string, handler: any): DisposableContract;
-        style(value?: any, refs?: string[]): {
+        style(value?: any, refs?: string[] | boolean): {
             inline: any;
             refs: string[];
         };

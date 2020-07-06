@@ -330,25 +330,46 @@ export class BaseComponent {
         props: {} as any,
         isDisposed: false
     };
-    protected readonly _context: ViewGeneratingContextContract<any>;
+    private _context: ViewGeneratingContextContract<any>;
     constructor(element: any, options?: ComponentOptionsContract) {
         if (!options) options = {};
+        let self = this;
         render(element, {}, {
             onInit(c) {
-                this._context = c;
+                self._context = c;
                 if (typeof options.contextRef === "function") options.contextRef(c);
             }
         });
     }
+    protected get currentContext() {
+        return this._context;
+    }
+    protected get currentModel() {
+        return this._context ? this._context.model() : undefined;
+    }
+    protected set currentModel(value: DescriptionContract) {
+        this.childModel(null, value);
+    }
     protected childContext(key: string) {
         return this._context.childContext(key);
     }
-    protected childModel(key: string) {
+    protected childModel(key: string, value?: any, override?: boolean) {
         let context = this._context.childContext(key);
         if (!context) return undefined;
-        return context.model();
+        let m = context.model();
+        if (arguments.length < 2 || !m) return m;
+        if (!override) for (let key in m) {
+            delete (m as any)[key];
+        }
+
+        if (!value) return undefined;
+        for (let key in value) {
+            (m as any)[key] = value[key];
+        }
+
+        return value;
     }
-    protected refreshChild(key: string) {
+    protected refreshChild(key?: string) {
         let context = this._context.childContext(key);
         if (!context) return;
         context.refresh();
