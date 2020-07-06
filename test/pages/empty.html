@@ -26,7 +26,7 @@
             }
         }
 
-        let context = Hje.render("demo-container", {
+        Hje.render("demo-container", {
             style: {
                 "color": "#808080",
                 "font-size": "14px"
@@ -49,12 +49,13 @@
                         { key: "x", tagName: "li", children: "UVW XYZ", control: A },
                     ]
                 }
-            ]
+            ],
+            onLoad(context) {
+                setTimeout(() => {
+                    context.childContext("x").control().updateValue("0123456789");
+                }, 3000);
+            }
         });
-
-        setTimeout(() => {
-            context.childContext("x").control().updateValue("0123456789");
-        }, 3000);
     </script>
 </body>
 
