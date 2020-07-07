@@ -638,6 +638,7 @@ declare namespace Hje {
     interface ComponentOptionsContract {
         children?: string | DescriptionContract[];
         contextRef?(context: ViewGeneratingContextContract<any>): void;
+        [property: string]: any;
     }
     class BaseComponent {
         private readonly _inner;
@@ -653,6 +654,7 @@ declare namespace Hje {
             inline: any;
             refs: string[];
         };
+        readonly isDisposed: boolean;
         prop<T = any>(key: string | any, value?: T | any): any;
         on(key: string, handler: any): DisposableContract;
         style(value?: any, refs?: string[] | boolean): {

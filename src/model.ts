@@ -323,6 +323,7 @@ function setProp(props: any, key: string, value?: any, disposable?: DisposableAr
 export interface ComponentOptionsContract {
     children?: string | DescriptionContract[],
     contextRef?(context: ViewGeneratingContextContract<any>): void;
+    [property: string]: any;
 }
 
 export class BaseComponent {
@@ -334,6 +335,9 @@ export class BaseComponent {
     constructor(element: any, options?: ComponentOptionsContract) {
         if (!options) options = {};
         let self = this;
+        if (typeof (options as any).disposeFlagHandler === "function") (options as any).disposeFlagHandler(() => {
+            this._inner.isDisposed = true;
+        });
         render(element, {}, {
             onInit(c) {
                 self._context = c;
@@ -401,6 +405,9 @@ export class BaseComponent {
         }
 
         return styleInfo;
+    }
+    get isDisposed() {
+        return this._inner.isDisposed;
     }
     prop<T = any>(key: string | any, value?: T | any) {
         if (arguments.length === 0) return Object.keys(this._inner.props);
@@ -483,8 +490,13 @@ export class BaseComponent {
         return this._context.element();
     }
     dispose() {
+        if (this._inner.isDisposed) return;
+        this._inner.isDisposed = true;
+        if (typeof (this as any).onUnmount === "function") (this as any).onUnmount();
+        let ele = this._context.element();
+        if (!ele) return;
         let h = viewGenerator();
-        h.unmount(this._context.element());
+        h.unmount(ele);
     }
 }
 

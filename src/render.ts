@@ -423,8 +423,16 @@ function updateContext<T = any>(h: ViewGeneratorContract<T>, bag: CreatingBagCon
             appendMode = false;
         }
 
-        bag.c = new model.control(bag.element, {
-            children: model.children
+        let cc: any = bag.c = new model.control(bag.element, {
+            children: model.children,
+            disposeFlagHandler(h: Function) {
+                if (typeof h !== "function") return;
+                context.pushDisposable({
+                    dispose() {
+                        h();
+                    }
+                })
+            }
         });
         if (model.props && typeof model.props === "object") {
             bag.c.prop(model.props);
@@ -439,6 +447,7 @@ function updateContext<T = any>(h: ViewGeneratorContract<T>, bag: CreatingBagCon
             });
         }
 
+        if (typeof cc.onInit === "function") cc.onInit();
         h.onInit(context);
         if (typeof options.onInit === "function") options.onInit(context);
         if (typeof model.onInit === "function") model.onInit(context);
@@ -625,7 +634,11 @@ export function render<T = any>(target: T, model: DescriptionContract, options?:
         if (!element) return false;
         if (h.alive(element)) return true;
         delete b.element;
-        delete b.c;
+        if (b.c) {
+            if (typeof (b.c as any).onUnmount === "function") (b.c as any).onUnmount();
+            delete b.c;
+        }
+
         b.info = {};
         if (!inheritRefs) b.keyRefs = {};
         else if (regKey) delete b.keyRefs[regKey];
