@@ -326,12 +326,23 @@ export interface ComponentOptionsContract {
     [property: string]: any;
 }
 
+/**
+ * The base component that you can extend customized business logic
+ * by a) updating constructor to set new model and refreshing;
+ * b) adding methods to update specific child model and refreshing.
+ */
 export class BaseComponent {
     private readonly _inner = {
         props: {} as any,
         isDisposed: false
     };
     private _context: ViewGeneratingContextContract<any>;
+
+    /**
+     * Initializes a new instance of the BaseComponent class.
+     * @param element The element.
+     * @param options The options.
+     */
     constructor(element: any, options?: ComponentOptionsContract) {
         if (!options) options = {};
         let self = this;
@@ -373,11 +384,17 @@ export class BaseComponent {
 
         return value;
     }
+
+    /**
+     * Refreshes a specific child by key.
+     * @param key The child key; or null for updating the whole component.
+     */
     protected refreshChild(key?: string) {
         let context = this._context.childContext(key);
         if (!context) return;
         context.refresh();
     }
+
     protected childProps(childKey: string, propKey: string, v?: any) {
         let h = viewGenerator();
         let context = this._context.childContext(childKey);
@@ -409,6 +426,11 @@ export class BaseComponent {
     get isDisposed() {
         return this._inner.isDisposed;
     }
+    /**
+     * Gets or sets a property.
+     * @param key The property key.
+     * @param value The optional value of the property if need set.
+     */
     prop<T = any>(key: string | any, value?: T | any) {
         if (arguments.length === 0) return Object.keys(this._inner.props);
         if (!key || this._inner.isDisposed) return undefined;
@@ -467,6 +489,12 @@ export class BaseComponent {
 
         return this._inner.props[key];
     }
+
+    /**
+     * Add a listener.
+     * @param key The event key.
+     * @param handler The handler of the event to add.
+     */
     on(key: string, handler: any) {
         let h = viewGenerator();
         if (this._inner.isDisposed) return undefined;
@@ -480,6 +508,7 @@ export class BaseComponent {
         });
         else return h.on(selfContext, key, handler);
     }
+
     style(value?: any, refs?: string[] | boolean) {
         return this.childStyle(null, value, refs);
     }

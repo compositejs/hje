@@ -1,6 +1,6 @@
 # Hyper-JSON Engine
 
-It is a javascript library to generate HTML view by JSON.
+This is a javascript library to generate HTML view by JSON.
 
 ## Installation and Usage
 

@@ -640,14 +640,28 @@ declare namespace Hje {
         contextRef?(context: ViewGeneratingContextContract<any>): void;
         [property: string]: any;
     }
+    /**
+     * The base component that you can extend customized business logic
+     * by a) updating constructor to set new model and refreshing;
+     * b) adding methods to update specific child model and refreshing.
+     */
     class BaseComponent {
         private readonly _inner;
         private _context;
+        /**
+         * Initializes a new instance of the BaseComponent class.
+         * @param element The element.
+         * @param options The options.
+         */
         constructor(element: any, options?: ComponentOptionsContract);
         protected readonly currentContext: ViewGeneratingContextContract<any>;
         protected currentModel: DescriptionContract;
         protected childContext(key: string): ViewGeneratingContextContract<any>;
         protected childModel(key: string, value?: any, override?: boolean): any;
+        /**
+         * Refreshes a specific child by key.
+         * @param key The child key; or null for updating the whole component.
+         */
         protected refreshChild(key?: string): void;
         protected childProps(childKey: string, propKey: string, v?: any): any;
         protected childStyle(childKey: string, style?: any, styleRefs?: string[] | boolean): {
@@ -655,7 +669,17 @@ declare namespace Hje {
             refs: string[];
         };
         readonly isDisposed: boolean;
+        /**
+         * Gets or sets a property.
+         * @param key The property key.
+         * @param value The optional value of the property if need set.
+         */
         prop<T = any>(key: string | any, value?: T | any): any;
+        /**
+         * Add a listener.
+         * @param key The event key.
+         * @param handler The handler of the event to add.
+         */
         on(key: string, handler: any): DisposableContract;
         style(value?: any, refs?: string[] | boolean): {
             inline: any;
