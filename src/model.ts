@@ -334,6 +334,7 @@ export interface ComponentOptionsContract {
 export class BaseComponent {
     private readonly _inner = {
         props: {} as any,
+        disposable: new DisposableArray(),
         isDisposed: false
     };
     private _context: ViewGeneratingContextContract<any>;
@@ -348,6 +349,7 @@ export class BaseComponent {
         let self = this;
         if (typeof (options as any).disposeFlagHandler === "function") (options as any).disposeFlagHandler(() => {
             this._inner.isDisposed = true;
+            this._inner.disposable.dispose();
         });
         render(element, {}, {
             onInit(c) {
@@ -423,9 +425,22 @@ export class BaseComponent {
 
         return styleInfo;
     }
+
+    /**
+     * Gets a value indicating whether the component is disposed.
+     */
     get isDisposed() {
         return this._inner.isDisposed;
     }
+
+    /**
+     * Gets a disposable array attached in this component
+     * which will dispose automatically when the component is disposed.
+     */
+    get disposableStore() {
+        return this._inner.disposable;
+    }
+
     /**
      * Gets or sets a property.
      * @param key The property key.
@@ -521,6 +536,7 @@ export class BaseComponent {
     dispose() {
         if (this._inner.isDisposed) return;
         this._inner.isDisposed = true;
+        this._inner.disposable.dispose();
         if (typeof (this as any).onUnmount === "function") (this as any).onUnmount();
         let ele = this._context.element();
         if (!ele) return;

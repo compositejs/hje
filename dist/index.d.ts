@@ -668,7 +668,15 @@ declare namespace Hje {
             inline: any;
             refs: string[];
         };
+        /**
+         * Gets a value indicating whether the component is disposed.
+         */
         readonly isDisposed: boolean;
+        /**
+         * Gets a disposable array attached in this component
+         * which will dispose automatically when the component is disposed.
+         */
+        readonly disposableStore: DisposableArray;
         /**
          * Gets or sets a property.
          * @param key The property key.
