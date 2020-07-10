@@ -358,24 +358,49 @@ export class BaseComponent {
             }
         });
     }
+
+    /**
+     * Gets the generating context of the current instance.
+     */
     protected get currentContext() {
         return this._context;
     }
+
+    /**
+     * Gets the view model of the current instance.
+     */
     protected get currentModel() {
         return this._context ? this._context.model() : undefined;
     }
+
+    /**
+     * Sets the view model of the current instance.
+     * @param value The view model.
+     */
     protected set currentModel(value: DescriptionContract) {
         this.childModel(null, value);
     }
+
+    /**
+     * Gets the generating context of a specific child.
+     * @param key The child key.
+     */
     protected childContext(key: string) {
         return this._context.childContext(key);
     }
-    protected childModel(key: string, value?: any, override?: boolean) {
+
+    /**
+     * Gets or sets the view model of the current instance.
+     * @param key The child key.
+     * @param value The optional view model to override by setting its properties. The original reference will not replace but keep.
+     * @param clearOriginal true if clear all properties of the original view model before set; otherwise, false.
+     */
+    protected childModel(key: string, value?: any, clearOriginal?: boolean) {
         let context = this._context.childContext(key);
         if (!context) return undefined;
         let m = context.model();
         if (arguments.length < 2 || !m) return m;
-        if (!override) for (let key in m) {
+        if (!clearOriginal) for (let key in m) {
             delete (m as any)[key];
         }
 
@@ -388,8 +413,16 @@ export class BaseComponent {
     }
 
     /**
+     * Gets a disposable array attached in this component
+     * which will dispose automatically when the component is disposed.
+     */
+    protected get disposableStore() {
+        return this._inner.disposable;
+    }
+
+    /**
      * Refreshes a specific child by key.
-     * @param key The child key; or null for updating the whole component.
+     * @param key The child key; or null for updating the current component.
      */
     protected refreshChild(key?: string) {
         let context = this._context.childContext(key);
@@ -397,6 +430,12 @@ export class BaseComponent {
         context.refresh();
     }
 
+    /**
+     * Gets or sets the child property.
+     * @param childKey The child key; or null for the current component.
+     * @param propKey The property key.
+     * @param v An opitonal value to set.
+     */
     protected childProps(childKey: string, propKey: string, v?: any) {
         let h = viewGenerator();
         let context = this._context.childContext(childKey);
@@ -404,6 +443,13 @@ export class BaseComponent {
         if (arguments.length > 2) h.setProp(context, propKey, v);
         return h.getProp(context, propKey);
     }
+
+    /**
+     * Gets or sets the style information of the specific child.
+     * @param childKey The child key; or null for the current component.
+     * @param style The inner style object.
+     * @param styleRefs The style class reference name list.
+     */
     protected childStyle(childKey: string, style?: any, styleRefs?: string[] | boolean) {
         let h = viewGenerator();
         let context = this._context.childContext(childKey);
@@ -434,11 +480,19 @@ export class BaseComponent {
     }
 
     /**
-     * Gets a disposable array attached in this component
-     * which will dispose automatically when the component is disposed.
+     * Adds disposable objects so that they will be disposed when this instance is disposed.
+     * @param items  The objects to add.
      */
-    get disposableStore() {
-        return this._inner.disposable;
+    pushDisposable(...items: DisposableContract[]) {
+        return this._inner.disposable.push(...items);
+    }
+
+    /**
+     * Removes the disposable objects added in this instance.
+     * @param items  The objects to remove.
+     */
+    public removeDisposable(...items: DisposableContract[]) {
+        return this._inner.disposable.remove(...items);
     }
 
     /**
@@ -524,15 +578,33 @@ export class BaseComponent {
         else return h.on(selfContext, key, handler);
     }
 
+    /**
+     * Gets or sets the style information.
+     * @param value The inner style object.
+     * @param refs The style class reference name list.
+     */
     style(value?: any, refs?: string[] | boolean) {
         return this.childStyle(null, value, refs);
     }
+
+    /**
+     * Sets the style references.
+     * @param value The style class reference name list.
+     */
     styleRefs(value: string[]) {
         return this.style(true, value);
     }
+
+    /**
+     * Gets the raw element.
+     */
     element() {
         return this._context.element();
     }
+    
+    /**
+     * Disposeses this instance and remove the element from the tree.
+     */
     dispose() {
         if (this._inner.isDisposed) return;
         this._inner.isDisposed = true;

@@ -654,16 +654,53 @@ declare namespace Hje {
          * @param options The options.
          */
         constructor(element: any, options?: ComponentOptionsContract);
+        /**
+         * Gets the generating context of the current instance.
+         */
         protected readonly currentContext: ViewGeneratingContextContract<any>;
+        /**
+         * Gets the view model of the current instance.
+         */
+        /**
+        * Sets the view model of the current instance.
+        * @param value The view model.
+        */
         protected currentModel: DescriptionContract;
+        /**
+         * Gets the generating context of a specific child.
+         * @param key The child key.
+         */
         protected childContext(key: string): ViewGeneratingContextContract<any>;
-        protected childModel(key: string, value?: any, override?: boolean): any;
+        /**
+         * Gets or sets the view model of the current instance.
+         * @param key The child key.
+         * @param value The optional view model to override by setting its properties. The original reference will not replace but keep.
+         * @param clearOriginal true if clear all properties of the original view model before set; otherwise, false.
+         */
+        protected childModel(key: string, value?: any, clearOriginal?: boolean): any;
+        /**
+         * Gets a disposable array attached in this component
+         * which will dispose automatically when the component is disposed.
+         */
+        protected readonly disposableStore: DisposableArray;
         /**
          * Refreshes a specific child by key.
-         * @param key The child key; or null for updating the whole component.
+         * @param key The child key; or null for updating the current component.
          */
         protected refreshChild(key?: string): void;
+        /**
+         * Gets or sets the child property.
+         * @param childKey The child key; or null for the current component.
+         * @param propKey The property key.
+         * @param v An opitonal value to set.
+         */
         protected childProps(childKey: string, propKey: string, v?: any): any;
+        /**
+         * Gets or sets the style information of the specific child.
+         * @param childKey The child key; or null for the current component.
+         * @param style The inner style object.
+         * @param styleRefs The style class reference name list.
+         */
         protected childStyle(childKey: string, style?: any, styleRefs?: string[] | boolean): {
             inline: any;
             refs: string[];
@@ -673,10 +710,15 @@ declare namespace Hje {
          */
         readonly isDisposed: boolean;
         /**
-         * Gets a disposable array attached in this component
-         * which will dispose automatically when the component is disposed.
+         * Adds disposable objects so that they will be disposed when this instance is disposed.
+         * @param items  The objects to add.
          */
-        readonly disposableStore: DisposableArray;
+        pushDisposable(...items: DisposableContract[]): number;
+        /**
+         * Removes the disposable objects added in this instance.
+         * @param items  The objects to remove.
+         */
+        removeDisposable(...items: DisposableContract[]): number;
         /**
          * Gets or sets a property.
          * @param key The property key.
@@ -689,15 +731,30 @@ declare namespace Hje {
          * @param handler The handler of the event to add.
          */
         on(key: string, handler: any): DisposableContract;
+        /**
+         * Gets or sets the style information.
+         * @param value The inner style object.
+         * @param refs The style class reference name list.
+         */
         style(value?: any, refs?: string[] | boolean): {
             inline: any;
             refs: string[];
         };
+        /**
+         * Sets the style references.
+         * @param value The style class reference name list.
+         */
         styleRefs(value: string[]): {
             inline: any;
             refs: string[];
         };
+        /**
+         * Gets the raw element.
+         */
         element(): any;
+        /**
+         * Disposeses this instance and remove the element from the tree.
+         */
         dispose(): void;
     }
 }
