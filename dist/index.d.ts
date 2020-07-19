@@ -322,7 +322,7 @@ declare namespace Hje {
     /**
      * The options on rendering.
      */
-    interface RenderingOptions {
+    export interface RenderingOptions {
         /**
          * true if append a new element to the target; otherwise, false.
          */
@@ -342,7 +342,7 @@ declare namespace Hje {
          */
         [property: string]: any;
     }
-    class HtmlGenerator implements ViewGeneratorContract<HTMLElement> {
+    export class HtmlGenerator implements ViewGeneratorContract<HTMLElement> {
         defaultTagName: string;
         initView(context: ViewGeneratingContextContract<HTMLElement>, tagName: string): HTMLElement;
         alive(element: HTMLElement): boolean;
@@ -372,7 +372,7 @@ declare namespace Hje {
         styleRefs: string[];
         children: MemoryJsonSourceContract[];
     }
-    class MemoryJsonGenerator implements ViewGeneratorContract<MemoryJsonSourceContract> {
+    export class MemoryJsonGenerator implements ViewGeneratorContract<MemoryJsonSourceContract> {
         defaultTagName: string;
         initView(context: ViewGeneratingContextContract<MemoryJsonSourceContract>, tagName: string): MemoryJsonSourceContract;
         alive(element: MemoryJsonSourceContract): boolean;
@@ -393,14 +393,15 @@ declare namespace Hje {
             dispose(): void;
         };
     }
-    function viewGenerator<T = any>(h?: ViewGeneratorContract<T>): ViewGeneratorContract<any>;
+    export function viewGenerator<T = any>(h?: ViewGeneratorContract<T>): ViewGeneratorContract<any>;
     /**
      * Renders.
      * @param target  The target element to present the view.
      * @param model  The instance of view description.
      * @param options  Additional options.
      */
-    function render<T = any>(target: T, model: DescriptionContract, options?: RenderingOptions | "html"): (ViewGeneratingContextContract<T> | undefined);
+    export function render<T = any>(target: T, model: DescriptionContract, options?: RenderingOptions | "html"): (ViewGeneratingContextContract<T> | undefined);
+    export {};
 }
 declare namespace Hje {
     /**
@@ -657,15 +658,16 @@ declare namespace Hje {
         /**
          * Gets the generating context of the current instance.
          */
-        protected readonly currentContext: ViewGeneratingContextContract<any>;
+        protected get currentContext(): ViewGeneratingContextContract<any>;
         /**
          * Gets the view model of the current instance.
          */
+        protected get currentModel(): DescriptionContract;
         /**
-        * Sets the view model of the current instance.
-        * @param value The view model.
-        */
-        protected currentModel: DescriptionContract;
+         * Sets the view model of the current instance.
+         * @param value The view model.
+         */
+        protected set currentModel(value: DescriptionContract);
         /**
          * Gets the generating context of a specific child.
          * @param key The child key.
@@ -682,7 +684,7 @@ declare namespace Hje {
          * Gets a disposable array attached in this component
          * which will dispose automatically when the component is disposed.
          */
-        protected readonly disposableStore: DisposableArray;
+        protected get disposableStore(): DisposableArray;
         /**
          * Refreshes a specific child by key.
          * @param key The child key; or null for updating the current component.
@@ -717,7 +719,7 @@ declare namespace Hje {
         /**
          * Gets a value indicating whether the component is disposed.
          */
-        readonly isDisposed: boolean;
+        get isDisposed(): boolean;
         /**
          * Adds disposable objects so that they will be disposed when this instance is disposed.
          * @param items  The objects to add.
@@ -735,7 +737,7 @@ declare namespace Hje {
          */
         prop<T = any>(key: string | any, value?: T | any): any;
         /**
-         * Add an event listener.
+         * Adds an event listener.
          * @param key The event key.
          * @param handler The handler of the event to add.
          */
