@@ -492,7 +492,7 @@ export class BaseComponent {
      * Adds disposable objects so that they will be disposed when this instance is disposed.
      * @param items  The objects to add.
      */
-    public pushDisposable(...items: DisposableContract[]) {
+    pushDisposable(...items: DisposableContract[]) {
         return this._inner.disposable.push(...items);
     }
 
@@ -500,7 +500,7 @@ export class BaseComponent {
      * Removes the disposable objects added in this instance.
      * @param items  The objects to remove.
      */
-    public removeDisposable(...items: DisposableContract[]) {
+    removeDisposable(...items: DisposableContract[]) {
         return this._inner.disposable.remove(...items);
     }
 

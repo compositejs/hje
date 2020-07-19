@@ -19,6 +19,7 @@ And you can also insert the [JavaScript bundled file](https://unpkg.com/hje/dist
 Hyper-Json Engine (Hje) provides a way to describe the view by JavaScript with event and binding. It can render to HTML or customized view by the description model.
 
 - [JSON → HTML](https://github.com/compositejs/hje/wiki/tohtml)
+- [Component](https://github.com/compositejs/hje/wiki/component)
 
 ## Building / Testing
 
