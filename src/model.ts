@@ -542,7 +542,6 @@ export class BaseComponent {
                 });
             } else if (typeof onPropsChanged === "function") {
                 (this as any).onPropsChanged(obj);
-                return;
             } else if (typeof onPropsChanged === "object") {
                 Object.keys(obj).forEach(k => {
                     if (!(this as any).onPropsChanged[key])
@@ -556,7 +555,7 @@ export class BaseComponent {
                 });
             }
 
-            return Object.keys(this._inner.props);
+            return Object.keys(key);
         }
 
         if (arguments.length > 1 && setProp(this._inner.props, key, value)) {
@@ -569,7 +568,7 @@ export class BaseComponent {
     }
 
     /**
-     * Add an event listener.
+     * Adds an event listener.
      * @param key The event key.
      * @param handler The handler of the event to add.
      */
@@ -578,10 +577,10 @@ export class BaseComponent {
         if (this._inner.isDisposed) return undefined;
         let selfContext = this._context;
         if (typeof (this as any).onListened === "function") typeof (this as any).onListened(key, handler, {
-            onChild(childKey: string, eventKey: string, handler: any) {
+            onChild(childKey: string, eventKey: string, h: any) {
                 let context = selfContext.childContext(childKey);
                 if (!context) return undefined;
-                return h.on(context, eventKey, handler);
+                return h.on(context, eventKey, h);
             }
         });
         else return h.on(selfContext, key, handler);
