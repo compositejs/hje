@@ -473,6 +473,15 @@ export class BaseComponent {
     }
 
     /**
+     * Sets the style references of the specific child.
+     * @param childKey The child key; or null for the current component.
+     * @param value The style class reference name list.
+     */
+    protected childStyleRefs(childKey: string, value: string[]) {
+        return this.childStyle(childKey, null, value);
+    }
+
+    /**
      * Gets a value indicating whether the component is disposed.
      */
     get isDisposed() {
@@ -483,7 +492,7 @@ export class BaseComponent {
      * Adds disposable objects so that they will be disposed when this instance is disposed.
      * @param items  The objects to add.
      */
-    pushDisposable(...items: DisposableContract[]) {
+    public pushDisposable(...items: DisposableContract[]) {
         return this._inner.disposable.push(...items);
     }
 
@@ -560,7 +569,7 @@ export class BaseComponent {
     }
 
     /**
-     * Add a listener.
+     * Add an event listener.
      * @param key The event key.
      * @param handler The handler of the event to add.
      */

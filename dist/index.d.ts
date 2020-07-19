@@ -706,6 +706,15 @@ declare namespace Hje {
             refs: string[];
         };
         /**
+         * Sets the style references of the specific child.
+         * @param childKey The child key; or null for the current component.
+         * @param value The style class reference name list.
+         */
+        protected childStyleRefs(childKey: string, value: string[]): {
+            inline: any;
+            refs: string[];
+        };
+        /**
          * Gets a value indicating whether the component is disposed.
          */
         readonly isDisposed: boolean;
@@ -726,7 +735,7 @@ declare namespace Hje {
          */
         prop<T = any>(key: string | any, value?: T | any): any;
         /**
-         * Add a listener.
+         * Add an event listener.
          * @param key The event key.
          * @param handler The handler of the event to add.
          */
