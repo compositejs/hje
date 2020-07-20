@@ -23,7 +23,7 @@ Hyper-Json Engine (Hje) provides a way to describe the view by JavaScript with e
 
 ## Building / Testing
 
-You may need install Gulp to build. Following is the command line to build this project including the source and test cases.
+You need install `gulp` and `tsc` to build. Following is the command line to build this project including the source and test cases.
 
 ```sh
 npm run-script build
