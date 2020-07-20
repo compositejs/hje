@@ -35,7 +35,6 @@ interface CreatingBagContract<T> {
     inheritRefs: boolean;
     model: DescriptionContract,
     info: any,
-    c: BaseComponent,
     dispose(): void;
 }
 
@@ -64,7 +63,6 @@ function createContext<T = any>(
         inheritRefs: false,
         model,
         info: {},
-        c: undefined,
         dispose() {
             handlers = inner.contextHandlers;
             disposable.dispose();
@@ -76,9 +74,6 @@ function createContext<T = any>(
         },
         model(): any {
             return bag.model;
-        },
-        control () {
-            return bag.c;
         },
         pushDisposable(...items: DisposableContract[]) {
             return disposable.push(...items);
@@ -416,46 +411,6 @@ function updateContext<T = any>(h: ViewGeneratorContract<T>, bag: CreatingBagCon
     bag.element = h.initView(context, model.tagName);
     if (!bag.element) return undefined;
 
-    // Control controlling logic.
-    if (typeof model.control === "function") {
-        if (appendMode) {
-            if (options.parent) h.append(options.parent, bag.element);
-            appendMode = false;
-        }
-
-        let cc: any = bag.c = new model.control(bag.element, {
-            children: model.children,
-            disposeFlagHandler(h: Function) {
-                if (typeof h !== "function") return;
-                context.pushDisposable({
-                    dispose() {
-                        h();
-                    }
-                })
-            }
-        });
-        if (model.props && typeof model.props === "object") {
-            bag.c.prop(model.props);
-        }
-
-        bag.c.style(model.style, model.styleRefs);
-        if (model.on && typeof model.on === "object") {
-            Object.keys(model.on).forEach(key => {
-                if (!key || typeof key !== "string") return;
-                let h = model.on[key];
-                bag.c.on(key, h);
-            });
-        }
-
-        if (typeof cc.onInit === "function") cc.onInit();
-        h.onInit(context);
-        if (typeof options.onInit === "function") options.onInit(context);
-        if (typeof model.onInit === "function") model.onInit(context);
-        if (typeof options.onLoad === "function") options.onLoad(context);
-        if (typeof model.onLoad === "function") model.onLoad(context);
-        return bag.element;
-    }
-
     // Set properties.
     let props = model.props || (model as any).attr || {};
     let propsB: string[] = [];
@@ -634,11 +589,6 @@ export function render<T = any>(target: T, model: DescriptionContract, options?:
         if (!element) return false;
         if (h.alive(element)) return true;
         delete b.element;
-        if (b.c) {
-            if (typeof (b.c as any).onUnmount === "function") (b.c as any).onUnmount();
-            delete b.c;
-        }
-
         b.info = {};
         if (!inheritRefs) b.keyRefs = {};
         else if (regKey) delete b.keyRefs[regKey];

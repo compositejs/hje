@@ -14,18 +14,6 @@
 
     <div id="demo-container"></div>
     <script>
-        class A extends Hje.BaseComponent {
-            constructor(element, options) {
-                super(element, options);
-                this.currentModel = options;
-                this.refreshChild(null);
-            }
-            updateValue(value) {
-                this.currentModel.children = value;
-                this.refreshChild(null);
-            }
-        }
-
         Hje.render("demo-container", {
             style: {
                 "color": "#808080",
@@ -46,13 +34,13 @@
                         { tagName: "li", children: "ABCDEFG" },
                         { tagName: "li", children: "HIJKLMN" },
                         { tagName: "li", children: "OPQ RST" },
-                        { key: "x", tagName: "li", children: "UVW XYZ", control: A },
+                        { key: "x", tagName: "li", children: "UVW XYZ" },
                     ]
                 }
             ],
             onLoad(context) {
                 setTimeout(() => {
-                    context.childContext("x").control().updateValue("0123456789");
+                    console.log("x", context.childContext("x").model());
                 }, 3000);
             }
         });
