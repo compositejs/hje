@@ -17,12 +17,21 @@
         class A extends Hje.BaseComponent {
             constructor(element, options) {
                 super(element, options);
-                this.currentModel = options;
+                this.currentModel = {
+                    children: [
+                        { key: "child", children: options.children },
+                        { children: "Additional" }
+                    ]
+                };
                 this.refreshChild(null);
             }
             updateValue(value) {
-                this.currentModel.children = value;
-                this.refreshChild(null);
+                let m = this.childModel("child");
+                m.children = value;
+                this.refreshChild("child");
+            }
+            onListened(key, h, info) {
+                return info.onChild("child", key, h);
             }
         }
 
@@ -46,14 +55,26 @@
                         { tagName: "li", children: "ABCDEFG" },
                         { tagName: "li", children: "HIJKLMN" },
                         { tagName: "li", children: "OPQ RST" },
-                        { key: "x", tagName: "li", children: "UVW XYZ", control: A },
+                        { tagName: "li", children: "UVW XYZ" },
+                        {
+                            control: A,
+                            key: "x",
+                            tagName: "li",
+                            children: "Greetings!",
+                            on: {
+                                click(ev) {
+                                    console.log("A click", ev);
+                                }
+                            }
+                        },
                     ]
                 }
             ],
             onLoad(context) {
+                let c = context.childContext("x").control();
                 setTimeout(() => {
-                    context.childContext("x").control().updateValue("0123456789");
-                }, 3000);
+                    c.updateValue("0123456789");
+                }, 2000);
             }
         });
     </script>

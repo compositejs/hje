@@ -423,7 +423,10 @@ declare namespace Hje {
         /**
          * The class name of style.
          */
-        styleRefs?: string[];
+        styleRefs?: string[] | string | {
+            subscribe(h: any): any;
+            [property: string]: any;
+        };
         /**
          * Inline style.
          */
@@ -637,6 +640,7 @@ declare namespace Hje {
         on(context: ViewGeneratingContextContract<T>, key: string, handler: (ev: any) => void): DisposableContract;
     }
     interface ComponentOptionsContract {
+        data?: any;
         children?: string | DescriptionContract[];
         contextRef?(context: ViewGeneratingContextContract<any>): void;
         [property: string]: any;
@@ -703,7 +707,10 @@ declare namespace Hje {
          * @param style The inner style object.
          * @param styleRefs The style class reference name list.
          */
-        protected childStyle(childKey: string, style?: any, styleRefs?: string[] | boolean): {
+        protected childStyle(childKey: string, style?: any, styleRefs?: string[] | string | boolean | {
+            subscribe(h: any): any;
+            [property: string]: any;
+        }): {
             inline: any;
             refs: string[];
         };
@@ -747,7 +754,10 @@ declare namespace Hje {
          * @param value The inner style object.
          * @param refs The style class reference name list.
          */
-        style(value?: any, refs?: string[] | boolean): {
+        style(value?: any, refs?: string[] | string | boolean | {
+            subscribe(h: any): any;
+            [property: string]: any;
+        }): {
             inline: any;
             refs: string[];
         };

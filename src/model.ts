@@ -24,7 +24,10 @@ export interface DescriptionContract {
     /**
      * The class name of style.
      */
-    styleRefs?: string[];
+    styleRefs?: string[] | string | {
+        subscribe(h: any): any;
+        [property: string]: any;
+    };
 
     /**
      * Inline style.
@@ -292,8 +295,8 @@ function setProp(props: any, key: string, value?: any, disposable?: DisposableAr
         if (!value) {
             props[key] = { value };
         } else if (typeof value.subscribe === "function") {
-            props[key] = {};
-            if (typeof value.get === "function") props[key].value = value.get();
+            let v = props[key] = {} as any;
+            if (typeof value.get === "function") v.value = value.get();
             let subscriber = (value as ObservableCompatibleContract).subscribe(nv => {
                 setProp(props, key, nv, false);
             });
@@ -308,6 +311,8 @@ function setProp(props: any, key: string, value?: any, disposable?: DisposableAr
                     noNeed = true;
                 }
             });
+        } else {
+            props[key] = { value };
         }
     }
 
@@ -318,9 +323,11 @@ function setProp(props: any, key: string, value?: any, disposable?: DisposableAr
         ele.dispose();
     }, 0);
     else disposable.push(ele);
+    return true;
 }
 
 export interface ComponentOptionsContract {
+    data?: any;
     children?: string | DescriptionContract[],
     contextRef?(context: ViewGeneratingContextContract<any>): void;
     [property: string]: any;
@@ -450,12 +457,30 @@ export class BaseComponent {
      * @param style The inner style object.
      * @param styleRefs The style class reference name list.
      */
-    protected childStyle(childKey: string, style?: any, styleRefs?: string[] | boolean) {
+    protected childStyle(childKey: string, style?: any, styleRefs?: string[] | string | boolean | {
+        subscribe(h: any): any;
+        [property: string]: any;
+    }) {
         let h = viewGenerator();
         let context = this._context.childContext(childKey);
         if (!context || this._inner.isDisposed) return undefined;
         if (arguments.length > 2 && typeof styleRefs !== "boolean") {
-            h.setStyle(context, style, styleRefs);
+            if (styleRefs) {
+                if (typeof (styleRefs as any).subscribe === "function") {
+                    (styleRefs as any).subscribe((nv: string[]) => {
+                        if (!nv) nv = [];
+                        else if (typeof nv === "string") nv = [nv as any];
+                        else if (!(nv instanceof Array)) return;
+                        h.setStyle(context, undefined, nv);
+                    });
+                    if (typeof (styleRefs as any).get === "function") styleRefs = (styleRefs as any).get();
+                }
+    
+                if (typeof styleRefs === "string") styleRefs = [styleRefs];
+                else if (!(styleRefs instanceof Array)) styleRefs = [];    
+            }
+
+            h.setStyle(context, style, styleRefs as any);
             return h.getStyle(context);
         }
 
@@ -512,15 +537,15 @@ export class BaseComponent {
     prop<T = any>(key: string | any, value?: T | any) {
         if (arguments.length === 0) return Object.keys(this._inner.props);
         if (!key || this._inner.isDisposed) return undefined;
-        let obj: any = {};
         if (typeof key === "object") {
+            let obj: any = {};
             if (value === true) {
                 let oldKeys = Object.keys(this._inner.props);
                 let disposable = new DisposableArray();
                 for (let i in oldKeys) {
                     let k = oldKeys[i];
-                    obj[k] = undefined;
                     setProp(this._inner.props, k, undefined, disposable);
+                    obj[k] = undefined;
                 }
 
                 if (disposable.count() > 0) setInterval(() => {
@@ -530,7 +555,7 @@ export class BaseComponent {
 
             Object.keys(key).forEach(k => {
                 setProp(this._inner.props, k, key[k]);
-                obj[key] = (this._inner.props[k] || {}).value;
+                obj[k] = (this._inner.props[k] || {}).value;
             });
 
             let onPropsChanged = (this as any).onPropsChanged;
@@ -544,14 +569,14 @@ export class BaseComponent {
                 (this as any).onPropsChanged(obj);
             } else if (typeof onPropsChanged === "object") {
                 Object.keys(obj).forEach(k => {
-                    if (!(this as any).onPropsChanged[key])
+                    if (!(this as any).onPropsChanged[k])
                         return;
-                    if (typeof (this as any).onPropsChanged[key].set === "function")
-                        (this as any).onPropsChanged[key].set(value);
-                    else if (typeof (this as any).onPropsChanged[key].next === "function")
-                        (this as any).onPropsChanged[key].next(value);
-                    else if (typeof (this as any).onPropsChanged[key] === "function")
-                        (this as any).onPropsChanged[key](value);
+                    if (typeof (this as any).onPropsChanged[k].set === "function")
+                        (this as any).onPropsChanged[k].set(obj[k]);
+                    else if (typeof (this as any).onPropsChanged[k].next === "function")
+                        (this as any).onPropsChanged[k].next(obj[k]);
+                    else if (typeof (this as any).onPropsChanged[k] === "function")
+                        (this as any).onPropsChanged[k](obj[k]);
                 });
             }
 
@@ -573,17 +598,26 @@ export class BaseComponent {
      * @param handler The handler of the event to add.
      */
     on(key: string, handler: any) {
-        let h = viewGenerator();
+        let g = viewGenerator();
         if (this._inner.isDisposed) return undefined;
         let selfContext = this._context;
         if (typeof (this as any).onListened === "function") typeof (this as any).onListened(key, handler, {
             onChild(childKey: string, eventKey: string, h: any) {
                 let context = selfContext.childContext(childKey);
                 if (!context) return undefined;
-                return h.on(context, eventKey, h);
+                // let m = context.model();
+                // if (!m.on) m.on = {};
+                // m.on[eventKey] = h;
+                let c = context.control();
+                if (c) {
+                    c.on(eventKey, h);
+                    return;
+                }
+
+                return g.on(context, eventKey, h);
             }
         });
-        else return h.on(selfContext, key, handler);
+        else return g.on(selfContext, key, handler);
     }
 
     /**
@@ -591,7 +625,10 @@ export class BaseComponent {
      * @param value The inner style object.
      * @param refs The style class reference name list.
      */
-    style(value?: any, refs?: string[] | boolean) {
+    style(value?: any, refs?: string[] | string | boolean | {
+        subscribe(h: any): any;
+        [property: string]: any;
+    }) {
         return this.childStyle(null, value, refs);
     }
 
