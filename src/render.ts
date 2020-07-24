@@ -197,7 +197,7 @@ export class HtmlGenerator implements ViewGeneratorContract<HTMLElement> {
             return;
         }
 
-        element.className = styleRefs.join(" ");
+        element.className = Array.prototype.join.call(styleRefs, " ");
     }
     getStyle(context: ViewGeneratingContextContract<HTMLElement>) {
         let element = context.element();
