@@ -281,8 +281,8 @@ function setProp(props: any, key: string, value?: any, disposable?: DisposableAr
         if (!value) {
             props[key] = { value };
         } else if (typeof value.subscribe === "function") {
-            props[key] = {};
-            if (typeof value.get === "function") props[key].value = value.get();
+            let v = props[key] = {} as any;
+            if (typeof value.get === "function") v.value = value.get();
             let subscriber = (value as ObservableCompatibleContract).subscribe(nv => {
                 setProp(props, key, nv, false);
             });
@@ -297,6 +297,8 @@ function setProp(props: any, key: string, value?: any, disposable?: DisposableAr
                     noNeed = true;
                 }
             });
+        } else {
+            props[key] = { value };
         }
     }
 
@@ -307,9 +309,11 @@ function setProp(props: any, key: string, value?: any, disposable?: DisposableAr
         ele.dispose();
     }, 0);
     else disposable.push(ele);
+    return true;
 }
 
 export interface ComponentOptionsContract {
+    data?: any;
     children?: string | DescriptionContract[],
     contextRef?(context: ViewGeneratingContextContract<any>): void;
     [property: string]: any;

@@ -149,6 +149,7 @@ export class HtmlGenerator implements ViewGeneratorContract<HTMLElement> {
         if (!ele || eleType === "symbol" || ele as any === true) return document.createElement(tagName || "div");
         if (eleType === "string") ele = document.getElementById(ele as any);
         else if (eleType === "number") ele = document.body.children[ele as any] as HTMLElement;
+        if (ele) ele.innerHTML = "";
         return ele;
     }
     alive(element: HTMLElement) {
@@ -185,7 +186,13 @@ export class HtmlGenerator implements ViewGeneratorContract<HTMLElement> {
         if (style) Object.keys(style).forEach(key => {
             (element.style as any)[key] = style[key];
         });
-        if (styleRefs) element.className = styleRefs.join(" ");
+        if (!styleRefs) return;
+        if (typeof styleRefs === "string") {
+            element.className = styleRefs;
+            return;
+        }
+
+        element.className = Array.prototype.join.call(styleRefs, " ");
     }
     getStyle(context: ViewGeneratingContextContract<HTMLElement>) {
         let element = context.element();
@@ -270,8 +277,9 @@ export class MemoryJsonGenerator implements ViewGeneratorContract<MemoryJsonSour
         if (!ele.props) ele.props = {};
         if (!ele.handlers) ele.handlers = {};
         if (!ele.style) ele.style = {};
-        if (!ele.styleRefs) ele.styleRefs = [];
-        if (!ele.children) ele.children = [];
+        if (!ele.styleRefs || !(ele.styleRefs instanceof Array)) ele.styleRefs = [];
+        if (!ele.children || !(ele.children instanceof Array)) ele.children = [];
+        else while (ele.children.length) ele.children.pop();
         return ele;
     }
     alive(element: MemoryJsonSourceContract) {
@@ -311,8 +319,10 @@ export class MemoryJsonGenerator implements ViewGeneratorContract<MemoryJsonSour
     setStyle(context: ViewGeneratingContextContract<MemoryJsonSourceContract>, style: any, styleRefs: string[]) {
         let element = context.element();
         if (!element) return;
-        element.style = style;
-        element.styleRefs = styleRefs;
+        if (style) element.style = style;
+        if (!styleRefs) element.styleRefs = [];
+        if (typeof styleRefs === "string") element.styleRefs = [styleRefs];
+        else element.styleRefs = styleRefs;
     }
     getStyle(context: ViewGeneratingContextContract<MemoryJsonSourceContract>) {
         let element = context.element();
@@ -459,7 +469,24 @@ function updateContext<T = any>(h: ViewGeneratorContract<T>, bag: CreatingBagCon
         });
     }
 
-    if (model.style || model.styleRefs) h.setStyle(context, model.style, model.styleRefs);
+    // Set style.
+    let styleRefs = model.styleRefs as string[];
+    if (styleRefs) {
+        if (typeof (styleRefs as any).subscribe === "function") {
+            (styleRefs as any).subscribe((nv: string[]) => {
+                if (!nv) nv = [];
+                else if (typeof nv === "string") nv = [nv as any];
+                else if (!(nv instanceof Array)) return;
+                h.setStyle(context, undefined, nv);
+            });
+            if (typeof (styleRefs as any).get === "function") styleRefs = (styleRefs as any).get();
+        }
+
+        if (typeof styleRefs === "string") styleRefs = [styleRefs];
+        else if (!(styleRefs instanceof Array)) styleRefs = [];
+    }
+
+    if (model.style || model.styleRefs) h.setStyle(context, model.style, styleRefs);
 
     // Add event listeners.
     if (model.on && typeof model.on === "object") {

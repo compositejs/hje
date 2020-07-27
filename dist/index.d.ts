@@ -629,6 +629,7 @@ declare namespace Hje {
         on(context: ViewGeneratingContextContract<T>, key: string, handler: (ev: any) => void): DisposableContract;
     }
     interface ComponentOptionsContract {
+        data?: any;
         children?: string | DescriptionContract[];
         contextRef?(context: ViewGeneratingContextContract<any>): void;
         [property: string]: any;
