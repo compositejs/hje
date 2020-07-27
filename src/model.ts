@@ -397,6 +397,15 @@ export class BaseComponent {
     }
 
     /**
+     * Gets the control of a specific child.
+     * @param key The child key.
+     */
+    protected childControl<T extends BaseComponent = BaseComponent>(key: string) {
+        let c = this._context.childContext(key);
+        return c ? c.control() as T : undefined;
+    }
+
+    /**
      * Gets or sets the view model of the current instance.
      * @param key The child key.
      * @param value The optional view model to override by setting its properties. The original reference will not replace but keep.
@@ -605,9 +614,6 @@ export class BaseComponent {
             onChild(childKey: string, eventKey: string, h: any) {
                 let context = selfContext.childContext(childKey);
                 if (!context) return undefined;
-                // let m = context.model();
-                // if (!m.on) m.on = {};
-                // m.on[eventKey] = h;
                 let c = context.control();
                 if (c) {
                     c.on(eventKey, h);
