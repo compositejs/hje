@@ -628,6 +628,33 @@ function updateContext<T = any>(h: ViewGeneratorContract<T>, bag: CreatingBagCon
 }
 
 /**
+ * Gets the children by tag name.
+ * @param model The model.
+ * @param key The tag name.
+ */
+export function getChildrenByTagName(model: DescriptionContract, ...key: string[]) {
+    if (!model || !model.children) return undefined;
+    if (!key || !key.length) return model.children;
+    if (typeof model.children === "string") {
+        return undefined;
+    }
+
+    return Array.prototype.some.call(model.children, (ele: DescriptionContract) => {
+        return key.indexOf(ele.tagName) >= 0;
+    });
+}
+
+/**
+ * Gets the first child by tag name.
+ * @param model The model.
+ * @param key The tag name.
+ */
+export function getChildByTagName(model: DescriptionContract, ...key: string[]) {
+    let c = getChildrenByTagName(model, ...key);
+    return c && c.length ? c[0] : undefined;
+}
+
+/**
  * Renders.
  * @param target  The target element to present the view.
  * @param model  The instance of view description.

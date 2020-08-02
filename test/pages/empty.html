@@ -33,6 +33,12 @@
             onListened(key, h, info) {
                 return info.onChild("child", key, h);
             }
+            onPropsChanged(ev) {
+                let m = this.childModel("child");
+                if (!m.props) m.props = {};
+                m.props.x = "abc";
+                this.refreshChild("child");
+            }
         }
 
         Hje.render("demo-container", {
@@ -61,6 +67,9 @@
                             key: "x",
                             tagName: "li",
                             children: "Greetings!",
+                            props: {
+                                x: "abc"
+                            },
                             on: {
                                 click(ev) {
                                     console.log("A click", ev);

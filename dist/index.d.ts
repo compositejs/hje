@@ -395,6 +395,18 @@ declare namespace Hje {
     }
     export function viewGenerator<T = any>(h?: ViewGeneratorContract<T>): ViewGeneratorContract<any>;
     /**
+     * Gets the children by tag name.
+     * @param model The model.
+     * @param key The tag name.
+     */
+    export function getChildrenByTagName(model: DescriptionContract, ...key: string[]): any;
+    /**
+     * Gets the first child by tag name.
+     * @param model The model.
+     * @param key The tag name.
+     */
+    export function getChildByTagName(model: DescriptionContract, ...key: string[]): any;
+    /**
      * Renders.
      * @param target  The target element to present the view.
      * @param model  The instance of view description.
@@ -677,6 +689,11 @@ declare namespace Hje {
          * @param key The child key.
          */
         protected childContext(key: string): ViewGeneratingContextContract<any>;
+        /**
+         * Gets the control of a specific child.
+         * @param key The child key.
+         */
+        protected childControl<T extends BaseComponent = BaseComponent>(key: string): T;
         /**
          * Gets or sets the view model of the current instance.
          * @param key The child key.
