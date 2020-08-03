@@ -452,12 +452,35 @@ export class BaseComponent {
      * @param propKey The property key.
      * @param v An opitonal value to set.
      */
-    protected childProps(childKey: string, propKey: string, v?: any) {
+    protected childProps(childKey: string, propKey: string | any, v?: any) {
+        if (!propKey || typeof propKey === "boolean") return undefined;
         let h = viewGenerator();
         let context = this._context.childContext(childKey);
         if (!context) return undefined;
-        if (arguments.length > 2) h.setProp(context, propKey, v);
-        return h.getProp(context, propKey);
+        if (arguments.length > 2) {
+            let m = context.model();
+            if (!m.props) m.props = {};
+            m.props[propKey] = v;
+            h.setProp(context, propKey, v);
+        }
+
+        if (typeof propKey === "string" || typeof propKey === "symbol" || typeof propKey === "number")
+            return h.getProp(context, propKey.toString());
+        
+        let result: any = {};
+        if (propKey instanceof Array) {
+            propKey.forEach(k => {
+                if (typeof k !== "string" && typeof k !== "symbol" && typeof k !== "number") return;
+                result[k] = h.getProp(context, k.toString());
+            });
+            return result;
+        }
+
+        if (typeof propKey !== "object") return undefined;
+        Object.keys(propKey).forEach(k => {
+            result[k] = this.childProps(childKey, k, propKey[k]);
+        });
+        return result;
     }
 
     /**
