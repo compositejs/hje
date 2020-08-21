@@ -452,7 +452,7 @@ export class BaseComponent {
      * @param propKey The property key.
      * @param v An opitonal value to set.
      */
-    protected childProps(childKey: string, propKey: string | any, v?: any) {
+    protected childProps(childKey: string, propKey: string | number | string[] | any, v?: any) {
         if (!propKey || typeof propKey === "boolean") return undefined;
         let h = viewGenerator();
         let context = this._context.childContext(childKey);

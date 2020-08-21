@@ -717,7 +717,7 @@ declare namespace Hje {
          * @param propKey The property key.
          * @param v An opitonal value to set.
          */
-        protected childProps(childKey: string, propKey: string | any, v?: any): any;
+        protected childProps(childKey: string, propKey: string | number | string[] | any, v?: any): any;
         /**
          * Gets or sets the style information of the specific child.
          * @param childKey The child key; or null for the current component.
