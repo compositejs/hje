@@ -175,8 +175,8 @@ export class HtmlGenerator implements ViewGeneratorContract<HTMLElement> {
             }
 
             return tagNs
-                ? document.createElementNS(tagNs, tagName || this.defaultTagName)
-                : document.createElement(tagName || this.defaultTagName);
+                ? document.createElementNS(tagNs, tagName || this.defaultTagName || "div")
+                : document.createElement(tagName || this.defaultTagName || "div");
         }
 
         if (eleType === "string") ele = document.getElementById(ele as any);
