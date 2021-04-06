@@ -146,7 +146,34 @@ export class HtmlGenerator implements ViewGeneratorContract<HTMLElement> {
     initView(context: ViewGeneratingContextContract<HTMLElement>, tagName: string) {
         let ele = context.element();
         let eleType = typeof ele;
-        if (!ele || eleType === "symbol" || ele as any === true) return document.createElement(tagName || "div");
+        if (!ele || eleType === "symbol" || ele as any === true) {
+            let tagNs = (context.model() || {} as any).tagNamespace;
+            if (!tagNs && tagName && tagName.indexOf(":") >= 0) {
+                if (tagName.startsWith("svg:")) {
+                    tagNs = "http://www.w3.org/2000/svg";
+                    tagName = tagName.substring(4);
+                    if (!tagName) tagName = "svg";
+                } else if (tagName.startsWith("mathml:")) {
+                    tagNs = "http://www.w3.org/1998/Math/MathML";
+                    tagName = tagName.substring(7);
+                    if (!tagName) tagName = "math";
+                } else if (tagName.startsWith("math:")) {
+                    tagNs = "http://www.w3.org/1998/Math/MathML";
+                    tagName = tagName.substring(5);
+                    if (!tagName) tagName = "math";
+                } else if (tagName.startsWith("html:")) {
+                    tagNs = "http://www.w3.org/1999/xhtml";
+                    tagName = tagName.substring(5);
+                } else if (tagName.startsWith(":")) {
+                    tagName = tagName.substring(6);
+                }
+            }
+
+            return tagNs
+                ? document.createElementNS(tagNs, tagName || this.defaultTagName || "div")
+                : document.createElement(tagName || this.defaultTagName || "div");
+        }
+        
         if (eleType === "string") ele = document.getElementById(ele as any);
         else if (eleType === "number") ele = document.body.children[ele as any] as HTMLElement;
         if (ele) ele.innerHTML = "";
