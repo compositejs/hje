@@ -675,7 +675,7 @@ export class BaseComponent {
     element() {
         return this._context.element();
     }
-    
+
     /**
      * Disposeses this instance and remove the element from the tree.
      */

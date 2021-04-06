@@ -153,7 +153,7 @@ export class HtmlGenerator implements ViewGeneratorContract<HTMLElement> {
         let eleType = typeof ele;
         if (!ele || eleType === "symbol" || ele as any === true) {
             let tagNs = (context.model() || {} as any).tagNamespace;
-            if (!tagNs && tagName && tagName.indexOf(":") > 0) {
+            if (!tagNs && tagName && tagName.indexOf(":") >= 0) {
                 if (tagName.startsWith("svg:")) {
                     tagNs = "http://www.w3.org/2000/svg";
                     tagName = tagName.substring(4);
@@ -169,12 +169,14 @@ export class HtmlGenerator implements ViewGeneratorContract<HTMLElement> {
                 } else if (tagName.startsWith("html:")) {
                     tagNs = "http://www.w3.org/1999/xhtml";
                     tagName = tagName.substring(5);
+                } else if (tagName.startsWith(":")) {
+                    tagName = tagName.substring(6);
                 }
             }
 
             return tagNs
-            ? document.createElementNS(tagNs, tagName || this.defaultTagName)
-            : document.createElement(tagName || this.defaultTagName);
+                ? document.createElementNS(tagNs, tagName || this.defaultTagName)
+                : document.createElement(tagName || this.defaultTagName);
         }
 
         if (eleType === "string") ele = document.getElementById(ele as any);
