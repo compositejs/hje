@@ -29,16 +29,6 @@ export interface RenderingOptions {
     [property: string]: any;
 }
 
-interface CreatingBagContract<T> {
-    element: T
-    keyRefs: any,
-    inheritRefs: boolean;
-    model: DescriptionContract,
-    info: any,
-    c: BaseComponent,
-    dispose(): void;
-}
-
 const inner = {
     contextHandlers: {
         alive() {
@@ -50,7 +40,7 @@ const inner = {
 
 function createContext<T = any>(
     element: T,
-    model: any,
+    model: DescriptionContract,
     assertElement: (bag: CreatingBagContract<T>, context: ViewGeneratingContextContract<T>) => boolean,
     refresh: (bag: CreatingBagContract<T>, context: ViewGeneratingContextContract<T>) => void) {
     let disposable = new DisposableArray();
@@ -74,7 +64,7 @@ function createContext<T = any>(
         element() {
             return bag.element;
         },
-        model(): any {
+        model() {
             return bag.model;
         },
         control () {
@@ -97,6 +87,19 @@ function createContext<T = any>(
         childContext(key: string) {
             if (!key) return context;
             return typeof key === "string" ? bag.keyRefs[key] : undefined;
+        },
+        childModel(key: string, modelPropertyKey?: string) {
+            if (!key) {
+                if (!modelPropertyKey) return bag.model;
+                return bag.model == null ? undefined : (bag.model as Record<string, any>)[modelPropertyKey];
+            }
+
+            if (typeof key !== "string") return undefined;
+            let context = bag.keyRefs[key];
+            if (!context) return undefined;
+            let model = context.model();
+            if (!modelPropertyKey) return model;
+            return model == null ? undefined : (model as Record<string, any>)[modelPropertyKey];
         },
         alive() {
             return handlers.alive();

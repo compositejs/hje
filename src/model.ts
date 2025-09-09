@@ -276,12 +276,43 @@ export interface ViewGeneratorContract<T> {
     on(context: ViewGeneratingContextContract<T>, key: string, handler: (ev: any) => void): DisposableContract;
 }
 
-interface CreatingBagContract<T> {
-    element: T
-    keyRefs: any,
-    model: DescriptionContract,
-    info: any,
-    c: BaseComponent,
+/**
+ * THe model about the control is creating.
+ */
+export interface CreatingBagContract<T> {
+    /**
+     * The element.
+     */
+    element: T;
+
+    /**
+     * The key references.
+     */
+    keyRefs: any;
+
+    /**
+     * A value indicating whether inherit the key references from parent.
+     */
+    inheritRefs: boolean;
+
+    /**
+     * The description model.
+     */
+    model: DescriptionContract;
+
+    /**
+     * The additional information.
+     */
+    info: any;
+
+    /**
+     * The control created if has.
+     */
+    c: BaseComponent;
+
+    /**
+     * Disposes this instance.
+     */
     dispose(): void;
 }
 
