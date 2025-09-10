@@ -11,6 +11,11 @@
             "name": "To HTML",
             "url": "/wiki/tohtml/README.md",
             "end": true
+        },
+        {
+            "name": "Component",
+            "url": "/wiki/component/README.md",
+            "end": true
         }
     ]
 }

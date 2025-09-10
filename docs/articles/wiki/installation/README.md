@@ -40,7 +40,12 @@ Hje.render(ele, {
 
 ## Insert script file
 
-You can download the [bundle file](https://raw.githubusercontent.com/compositejs/hje/master/dist/index.js) and insert it into your web page, then you can use the global namespace `Hje`. Following is a sample.
+You can download __one of__ bundle file and insert it into your web page.
+
+- `https://cdn.jsdelivr.net/npm/hje/dist/index.js`
+- `https://unpkg.com/hje/dist/index.js`
+
+Then you can use the global namespace `Hje`. Following is a sample.
 
 ```typescript
 let ele = document.createElement("div");
