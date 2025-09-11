@@ -51,7 +51,7 @@ Hje.render(ele, {
 
 ## 直接引入JS文件
 
-你可以将以下其中一个打包JS脚本文件下载到本地，并通过`script`标签插入到你的页面中。
+你可以将以下其中一个打包 JS 脚本文件下载到本地（也可以直接引用），并通过 `script` 标签插入到你的页面中。
 
 - `https://cdn.jsdelivr.net/npm/hje/dist/index.js`
 - `https://unpkg.com/hje/dist/index.js`

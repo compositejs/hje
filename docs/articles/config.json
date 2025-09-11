@@ -16,6 +16,23 @@
             "name": "Component",
             "url": "/wiki/component/README.md",
             "end": true
+        },
+        "简体中文",
+        {
+            "name": "安装",
+            "url": "/wiki/anzhuang/README.md",
+            "categories": ["install", "prepare", "npm"],
+            "end": true
+        },
+        {
+            "name": "动态生成页面",
+            "url": "/wiki/yemian/README.md",
+            "end": true
+        },
+        {
+            "name": "组件",
+            "url": "/wiki/zujian/README.md",
+            "end": true
         }
     ]
 }
