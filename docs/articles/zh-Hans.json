@@ -2,23 +2,6 @@
     "name": "Hje",
     "wiki": [
         {
-            "name": "Installation",
-            "url": "/wiki/installation/README.md",
-            "categories": ["install", "prepare", "npm"],
-            "end": true
-        },
-        {
-            "name": "To HTML",
-            "url": "/wiki/tohtml/README.md",
-            "end": true
-        },
-        {
-            "name": "Component",
-            "url": "/wiki/component/README.md",
-            "end": true
-        },
-        "简体中文",
-        {
             "name": "安装",
             "url": "/wiki/anzhuang/README.md",
             "categories": ["install", "prepare", "npm"],
@@ -34,5 +17,12 @@
             "url": "/wiki/zujian/README.md",
             "end": true
         }
-    ]
+    ],
+    "redir": {
+        "installation": "anzhuang",
+        "install": "anzhuang",
+        "tohtml": "yemian",
+        "render": "yemian",
+        "component": "zujian"
+    }
 }
