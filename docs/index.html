@@ -26,6 +26,8 @@
             desc: "通过 JS 友好的描述模型，生成具有交互能力的 DOM。"
         }], "part-features");
         if (ww) return;
+        curSite.setText("text-summary", "本前端库提供一种将 JS 描述视图的能力。");
+        curSite.setText("text-intro", "提供一种新的生成界面方式，只需在 JS 中描述文档结构和关键属性即可，也支持事件注册、数据绑定、按需刷新。");
         curSite.setText("text-hint", "如下例所示，你可以将一个类 JSON 格式的模型，转化为视图，绑定到指定元素中。");
     }
     </script>
@@ -50,7 +52,7 @@
     <section>
         <section>
             <div>
-                <span>A JavaScript library to generate HTML view by JSON.</span>
+                <span id="text-summary">A JavaScript library to generate HTML view by JSON.</span>
             </div>
         </section>
         <section class="x-part-intro">
@@ -58,8 +60,8 @@
                 <div>
                     <img alt="Hje" src="https://cdn.jsdelivr.net/npm/hje@2.0.0/docs/images/logos/hje.png" />
                     <strong>Hyper-JSON Engine</strong><span> (Hje)</span><br />
-                    <span>provides a way to describe the view by JavaScript with event and binding.</span>
-                    <span>It can render to HTML or customized view by the description model.</span>
+                    <span id="text-intro">provides a way to describe the view by JavaScript with event and binding.
+                        It can render to HTML or customized view by the description model.</span>
                 </div>
             </div>
         </section>
