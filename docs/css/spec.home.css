@@ -1,0 +1,90 @@
+body > section {
+    margin-bottom: 100px;
+}
+header + section > section:first-child + section.x-part-intro > div {
+    font-size: 16px; padding-right: 69px; position: relative;
+}
+header + section > section:first-child + section.x-part-intro > div > div > img {
+    position: absolute; top: 20px; right: 16px; width: 48px; height: 48px;
+}
+section.x-part-intro > div {
+    padding: 9px; margin-bottom: 10px; border: 1px solid #333; border-radius: 4px; position: relative;
+}
+section.x-part-intro > div > div {
+    margin: 10px;
+}
+section.x-part-intro.x-part-installation > div {
+    border-radius: 0;
+}
+section.x-part-intro.x-part-installation > div:first-child {
+    border-radius: 4px 4px 0 0;
+}
+section.x-part-intro.x-part-installation > div:last-child {
+    border-radius: 0 0 4px 4px;
+}
+section.x-part-intro.x-part-installation > div:last-child > div:first-child > a:first-child {
+    display: block;
+}
+section.x-part-intro.x-part-installation > div:last-child > div:first-child > a:first-child > span:last-child::after {
+    content: " >";
+}
+section.x-part-installation > div > div:first-child, section.x-part-installation > div > img + div {
+    margin-top: 0;
+}
+section.x-part-installation > div > div:last-child {
+    margin-bottom: 0;
+}
+section.x-part-installation > div > div > span {
+    user-select: none;
+}
+section.x-part-installation > div > div.x-part-code {
+    background-color: #2C2C2C; padding: 10px 10px 9px 10px; margin: 10px 0 0 0; border-bottom: 1px solid #393939; border-radius: 4px; transition: 0.2s; overflow-x: auto; scrollbar-color: rgba(128, 128, 128, 0.2) transparent;
+}
+section.x-part-installation > div > div.x-part-code:hover {
+    border-bottom: 1px solid #484848;
+}
+section.x-part-installation > div > div.x-part-code > span:has(+ code) {
+    margin-right: 10px;
+}
+section.x-part-installation > div:first-child {
+    padding-left: 54px;
+}
+section.x-part-installation > div:first-child > img {
+    width: 32px; height: 32px; border-radius: 0 0 4px 4px; position: absolute; top: 0; left: 10px;
+}
+section.x-part-installation > div:first-child > img + div {
+    margin-left: 0;
+}
+section.x-part-features > a.link-long-button, section.x-part-features > a.link-long-button:visited, section.x-part-features > a.link-long-button:active {
+    padding: 14px 24px 14px 24px;
+}
+section.x-part-features > a.link-long-button:hover {
+    padding: 12px 24px 16px 24px;
+}
+section.x-part-features > div > div.x-part-code {
+    background-color: #2C2C2C; padding: 9px; margin: 10px; border: 1px solid #333; border-radius: 4px; transition: 0.2s; overflow-x: auto; scrollbar-color: rgba(128, 128, 128, 0.2) transparent;
+}
+section.x-part-features > div > div.x-part-code:hover {
+    border-color: #444;
+}
+div.x-part-code > code > span.x-code-command {
+    color: #F9F1A5;
+}
+div.x-part-code > code > span.x-code-args {
+    color: #CCC;
+}
+div.x-part-code > code > span.x-code-tag {
+    color: #5C9BD3;
+}
+div.x-part-code > code > span.x-code-attr {
+    color: #A1DBFC;
+}
+div.x-part-code > code > span.x-code-quote {
+    color: #CB927B;
+}
+div.x-part-code > code > span.x-code-string {
+    color: #CB927B;
+}
+div.x-part-code > code > span.x-code-pack {
+    color: #808080;
+}

@@ -11,7 +11,7 @@ let ele = document.createElement("div");
 document.body.appendChild(ele);
 
 Hje.render(ele, {
-  attr: {
+  props: {
     type: "circle",
   },
   style: {
