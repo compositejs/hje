@@ -10,9 +10,27 @@
     <link rel="icon" type="image/png" href="./images/logos/hje.png">
     <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/hje@1.1.0/dist/index.js" ></script>
     <script type="text/javascript" src="./js/site.js" ></script>
-    <script type="text/javascript" src="./js/spec.js" ></script>
+    <script type="text/javascript" src="./js/current.js" ></script>
+    <script type="text/javascript" >
+    function onInit() {
+        let manifest = { name: 'hje', path: 'dist/index.js' };
+        curSite.initHome(manifest);
+        let ww = site.getString("name") !== "名称";
+        curSite.listModel(ww ? [{
+            name: "To HTML",
+            url: "./articles/?tohtml",
+            desc: "Convert the description model to DOMs with interactive."
+        }] : [{
+            name: "动态生成页面",
+            url: "./articles/?yemian",
+            desc: "通过 JS 友好的描述模型，生成具有交互能力的 DOM。"
+        }], "part-features");
+        if (ww) return;
+        curSite.setText("text-hint", "如下例所示，你可以将一个类 JSON 格式的模型，转化为视图，绑定到指定元素中。");
+    }
+    </script>
 </head>
-<body onload="curSite.initHome({ name: 'hje', path: 'dist/index.js' })">
+<body onload="onInit()">
     <header>
         <section>
             <h1><a href="https://composite.js.org"><strong>Composite</strong><span>Js</span></a></h1>
@@ -59,7 +77,7 @@
             </div>
         </section>
         <h2 id="title-features">Features</h2>
-        <section class="x-part-features">
+        <section id="part-features" class="x-part-features">
             <a class="link-long-button" href="./articles/?tohtml" >
                 <span>To HTML</span><br />
                 <span>
@@ -70,7 +88,7 @@
         <section class="x-part-features x-part-intro">
             <div>
                 <div>
-                    <span>You can use this to convert a JSON model to HTML view part. Following is a sample.</span>
+                    <span id="text-hint">You can convert a JSON model to HTML view part. Following is a sample.</span>
                 </div>
                 <div class="x-part-code">
                     <pre><code>import * as Hje from 'hje';

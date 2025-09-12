@@ -2,7 +2,7 @@
 var curSite = {};
 (function (curSite) {
 
-    function genCdnScript(name, ver, url, path) {
+    curSite.cdnModel = function (name, ver, url, path) {
         if (!name || !url) return undefined;
         let s = name;
         if (ver) s += "@" + ver;
@@ -47,10 +47,52 @@ var curSite = {};
                 }, {
                     tagName: "span",
                     styleRefs: "x-code-pack",
-                    children: "/>"
+                    children: " />"
                 }]
             }]
         }
+    };
+
+    curSite.listModel = function (list, element) {
+        if (!list) return undefined;
+        let m = {
+            tagName: "section",
+            children: list.map(function (item) {
+                if (!item || !item.name || !item.url) return undefined;
+                let text = [{ tagName: "span", children: item.name }];
+                if (item.desc) {
+                    text.push({ tagName: "br" });
+                    text.push({
+                        tagName: "span",
+                        children: [{ tagName: "span", children: item.desc }]
+                    });
+                } else if (item.subtitle) {
+                    text.push({ tagName: "span", children: item.subtitle });
+                }
+                return {
+                    tagName: "a",
+                    props: { href: item.url },
+                    styleRefs: "link-long-button",
+                    children: text
+                };
+            }).filter(function (item) {
+                return item;
+            })
+        };
+        if (element) {
+            if (typeof element === "string") element = document.getElementById(element);
+            if (element.tagName) Hje.render(element, m);
+        }
+
+        return m;
+    };
+
+    curSite.setText = function (element, str) {
+        if (!element) return undefined;
+        if (typeof element === "string") element = document.getElementById(element);
+        if (!element.tagName) return undefined;
+        element.innerText = str;
+        return element;
     }
 
     curSite.initHome = function (config) {
@@ -63,6 +105,27 @@ var curSite = {};
         let installPart = document.getElementById("part-install");
         if (!installPart) return;
         let zh = installStr === "安装";
+        let installModel = [{
+            tagName: "div",
+            children: [{
+                tagName: "span",
+                children: [
+                    { tagName: "span", children: zh ? "或者也可以将下方打包后的 JS 文件" : "Or you can insert " },
+                    { tagName: "strong", children: zh ? "之一" : "one of" },
+                    { tagName: "span", children: zh ? "，以 " : " following JavaScript bundled file by " },
+                    { tagName: "code", children: "script" },
+                    { tagName: "span", children: zh ? " 标签的形式插入到你的网页中。" : " tag into your web page." },
+                ]
+            }]
+        }];
+        if (!config.cdn) config.cdn = ["https://cdn.jsdelivr.net/npm/", "https://unpkg.com/"];
+        for (let i = 0; i < config.cdn.length; i++) {
+            let url = config.cdn[i];
+            if (!url) continue;
+            let cdnM = curSite.cdnModel(config.name, config.version, url, config.path);
+            if (cdnM) installModel.push(cdnM);
+        }
+
         let m = {
             tagName: "section",
             styleRefs: ["x-part-installation", "x-part-intro"],
@@ -97,19 +160,7 @@ var curSite = {};
                 }]
             }, {
                 tagName: "div",
-                children: [{
-                    tagName: "div",
-                    children: [{
-                        tagName: "span",
-                        children: [
-                            { tagName: "span", children: zh ? "或者也可以将下方打包后的 JS 文件" : "Or you can insert " },
-                            { tagName: "strong", children: zh ? "之一" : "one of" },
-                            { tagName: "span", children: zh ? "以 " : " following JavaScript bundled file by " },
-                            { tagName: "code", children: "script" },
-                            { tagName: "span", children: zh ? " 标签的形式插入到你的网页中。" : " tag into your web page." },
-                        ]
-                    }]
-                }, genCdnScript(config.name, config.version, "https://cdn.jsdelivr.net/npm/", config.path), genCdnScript(config.name, config.version, "https://unpkg.com/", config.path)]
+                children: installModel
             }, {
                 tagName: "div",
                 children: [{
@@ -124,5 +175,12 @@ var curSite = {};
         };
         Hje.render(installPart, m);
     };
+
+    curSite.initWiki = function (config) {
+        if (!config) config = {};
+        if (!config.rootPath) config.rootPath = "articles";
+        if (!config.menuPath) config.menuPath = site.getString("name") === "名称" ? "zh-Hans.json" : "en.json";
+        site.blogs(config);
+    }
 
 })(curSite || (curSite = {}));

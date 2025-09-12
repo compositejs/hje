@@ -10,6 +10,7 @@
     <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/hje@1.1.0/dist/index.js" ></script>
     <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/marked@16.2.1/lib/marked.umd.js" ></script>
     <script type="text/javascript" src="../js/site.js" ></script>
+    <script type="text/javascript" src="../js/current.js" ></script>
 </head>
 <body>
     <header>
@@ -29,9 +30,11 @@
         </section>
     </header>
     <script type="text/javascript">
-        site.blogs({
-            rootPath: "articles",
-            menuPath: site.getString("name") === "名称" ? "zh-Hans.json" : "en.json"
+        curSite.initWiki({
+            banner: [{
+                tagName: "p",
+                children: "Hyper-JSON Engine provides a way to describe the view by JavaScript with event and binding. It can render to HTML or customized view by the description model."
+            }]
         });
     </script>
     <footer>
