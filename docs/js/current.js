@@ -2,57 +2,6 @@
 var curSite = {};
 (function (curSite) {
 
-    curSite.cdnModel = function (name, ver, url, path) {
-        if (!name || !url) return undefined;
-        let s = name;
-        if (ver) s += "@" + ver;
-        if (!path) path = "";
-        else if (!path.startsWith("/")) path = "/" + path
-        url += s + path;
-        return {
-            tagName: "div",
-            styleRefs: "x-part-code",
-            children: [{
-                tagName: "code",
-                children: [{
-                    tagName: "span",
-                    styleRefs: "x-code-pack",
-                    children: "<"
-                }, {
-                    tagName: "span",
-                    styleRefs: "x-code-tag",
-                    children: "script"
-                }, {
-                    tagName: "span",
-                    children: " "
-                }, {
-                    tagName: "span",
-                    styleRefs: "x-code-attr",
-                    children: "src"
-                }, {
-                    tagName: "span",
-                    children: "="
-                }, {
-                    tagName: "span",
-                    styleRefs: "x-code-quote",
-                    children: "\""
-                }, {
-                    tagName: "span",
-                    styleRefs: "x-code-string",
-                    children: url
-                }, {
-                    tagName: "span",
-                    styleRefs: "x-code-quote",
-                    children: "\""
-                }, {
-                    tagName: "span",
-                    styleRefs: "x-code-pack",
-                    children: " />"
-                }]
-            }]
-        }
-    };
-
     curSite.listModel = function (list, element) {
         if (!list) return undefined;
         let m = {
