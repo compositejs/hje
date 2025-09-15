@@ -539,6 +539,12 @@ ul.link-tile-compact > li > a:active, ul.link-tile-compact > li.state-sel > a:ho
 ul.link-tile-compact > li.state-sel > a > span > span, ul.link-tile-compact > li.state-sel > a > span + span {
     font-weight: normal;
 }
+div.placeholder-after-loading {
+    line-height: 20px;
+}
+div.placeholder-after-loading:first-child > span::after {
+    color: #888; font-size: 12px; content: "Loading…"
+}
 
 /* Blog */
 #blog_content {
