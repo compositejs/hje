@@ -462,7 +462,7 @@ declare namespace Hje {
         /**
          * Childrens.
          */
-        children?: DescriptionContract[] | string;
+        children?: DescriptionContract[] | string | number;
         /**
          * Data bound.
          */
@@ -527,7 +527,6 @@ declare namespace Hje {
         };
         /**
          * Gets the child context by specific key.
-         * @param key  The key of context cached.
          */
         childContext: {
             /**
@@ -549,6 +548,52 @@ declare namespace Hje {
              * @param key  The key of child declared in description.
              */
             remove(key: string | string[]): void;
+        };
+        /**
+         * Gets the model of a specific child by specific key.
+         */
+        childModel: {
+            /**
+             * Gets the model of a specific child by specific key.
+             * @param key  The key of context cached; or the zero-based index of child.
+             */
+            (key: string | number): DescriptionContract | undefined;
+            /**
+             * Gets the prop of a specific child by specific key.
+             * @param key  The key of context cached; or the zero-based index of child.
+             * @param propKey  The additional property key.
+             */
+            prop(key: string | number, propKey?: string | undefined | null): any;
+            /**
+             * Gets the style of a specific child by specific key.
+             * @param key  The key of context cached; or the zero-based index of child.
+             */
+            style(key: string | number): any;
+            /**
+             * Gets the class name of the style of a specific child by specific key.
+             * @param key  The key of context cached; or the zero-based index of child.
+             */
+            styleRefs(key: string | number): string | string[] | {
+                subscribe(h: any): any;
+                [property: string]: any;
+            };
+            /**
+             * Gets the data of a specific child by specific key.
+             * @param key  The key of context cached; or the zero-based index of child.
+             */
+            data(key: string | number): any;
+            /**
+             * Gets the children of a specific child by specific key.
+             * @param key  The key of context cached; or the zero-based index of child.
+             * @param index  The additional zero-base index, if gets the child of the children.
+             */
+            children(key: string | number): DescriptionContract[] | string | number | undefined;
+            /**
+             * Gets the children of a specific child by specific key.
+             * @param key  The key of context cached; or the zero-based index of child.
+             * @param index  The additional zero-base index, if gets the child of the children.
+             */
+            children(key: string | number, index: number): DescriptionContract | undefined;
         };
         /**
          * Checks whether the element is still in the document.
@@ -686,7 +731,7 @@ declare namespace Hje {
     }
     interface ComponentOptionsContract {
         data?: any;
-        children?: string | DescriptionContract[];
+        children?: DescriptionContract[] | string | number;
         contextRef?(context: ViewGeneratingContextContract<any>): void;
         [property: string]: any;
     }

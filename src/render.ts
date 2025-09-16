@@ -88,18 +88,19 @@ function createContext<T = any>(
             if (!key) return context;
             return typeof key === "string" ? bag.keyRefs[key] : undefined;
         },
-        childModel(key: string, modelPropertyKey?: string) {
-            if (!key) {
-                if (!modelPropertyKey) return bag.model;
-                return bag.model == null ? undefined : (bag.model as Record<string, any>)[modelPropertyKey];
+        childModel(key: string | number) {
+            if (typeof key === "number") {
+                let children = bag.model.children;
+                if (typeof children === "string" || typeof children === "number") return key === 0 ? children : undefined;
+                let model = children[key];
+                return model;
             }
 
+            if (!key) return bag.model;
             if (typeof key !== "string") return undefined;
             let context = bag.keyRefs[key];
             if (!context) return undefined;
-            let model = context.model();
-            if (!modelPropertyKey) return model;
-            return model == null ? undefined : (model as Record<string, any>)[modelPropertyKey];
+            return context.model();
         },
         alive() {
             return handlers.alive();
@@ -139,6 +140,31 @@ function createContext<T = any>(
             if (typeof s === "string" || typeof s === "symbol")
                 delete bag.keyRefs[s];
         }
+    };
+    context.childModel.prop = (key, propKey?) => {
+        let m = context.childModel(key);
+        if (!m) return undefined;
+        if (!propKey) return m.props;
+        return m.props ? m.props[propKey] : undefined;
+    };
+    context.childModel.style = key => {
+        let m = context.childModel(key);
+        return m ? m.style : undefined;
+    };
+    context.childModel.styleRefs = key => {
+        let m = context.childModel(key);
+        return m ? m.styleRefs : undefined;
+    };
+    context.childModel.data = key => {
+        let m = context.childModel(key);
+        return m ? m.data : undefined;
+    };
+    (context.childModel.children as any) = (key: string | number, index?: number | undefined | null) => {
+        let m = context.childModel(key);
+        if (!m) return;
+        if (typeof index !== "number") return m.children;
+        if (!m.children || !(m.children instanceof Array)) return undefined;
+        return m.children[index];
     };
     return {
         context,
@@ -637,7 +663,7 @@ function updateContext<T = any>(h: ViewGeneratorContract<T>, bag: CreatingBagCon
     if (model.children) {
         if (model.children instanceof Array) model.children.forEach(child => {
             if (!child) return;
-            render<T>(bag.element, child, {
+            render(bag.element, child, {
                 onInit: context2 => {
                     let element = context2.element();
                     if (!element) return;
@@ -649,6 +675,7 @@ function updateContext<T = any>(h: ViewGeneratorContract<T>, bag: CreatingBagCon
             });
         });
         else if (typeof model.children === "string") h.setTextValue(context, model.children);
+        else if (typeof model.children === "number") h.setTextValue(context, model.children.toString(10));
     }
 
     // Finish.
@@ -665,7 +692,7 @@ function updateContext<T = any>(h: ViewGeneratorContract<T>, bag: CreatingBagCon
 export function getChildrenByTagName(model: DescriptionContract, ...key: string[]) {
     if (!model || !model.children) return undefined;
     if (!key || !key.length) return model.children;
-    if (typeof model.children === "string") {
+    if (typeof model.children === "string" || typeof model.children === "number") {
         return undefined;
     }
 
