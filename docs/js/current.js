@@ -110,6 +110,7 @@ var curSite = {};
                     tagName: "div",
                     children: [{
                         tagName: "a",
+                        styleRefs: "x-link-more",
                         props: { href: "./articles/?installation" },
                         children: [{ tagName: "span", children: site.getString("getDetails") }]
                     }]

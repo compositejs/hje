@@ -337,6 +337,23 @@ section.x-bg-motley, div.x-bg-motley-light {
 }
 
 /* Links */
+a.x-link-more > span:last-child, a.x-link-more:visited > span:last-child {
+    padding-right: 20px;
+    background-image: url(../images/ele/right_pos_gray.png);
+    background-size: 12px;
+    background-repeat: no-repeat;
+    background-position: right 2px center;
+    display: inline-block;
+    transition: 0.2s;
+}
+a.x-link-more:hover > span:last-child {
+    background-size: 12px;
+    background-position: right 0 center;
+}
+a.x-link-more:active > span:last-child {
+    background-size: 10px;
+    background-position: right 2px center;
+}
 a.link-tile-wide, a.link-tile-wide:visited,
 a.link-long-button, a.link-long-button:visited,
 a.link-button-normal, a.link-button-normal:visited,
@@ -787,31 +804,47 @@ div.placeholder-after-loading:first-child > span::after {
     box-shadow: #111 1px 1px 4px;
     transition: 0.1s;
 }
+#blog_content > article > section.x-part-blog-next > a:first-child > span,
+#blog_content > article > section.x-part-blog-next > a:last-child > span:last-child {
+    color: transparent;
+}
 #blog_content > article > section.x-part-blog-next > a:first-child,
 #blog_content > article > section.x-part-blog-next > a:first-child:visited {
+    background-image: url(../images/ele/left_pos_white.png);
+    background-repeat: no-repeat;
+    background-size: 16px;
+    background-position: left 40px center;
     width: 80px;
     padding-left: 9px;
 }
-#blog_content > article > section.x-part-blog-next > a:first-child + a,
-#blog_content > article > section.x-part-blog-next > a:first-child + a:visited {
-    width: 120px;
-    padding-right: 9px;
+#blog_content > article > section.x-part-blog-next > a:last-child,
+#blog_content > article > section.x-part-blog-next > a:last-child:visited {
+    background-image: url(../images/ele/right_pos_white.png);
+    background-repeat: no-repeat;
+    background-size: 16px;
+    background-position: right 12px center;
+    width: 110px;
+    padding-right: 19px;
 }
 #blog_content > article > section.x-part-blog-next > a:first-child:hover {
+    background-position: left 36px center;
     width: 85px;
     padding-left: 4px;
 }
-#blog_content > article > section.x-part-blog-next > a:first-child + a:hover {
-    width: 125px;
-    padding-right: 4px;
+#blog_content > article > section.x-part-blog-next > a:last-child:hover {
+    background-position: right 8px center;
+    width: 115px;
+    padding-right: 14px;
 }
 #blog_content > article > section.x-part-blog-next > a:first-child:active {
+    background-position: left 38px center;
     width: 80px;
     padding-left: 9px;
 }
-#blog_content > article > section.x-part-blog-next > a:first-child + a:active {
-    width: 120px;
-    padding-right: 9px;
+#blog_content > article > section.x-part-blog-next > a:last-child:active {
+    background-position: right 10px center;
+    width: 110px;
+    padding-right: 19px;
 }
 #blog_content > article > section.x-part-blog-next > a:active {
     color: #9EF;

@@ -28,9 +28,6 @@ section.x-part-intro.x-part-installation > div:last-child > div:first-child > a:
 section.x-part-intro.x-part-installation > div:last-child > div:first-child > a:first-child:hover {
     margin-left: 2px;
 }
-section.x-part-intro.x-part-installation > div:last-child > div:first-child > a:first-child > span:last-child::after {
-    content: " >";
-}
 section.x-part-installation > div > div:first-child, section.x-part-installation > div > img + div {
     margin-top: 0;
 }
