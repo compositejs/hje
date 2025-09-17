@@ -19,7 +19,7 @@ a:active {
     color: #8CE;
     text-decoration: underline;
 }
-code, code a, code span {
+code, code a, code span, span.x-part-code {
     font-family: "Cascadia Code", "Consolas", "Segoe UI", "Microsoft Yahei", "Microsoft JhengHei", monospace, "Tahoma", "Helvetica Neue", "Arial", "Geneva", "Verdana", sans-serif, "Segoe UI Emoji", "Segoe UI Symbol";
 }
 body > header > section, body > footer > section {
@@ -67,6 +67,7 @@ input[type=checkbox]:checked:hover {
 body > header:first-child {
     height: 60px;
     background-color: #333;
+    background-image: url(../images/bg/jc/title.jpg);
     background-position: center top;
     background-repeat: no-repeat;
     white-space: nowrap;
@@ -167,6 +168,7 @@ body > header:first-child + header {
         display: block;
     }
     body > header:first-child > section:first-child > h1 + ul {
+        background-image: url(../images/bg/title-menu.jpg);
         background-repeat: repeat-x;
         height: 50px;
         max-width: none;
@@ -196,6 +198,7 @@ body > script + footer {
     height: 340px;
     margin: 0;
     background-color: #333;
+    background-image: url(../images/bg/jc/bottom.jpg);
     background-position: center;
     background-repeat: no-repeat;
 }
@@ -324,6 +327,11 @@ section.x-bg-motley, div.x-bg-motley {
 }
 section.x-bg-stars, div.x-bg-stars {
     background-image: url(../images/bg/jc/star_plus.jpg);
+    background-repeat: repeat;
+    background-position: top center;
+}
+section.x-bg-motley, div.x-bg-motley-light {
+    background-image: url(../images/bg/jc/motley_333.jpg);
     background-repeat: repeat;
     background-position: top center;
 }

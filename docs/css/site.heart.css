@@ -2,24 +2,29 @@ body {
     color: #DDD;
     font-family: 'Segoe UI', 'Microsoft Yahei', 'Microsoft JhengHei', Tahoma, "Helvetica Neue", Arial, Geneva, Verdana, sans-serif, "Segoe UI Emoji", "Segoe UI Symbol";
     font-size: 14px;
+    background-image: url(../images/bg/jc/heart_bg.jpg);
+    background-repeat: repeat;
+    background-position: center top;
+    background-size: 240px;
+    background-attachment: fixed;
     background-color: #222;
     padding: 0;
     margin: 0;
 }
 a, a:visited {
-    color: #6DF;
+    color: #F5B;
     text-decoration: none;
     cursor: pointer;
 }
 a:hover {
-    color: #9EF;
+    color: #F7C;
     text-decoration: underline;
 }
 a:active {
-    color: #8CE;
+    color: #C6B;
     text-decoration: underline;
 }
-code, code a, code span {
+code, code a, code span, span.x-part-code {
     font-family: "Cascadia Code", "Consolas", "Segoe UI", "Microsoft Yahei", "Microsoft JhengHei", monospace, "Tahoma", "Helvetica Neue", "Arial", "Geneva", "Verdana", sans-serif, "Segoe UI Emoji", "Segoe UI Symbol";
 }
 body > header > section, body > footer > section {
@@ -55,8 +60,8 @@ input[type=checkbox]:hover {
     border-color: #EEE;
 }
 input[type=checkbox]:checked {
-    border-color: #6DF;
-    background-color: #6DF;
+    border-color: #F5B;
+    background-color: #F5B;
     background-position: center center;
 }
 input[type=checkbox]:checked:hover {
@@ -67,8 +72,10 @@ input[type=checkbox]:checked:hover {
 body > header:first-child {
     height: 60px;
     background-color: #333;
-    background-position: center top;
-    background-repeat: no-repeat;
+    background-image: url(../images/bg/jc/heart_rose.jpg);
+    background-repeat: repeat;
+    background-size: 240px;
+    background-attachment: fixed;
     white-space: nowrap;
 }
 body > header:first-child > section:first-child {
@@ -145,12 +152,12 @@ body > header:first-child > section:first-child > h1 + ul > li.state-sel > a:vis
     text-shadow: rgba(192, 240, 255, 0.6) 0 0 10px;
 }
 body > header:first-child > section:first-child a:hover {
-    color: #9EF;
+    color: #F7C;
     text-decoration: underline dashed;
     transition: 0.1s;
 }
 body > header:first-child > section:first-child a:active {
-    color: #8CE;
+    color: #C6B;
     text-decoration: underline dotted;
     transition: 0.1s;
 }
@@ -167,6 +174,7 @@ body > header:first-child + header {
         display: block;
     }
     body > header:first-child > section:first-child > h1 + ul {
+        background-image: url(../images/bg/title-menu.jpg);
         background-repeat: repeat-x;
         height: 50px;
         max-width: none;
@@ -195,9 +203,12 @@ body > section + footer,
 body > script + footer {
     height: 340px;
     margin: 0;
+    background-image: url(../images/bg/jc/heart_rose.jpg);
+    background-position: center top;
+    background-repeat: repeat;
+    background-size: 240px;
+    background-attachment: fixed;
     background-color: #333;
-    background-position: center;
-    background-repeat: no-repeat;
 }
 body > footer > section > div.x-copyright {
     width: 275px;
@@ -328,6 +339,29 @@ section.x-bg-stars, div.x-bg-stars {
     background-position: top center;
 }
 
+/* Highlight section */
+section.x-bg-emphasis, div.x-bg-emphasis {
+    background-image: url(../images/bg/jc/heart_dark.jpg);
+    background-position: center top;
+    background-repeat: repeat;
+    background-size: 240px;
+    background-attachment: fixed;
+}
+section.x-bg-outstanding, div.x-bg-outstanding {
+    background-image: url(../images/bg/jc/heart_gray.jpg);
+    background-position: center top;
+    background-repeat: repeat;
+    background-size: 240px;
+    background-attachment: fixed;
+}
+section.x-zone-hl {
+    padding: 20px; margin: 0; position: sticky; top: 0; z-index: 100;
+}
+body > section > section.layout-wide-full.x-zone-hl > h1,
+body > section > section.layout-wide-full.x-zone-hl > h2 {
+    padding: 0; margin: 0 auto; line-height: 30px;
+}
+
 /* Links */
 a.link-tile-wide, a.link-tile-wide:visited,
 a.link-long-button, a.link-long-button:visited,
@@ -344,9 +378,9 @@ button.link-button-normal, button.link-button-normal:visited {
     cursor: pointer;
     transition: 0.4s;
 }
-section.x-bg-texture a.link-tile-wide,
-section.x-bg-texture a.link-long-button,
-section.x-bg-texture section.link-tile-wide > a {
+a.link-tile-wide,
+a.link-long-button,
+section.link-tile-wide > a {
     backdrop-filter: blur(4px);
 }
 a.link-tile-wide:hover, a.link-long-button:hover, a.link-button-normal:hover,

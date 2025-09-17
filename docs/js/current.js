@@ -36,14 +36,6 @@ var curSite = {};
         return m;
     };
 
-    curSite.setText = function (element, str) {
-        if (!element) return undefined;
-        if (typeof element === "string") element = document.getElementById(element);
-        if (!element.tagName) return undefined;
-        element.innerText = str;
-        return element;
-    };
-
     curSite.initHome = function (config) {
         let installStr = site.getString("installation", "title-install");
         site.getString("features", "title-features");
@@ -51,8 +43,6 @@ var curSite = {};
         site.getString("getDetails", "link-install");
         if (!config || !config.name) return;
 
-        let installPart = document.getElementById("part-install");
-        if (!installPart) return;
         let zh = installStr === "安装";
         let installModel = [{
             tagName: "div",
@@ -71,7 +61,7 @@ var curSite = {};
         for (let i = 0; i < config.cdn.length; i++) {
             let url = config.cdn[i];
             if (!url) continue;
-            let cdnM = curSite.cdnModel(config.name, config.version, url, config.path);
+            let cdnM = site.cdnModel(config.name, config.version, url, config.path);
             if (cdnM) installModel.push(cdnM);
         }
 
@@ -80,6 +70,7 @@ var curSite = {};
             styleRefs: ["x-part-installation", "x-part-intro"],
             children: [{
                 tagName: "div",
+                styleRefs: "x-bg-stars",
                 children: [{
                     tagName: "img",
                     props: { alt: "npm", src: "https://static-production.npmjs.com/f1786e9b7cba9753ca7b9c40e8b98f67.png" }
@@ -98,6 +89,7 @@ var curSite = {};
                     styleRefs: "x-part-code",
                     children: [{
                         tagName: "span",
+                        styleRefs: "x-part-code",
                         children: ">"
                     }, {
                         tagName: "code",
@@ -109,9 +101,11 @@ var curSite = {};
                 }]
             }, {
                 tagName: "div",
+                styleRefs: "x-bg-stars",
                 children: installModel
             }, {
                 tagName: "div",
+                styleRefs: "x-bg-stars",
                 children: [{
                     tagName: "div",
                     children: [{
@@ -122,7 +116,7 @@ var curSite = {};
                 }]
             }]
         };
-        Hje.render(installPart, m);
+        Hje.render("part-install", m);
     };
 
     curSite.initWiki = function (config) {

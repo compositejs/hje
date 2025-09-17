@@ -22,7 +22,7 @@ a:active {
     color: #8CE;
     text-decoration: underline;
 }
-code, code a, code span {
+code, code a, code span, span.x-part-code {
     font-family: "Cascadia Code", "Consolas", "Segoe UI", "Microsoft Yahei", "Microsoft JhengHei", monospace, "Tahoma", "Helvetica Neue", "Arial", "Geneva", "Verdana", sans-serif, "Segoe UI Emoji", "Segoe UI Symbol";
 }
 body > header > section, body > footer > section {
@@ -39,6 +39,31 @@ body > section > section a:active, body > section > section a:hover {
 }
 body > section, body > main, body > header, body > footer {
     padding: 0 20px;
+}
+input[type=checkbox] {
+    appearance: none;
+    width: 16px;
+    height: 16px;
+    border: 1px solid #999;
+    border-radius: 4px;
+    background-color: rgba(128, 128, 128, 0.1);
+    background-image: url(../images/ele/check_mark_white.png);
+    background-repeat: no-repeat;
+    background-size: 12px;
+    background-position: left 16px center;
+    vertical-align: middle;
+    transition: 0.2s;
+}
+input[type=checkbox]:hover {
+    border-color: #EEE;
+}
+input[type=checkbox]:checked {
+    border-color: #6DF;
+    background-color: #6DF;
+    background-position: center center;
+}
+input[type=checkbox]:checked:hover {
+    border-color: rgba(255, 255, 255, 0.9);
 }
 
 /* Header */
@@ -212,44 +237,67 @@ body > footer > section > div.x-copyright > img:first-child + span {
 /* Body */
 body > main,
 body > section > section,
+body > section > main,
 body > section > h1,
 body > section > h2,
 body > section > h3,
-body > section > h4 {
+body > section > h4,
+body > section > section.layout-wide-full > section,
+body > section > section.layout-wide-full > main,
+body > section > section.layout-wide-full > h1,
+body > section > section.layout-wide-full > h2,
+body > section > section.layout-wide-full > h3,
+body > section > section.layout-wide-full > h4 {
     max-width: 1200px;
     margin: 20px auto;
     position: relative;
     box-sizing: content-box;
 }
+body > section > section.layout-wide-full {
+    max-width: none;
+    margin: 0 -20px;
+}
 body > section > section,
 body > section > h1,
 body > section > h2,
 body > section > h3,
-body > section > h4 {
+body > section > h4,
+body > section > section.layout-wide-full > section,
+body > section > section.layout-wide-full > h1,
+body > section > section.layout-wide-full > h2,
+body > section > section.layout-wide-full > h3,
+body > section > section.layout-wide-full > h4 {
     padding: 0;
+}
+body > section > h1,
+body > section > h2,
+body > section > h3,
+body > section > h4,
+body > section > section.layout-wide-full > h1,
+body > section > section.layout-wide-full > h2,
+body > section > section.layout-wide-full > h3,
+body > section > section.layout-wide-full > h4
+{
+    cursor: default;
+    user-select: none;
 }
 body > section > h1,
 body > section > h2 {
     color: #D3D3D3;
     font-weight: 200;
 }
-body > section > h1,
-body > section > h2,
-body > section > h3,
-body > section > h4 {
-    cursor: default;
-    user-select: none;
-}
 body > section > section,
 body > section > h3,
 body > section > h4 {
     font-weight: normal;
 }
-body > section > h1, body > section > section > h1 {
+body > section > h1,
+body > section > section > h1 {
     font-size: 24px;
     line-height: 32px;
 }
-body > section > h2, body > section > section > h2 {
+body > section > h2,
+body > section > section > h2 {
     font-size: 20px;
     line-height: 28px;
 }
@@ -264,15 +312,29 @@ body > section > section > h3 {
     font-size: 18px;
     line-height: 24px;
 }
-body > section > h3 > svg, body > section > h3 > span, body > section > h3 > a {
+body > section > h3 > svg,
+body > section > h3 > span,
+body > section > h3 > a {
     vertical-align: middle;
 }
-body > section > h4, body > section > section > h4 {
+body > section > h4,
+body > section > section > h4 {
     font-size: 16px;
     line-height: 24px;
 }
-body > section > ul, body > section > ul > li {
+body > section > ul,
+body > section > ul > li {
     background-color: transparent;
+}
+section.x-bg-motley, div.x-bg-motley {
+    background-image: url(../images/bg/jc/motley_222.jpg);
+    background-repeat: repeat;
+    background-position: top center;
+}
+section.x-bg-stars, div.x-bg-stars {
+    background-image: url(../images/bg/jc/star_plus.jpg);
+    background-repeat: repeat;
+    background-position: top center;
 }
 
 /* Links */
@@ -290,6 +352,11 @@ button.link-button-normal, button.link-button-normal:visited {
     border-radius: 4px;
     cursor: pointer;
     transition: 0.4s;
+}
+section.x-bg-texture a.link-tile-wide,
+section.x-bg-texture a.link-long-button,
+section.x-bg-texture section.link-tile-wide > a {
+    backdrop-filter: blur(4px);
 }
 a.link-tile-wide:hover, a.link-long-button:hover, a.link-button-normal:hover,
 section.link-tile-wide > a:hover, button.link-button-normal:hover {

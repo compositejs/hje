@@ -5,12 +5,12 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta property="og:image" content="./images/bg/poster.jpg">
     <title>Hje</title>
-    <link href="https://cdn.jsdelivr.net/npm/hje@2.0.0/docs/css/site.org.css" rel="stylesheet" />
-    <link href="https://cdn.jsdelivr.net/npm/hje@2.0.0/docs/css/spec.home.css" rel="stylesheet" />
+    <link href="./css/site.org.css" rel="stylesheet" />
+    <link href="./css/spec.home.css" rel="stylesheet" />
     <link rel="icon" type="image/png" href="https://cdn.jsdelivr.net/npm/hje@2.0.0/docs/images/logos/hje.png">
     <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/hje@2.0.0/dist/index.js" ></script>
-    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/hje@2.0.0/docs/js/site.js" ></script>
-    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/hje@2.0.0/docs/js/current.js" ></script>
+    <script type="text/javascript" src="./js/site.js" ></script>
+    <script type="text/javascript" src="./js/current.js" ></script>
     <script type="text/javascript" >
     function onInit() {
         let manifest = { name: 'hje', path: 'dist/index.js' };
@@ -26,9 +26,9 @@
             desc: "通过 JS 友好的描述模型，生成具有交互能力的 DOM。"
         }], "part-features");
         if (ww) return;
-        curSite.setText("text-summary", "本前端库提供一种将 JS 描述视图的能力。");
-        curSite.setText("text-intro", "提供一种新的生成界面方式，只需在 JS 中描述文档结构和关键属性即可，也支持事件注册、数据绑定、按需刷新。");
-        curSite.setText("text-hint", "如下例所示，你可以将一个类 JSON 格式的模型，转化为视图，绑定到指定元素中。");
+        site.setElementProp("text-summary", null, "本前端库提供一种将 JS 描述视图的能力。");
+        site.setElementProp("text-intro", null, "提供一种新的生成界面方式，只需在 JS 中描述文档结构和关键属性即可，也支持事件注册、数据绑定、按需刷新。");
+        site.setElementProp("text-hint", null, "如下例所示，你可以将一个类 JSON 格式的模型，转化为视图，绑定到指定元素中。");
     }
     </script>
 </head>
@@ -56,7 +56,7 @@
             </div>
         </section>
         <section class="x-part-intro">
-            <div>
+            <div class="x-bg-stars">
                 <div>
                     <img alt="Hje" src="https://cdn.jsdelivr.net/npm/hje@2.0.0/docs/images/logos/hje.png" />
                     <strong>Hyper-JSON Engine</strong><span> (Hje)</span><br />
@@ -67,7 +67,7 @@
         </section>
         <h2 id="title-install">Installation</h2>
         <section id="part-install" class="x-part-installation x-part-intro">
-            <div>
+            <div class="x-bg-stars">
                 <div>
                     <span><a href="https://www.npmjs.com/package/hje" >Package</a></span>
                     <span> &nbsp; | &nbsp; </span>
@@ -88,7 +88,7 @@
             </a>
         </section>
         <section class="x-part-features x-part-intro">
-            <div>
+            <div class="x-bg-stars">
                 <div>
                     <span id="text-hint">You can convert a JSON model to HTML view part. Following is a sample.</span>
                 </div>

@@ -25,6 +25,9 @@ section.x-part-intro.x-part-installation > div:last-child {
 section.x-part-intro.x-part-installation > div:last-child > div:first-child > a:first-child {
     display: block;
 }
+section.x-part-intro.x-part-installation > div:last-child > div:first-child > a:first-child:hover {
+    margin-left: 2px;
+}
 section.x-part-intro.x-part-installation > div:last-child > div:first-child > a:first-child > span:last-child::after {
     content: " >";
 }
@@ -42,6 +45,9 @@ section.x-part-installation > div > div.x-part-code {
 }
 section.x-part-installation > div > div.x-part-code:hover {
     border-bottom: 1px solid #484848;
+}
+section.x-part-installation > div > div.x-part-code > span.x-part-code {
+    color: #999;
 }
 section.x-part-installation > div > div.x-part-code > span:has(+ code) {
     margin-right: 10px;

@@ -14,6 +14,11 @@ button.link-button-normal, button.link-button-normal:visited {
     cursor: pointer;
     transition: 0.4s;
 }
+section.x-bg-texture a.link-tile-wide,
+section.x-bg-texture a.link-long-button,
+section.x-bg-texture section.link-tile-wide > a {
+    backdrop-filter: blur(4px);
+}
 a.link-tile-wide:hover, a.link-long-button:hover, a.link-button-normal:hover,
 section.link-tile-wide > a:hover, button.link-button-normal:hover {
     color: #EEE;
