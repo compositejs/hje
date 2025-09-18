@@ -118,6 +118,12 @@ var curSite = {};
             }]
         };
         Hje.render("part-install", m);
+        let tutorial = site.codeElements("part-tutorial");
+        if (tutorial && typeof hljs === "object") {
+            for (let i = 0; i < tutorial.length; i++) {
+                hljs.highlightElement(tutorial[i]);
+            }
+        }
     };
 
     curSite.initWiki = function (config) {

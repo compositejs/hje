@@ -73,6 +73,12 @@ section.x-part-features > div > div.x-part-code {
 section.x-part-features > div > div.x-part-code:hover {
     border-color: #444;
 }
+section.x-part-features > div > div.x-part-code:has(> pre > code.hljs) {
+    padding: 0;
+}
+section.x-part-features > div > div.x-part-code > pre:has(> code.hljs) {
+    margin: 0;
+}
 div.x-part-code > code > span.x-code-command {
     color: #F9F1A5;
 }
@@ -93,4 +99,7 @@ div.x-part-code > code > span.x-code-string {
 }
 div.x-part-code > code > span.x-code-pack {
     color: #808080;
+}
+#blog_content > article > main > pre:has(> code.hljs) {
+    padding: 0;
 }

@@ -759,6 +759,9 @@ div.placeholder-after-loading:first-child > span::after {
     border-color: rgba(128, 128, 128, 0.2);
     transition: 0.2s;
 }
+#blog_content > article > main > pre:has(> code.hljs) {
+    padding: 0;
+}
 #blog_content > article:has(> main.x-part-blog-menu) {
     max-width: none;
     grid-column: 1 / -1;

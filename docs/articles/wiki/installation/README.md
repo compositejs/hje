@@ -2,7 +2,7 @@ You can install this web front-end library by [npm](https://www.npmjs.com/packag
 
 ## ES6 / Type Script via npm
 
-```
+```bash
 npm i hje
 ```
 
@@ -21,7 +21,7 @@ Hje.render(ele, {
 
 ## CommonJS via npm
 
-```
+```bash
 npm i hje
 ```
 
