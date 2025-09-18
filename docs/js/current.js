@@ -49,8 +49,8 @@ var curSite = {};
             children: [{
                 tagName: "span",
                 children: [
-                    { tagName: "span", children: zh ? "或者也可以将下方打包后的 JS 文件" : "Or you can insert " },
-                    { tagName: "strong", children: zh ? "之一" : "one of" },
+                    { tagName: "span", children: zh ? "或者从下方打包后的 JS 文件中，" : "Or you can insert " },
+                    { tagName: "strong", children: zh ? "挑选其中一个" : "one of" },
                     { tagName: "span", children: zh ? "，以 " : " following JavaScript bundled file by " },
                     { tagName: "code", children: "script" },
                     { tagName: "span", children: zh ? " 标签的形式插入到你的网页中。" : " tag into your web page." },
