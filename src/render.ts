@@ -198,8 +198,14 @@ export class HtmlGenerator implements ViewGeneratorContract<HTMLElement> {
                 } else if (tagName.startsWith("html:")) {
                     tagNs = "http://www.w3.org/1999/xhtml";
                     tagName = tagName.substring(5);
+                } else if (tagName.startsWith("xbl:")) {
+                    tagNs = "http://www.mozilla.org/xbl";
+                    tagName = tagName.substring(4);
+                } else if (tagName.startsWith("xul:")) {
+                    tagNs = "http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul";
+                    tagName = tagName.substring(4);
                 } else if (tagName.startsWith(":")) {
-                    tagName = tagName.substring(6);
+                    tagName = tagName.substring(1);
                 }
             }
 

@@ -44,7 +44,7 @@ input[type=checkbox] {
     border: 1px solid #999;
     border-radius: 4px;
     background-color: rgba(128, 128, 128, 0.1);
-    background-image: url(https://cdn.jsdelivr.net/npm/hje@2.1.0/dist/images/ele/check_mark_white.png);
+    background-image: url(https://cdn.jsdelivr.net/npm/hje@2.2.0/docs/images/ele/check_mark_white.png);
     background-repeat: no-repeat;
     background-size: 12px;
     background-position: left 16px center;
@@ -318,12 +318,12 @@ body > section > ul > li {
     background-color: transparent;
 }
 section.x-bg-motley, div.x-bg-motley {
-    background-image: url(https://cdn.jsdelivr.net/npm/hje@2.1.0/dist/images/bg/jc/motley_222.jpg);
+    background-image: url(https://cdn.jsdelivr.net/npm/hje@2.2.0/docs/images/bg/jc/motley_222.jpg);
     background-repeat: repeat;
     background-position: top center;
 }
 section.x-bg-stars, div.x-bg-stars {
-    background-image: url(https://cdn.jsdelivr.net/npm/hje@2.1.0/dist/images/bg/jc/star_plus.jpg);
+    background-image: url(https://cdn.jsdelivr.net/npm/hje@2.2.0/docs/images/bg/jc/star_plus.jpg);
     background-repeat: repeat;
     background-position: top center;
 }
@@ -331,7 +331,7 @@ section.x-bg-stars, div.x-bg-stars {
 /* Links */
 a.x-link-more > span:last-child, a.x-link-more:visited > span:last-child {
     padding-right: 20px;
-    background-image: url(https://cdn.jsdelivr.net/npm/hje@2.1.0/dist/images/ele/right_pos_gray.png);
+    background-image: url(https://cdn.jsdelivr.net/npm/hje@2.2.0/docs/images/ele/right_pos_gray.png);
     background-size: 12px;
     background-repeat: no-repeat;
     background-position: right 2px center;
@@ -805,7 +805,7 @@ div.placeholder-after-loading:first-child > span::after {
 }
 #blog_content > article > section.x-part-blog-next > a:first-child,
 #blog_content > article > section.x-part-blog-next > a:first-child:visited {
-    background-image: url(https://cdn.jsdelivr.net/npm/hje@2.1.0/dist/images/ele/left_pos_white.png);
+    background-image: url(https://cdn.jsdelivr.net/npm/hje@2.2.0/docs/images/ele/left_pos_white.png);
     background-repeat: no-repeat;
     background-size: 16px;
     background-position: left 40px center;
@@ -814,7 +814,7 @@ div.placeholder-after-loading:first-child > span::after {
 }
 #blog_content > article > section.x-part-blog-next > a:last-child,
 #blog_content > article > section.x-part-blog-next > a:last-child:visited {
-    background-image: url(https://cdn.jsdelivr.net/npm/hje@2.1.0/dist/images/ele/right_pos_white.png);
+    background-image: url(https://cdn.jsdelivr.net/npm/hje@2.2.0/docs/images/ele/right_pos_white.png);
     background-repeat: no-repeat;
     background-size: 16px;
     background-position: right 12px center;

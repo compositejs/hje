@@ -13,6 +13,12 @@ section.x-part-intro > div {
 section.x-part-intro > div > div {
     margin: 10px;
 }
+section.x-part-intro > div > p {
+    margin: 1em 10px;
+}
+section.x-part-intro > div:first-child > p:first-child {
+    margin-top: 10px;
+}
 section.x-part-intro.x-part-installation > div {
     border-radius: 0;
 }
@@ -100,6 +106,6 @@ div.x-part-code > code > span.x-code-string {
 div.x-part-code > code > span.x-code-pack {
     color: #808080;
 }
-#blog_content > article > main > pre:has(> code.hljs) {
-    padding: 0;
+#part-tutorial {
+    font-size: 16px;
 }

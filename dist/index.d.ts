@@ -807,7 +807,7 @@ declare namespace Hje {
             [property: string]: any;
         }): {
             inline: any;
-            refs: string[];
+            refs: string[] | undefined;
         };
         /**
          * Sets the style references of the specific child.
@@ -816,7 +816,7 @@ declare namespace Hje {
          */
         protected childStyleRefs(childKey: string, value: string[]): {
             inline: any;
-            refs: string[];
+            refs: string[] | undefined;
         };
         /**
          * Gets a value indicating whether the component is disposed.
@@ -854,7 +854,7 @@ declare namespace Hje {
             [property: string]: any;
         }): {
             inline: any;
-            refs: string[];
+            refs: string[] | undefined;
         };
         /**
          * Sets the style references.
@@ -862,7 +862,7 @@ declare namespace Hje {
          */
         styleRefs(value: string[]): {
             inline: any;
-            refs: string[];
+            refs: string[] | undefined;
         };
         /**
          * Gets the raw element.
