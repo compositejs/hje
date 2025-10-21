@@ -5,7 +5,7 @@
   "main": "index.js",
   "types": "./index.d.ts",
   "scripts": {
-    "build": "tsc --project ./src/tsconfig.json && terser ./dist/index.js -- compress -o ./dist/index.js",
+    "build": "tsc --project ./src/tsconfig.json && terser ./dist/index.js --compress -o ./dist/index.js",
     "test": "node ./test/index.js"
   },
   "repository": {
@@ -25,8 +25,9 @@
   "bugs": {
     "url": "https://github.com/compositejs/hje/issues"
   },
-  "homepage": "https://github.com/compositejs/hje/wiki",
+  "homepage": "https://hje.js.org/",
   "devDependencies": {
-    "typescript": "^5.9.2"
+    "typescript": "^5.9.2",
+    "terser": "^5.44.0"
   }
 }
