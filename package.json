@@ -5,7 +5,8 @@
   "main": "index.js",
   "types": "./index.d.ts",
   "scripts": {
-    "build": "tsc --project ./src/tsconfig.json && terser ./dist/index.js --compress -o ./dist/index.js",
+    "build": "tsc --project ./src/ && terser ./dist/index.js --compress -o ./dist/index.js",
+    "build-mdblogs": "tsc --project ./samples/mdblogs/ && terser ./dist/mdblogs.js --compress -o ./dist/mdblogs.js",
     "test": "node ./test/index.js"
   },
   "repository": {

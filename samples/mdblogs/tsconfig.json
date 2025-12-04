@@ -1,0 +1,22 @@
+{
+    "compilerOptions": {
+        "outFile": "../../dist/mdblogs.js",
+        "noImplicitAny": true,
+        "target": "es5",
+        "declaration": true,
+        "sourceMap": false,
+        "moduleResolution": "node",
+        "lib": [
+            "es2015",
+            "dom"
+        ]
+    },
+    "include": [
+        "./*",
+        "../../dist/index.d.ts"
+    ],
+    "exclude": [
+        "../dist",
+        "../test"
+    ]
+}

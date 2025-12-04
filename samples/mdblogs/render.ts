@@ -1,0 +1,553 @@
+namespace DeepX.MdBlogs {
+    export class ArticlesPart extends Hje.BaseComponent {
+        readonly __inner = {} as {
+            select?: ArticleInfo;
+            info?: Articles;
+            mkt?: string | boolean;
+            lifecycle?: IArticlesLifecycle;
+            title?: string;
+            banner?: Hje.DescriptionContract;
+            supplement?: Hje.DescriptionContract;
+        };
+
+        constructor(element: any, options?: Hje.ComponentOptionsContract) {
+            super(element, options);
+            if (options?.data?.mkt != null) this.__inner.mkt = options.data.mkt;
+            this.currentModel = {
+                children: [{
+                    key: "content",
+                    tagName: "article",
+                    children: []
+                }, {
+                    tagName: "aside",
+                    children: [{
+                        tagName: "nav",
+                        children: [{
+                            key: "contents",
+                            tagName: "ul",
+                            styleRefs: "link-tile-compact",
+                            children: [],
+                            style: { display: "none" }
+                        }, {
+                            key: "title",
+                            tagName: "h1",
+                            style: { display: "none" }
+                        }, {
+                            key: "menu",
+                            tagName: "ul",
+                            styleRefs: "link-tile-compact",
+                            children: []
+                        }]
+                    }]
+                }]
+            };
+            this.refreshChild();
+            if (!options?.data) return;
+            this.__inner.banner = options.data.banner;
+            this.__inner.supplement = options.data.supplement;
+            const lifecycle: IArticlesLifecycle = options.data.lifecycle || { disable: true };
+            this.__inner.lifecycle = lifecycle;
+            if (typeof options.data.articles === "string") {
+                fetchArticles(options.data.articles).then(r => {
+                    this.initRender(r, options.data.select, lifecycle);
+                });
+            } else if (options.data.articles instanceof Articles) {
+                this.initRender(options.data.articles, options.data.select, lifecycle);
+            }
+        }
+
+        get title(): string {
+            return this.__inner.title;
+        }
+
+        set title(value: string) {
+            const m = super.childModel("title");
+            this.__inner.title = value;
+            const self = this;
+            m.children = [{
+                tagName: "a",
+                props: { href: "./" },
+                on: {
+                    click(ev: Event) {
+                        ev.preventDefault();
+                        self.home();
+                    }
+                },
+                children: value
+            }];
+            m.style = value ? { display: "" } : { display: "none" };
+            super.refreshChild("title");
+        }
+
+        get mkt() {
+            return this.__inner.mkt;
+        }
+
+        set mkt(value: string | boolean) {
+            this.__inner.mkt = value;
+        }
+        
+        home() {
+            const already = !this.__inner.select;
+            this.__inner.select = null;
+            const children: Hje.DescriptionContract[] = [];
+            const config = this.__inner.info.config;
+            const options = this.createLocaleOptions();
+            if (!config.disableName) children.push({
+                tagName: "h1",
+                children: this.__inner.info.getName(options)
+            });
+            if (this.__inner.banner) children.push(this.__inner.banner);
+            const part = this.__inner.info.home(options);
+            if (part) children.push({
+                tagName: "main",
+                onInit(c) {
+                    if (part.contentCache) renderMd(c.element(), part.contentCache);
+                    else part.getContent(options).then(r => {
+                        renderMd(c.element(), r);
+                    });
+                },
+                children: part.contentCache
+            });
+            const menu: Hje.DescriptionContract[] = [];
+            this.genMenu(menu, this.__inner.info.wiki(options), true);
+            this.genMenu(menu, this.__inner.info.blogs(options), false);
+            children.push({
+                tagName: "main",
+                styleRefs: "x-part-blog-menu",
+                children: [{
+                    tagName: "ul",
+                    styleRefs: "link-tile-compact",
+                    children: menu
+                }]
+            });
+            if (this.__inner.supplement) children.push(this.__inner.supplement);
+            super.childModel("content", { children });
+            super.refreshChild("content");
+            const articleContents = this.childModel("contents");
+            articleContents.children = [];
+            articleContents.style = { display: "none" };
+            super.refreshChild("contents");
+            scrollToTop();
+            this.refreshMenu();
+            if (!already) this.lifecycle()?.onhome?.(this);
+        }
+
+        select(article: ArticleInfo | string) {
+            const options = this.createLocaleOptions();
+            if (typeof article === "number") {
+                if (article === -1) {
+                    this.home();
+                    return undefined;
+                }
+
+                if (isNaN(article) || article < 0) return this.__inner.select;
+                const blogs = this.__inner.info?.blogs(options);
+                article = blogs[article];
+                if (!article) return undefined;
+            } else if (typeof article === "string") {
+                if (!article) {
+                    this.home();
+                    return undefined;
+                }
+
+                article = this.__inner.info?.get(article, options);
+                if (!article) return undefined;
+            }
+
+            if (!article || this.__inner.select === article) return this.__inner.select;
+            const children: Hje.DescriptionContract[] = [];
+            const self = this;
+            children.push({
+                tagName: "h1",
+                children: article.getName(options)
+            });
+            const infoChildren: Hje.DescriptionContract[] = [];
+            const author = article.author;
+            if (author) {
+                for (let i = 0; i < author.length; i++) {
+                    const authorItem = author[i];
+                    infoChildren.push(authorItem.url ? {
+                        tagName: "a",
+                        props: { href: authorItem.url },
+                        children: authorItem.name
+                    } : {
+                        tagName: "span",
+                        children: authorItem.name
+                    });
+                }
+            }
+
+            const publishDate = article.dateObj;
+            if (publishDate) {
+                let dateStr = article.dateString || publishDate.year.toString(10);
+                if (article.location) dateStr += " " + article.location;
+                infoChildren.push({
+                    tagName: "time",
+                    props: {
+                        datetime: `${publishDate.year.toString(10)}-${publishDate.month.toString(10)}-${publishDate.date.toString(10)}`
+                    },
+                    children: dateStr
+                })
+            }
+
+            const keywords = article.keywords;
+            const mkt = options?.mkt;
+            if (keywords instanceof Array) {
+                for (let i = 0; i < keywords.length; i++) {
+                    let keyword = keywords[i];
+                    if (!keyword) continue;
+                    if (typeof keyword !== "string") {
+                        keyword = getLocaleProp(keyword, null, options) as string || keyword.value;
+                    }
+
+                    if (!keyword) continue;
+                    infoChildren.push({ tagName: "span", children: keyword });
+                }
+            }
+
+            if (infoChildren.length > 0) children.push({
+                tagName: "section",
+                styleRefs: "x-part-blog-note",
+                children: infoChildren
+            });
+            children.push({
+                tagName: "main",
+                children: [
+                    { tagName: "em", children: getLocaleString("loading", mkt) }
+                ],
+                onInit(c) {
+                    const config = self.__inner.info.blogsInfo(options);
+                    article.getContent(options).then(md => {
+                        const mdEle = c.element();
+                        let header1 = "# " + article.name + "\n";
+                        if (md.startsWith(header1)) md = md.substring(header1.length);
+                        header1 = "# " + article.name + "\r\n";
+                        if (md.startsWith(header1)) md = md.substring(header1.length);
+                        if (article.end) {
+                            let endTag = "\n<!-- " + (article.end === true ? "End" : article.end) + " -->";
+                            let endIndex = md.lastIndexOf(endTag);
+                            if (endIndex > 1) md = md.substring(0, endIndex);
+                        }
+
+                        renderMd(c.element(), md);
+                        if (article.disableMenu || config.disableMenu) return;
+                        const articleContents = self.childModel("contents");
+                        articleContents.children = [];
+                        let headers = getHeadings(mdEle);
+                        let levels = getHeadingLevels(headers);
+                        if (!headers || headers.length < 2 || levels.length < 1) return;
+                        articleContents.children.push({
+                            tagName: "li",
+                            children: [{
+                                tagName: "a",
+                                props: { href: "javascript:void(0)" },
+                                on: {
+                                    click(ev: Event) {
+                                        scrollToTop();
+                                    }
+                                },
+                                children: "⇮ " + getLocaleString("top", mkt)
+                            }]
+                        });
+                        if (levels.length == 1) levels.push(levels[0] + 1);
+                        for (let i = 0; i < headers.length; i++) {
+                            let item = headers[i];
+                            switch (item.level) {
+                                case levels[0]:
+                                    articleContents.children.push(genHeadModel(item));
+                                    break;
+                                case levels[1]:
+                                    articleContents.children.push(genHeadModel(item, true));
+                                    break;
+                            }
+                        }
+
+                        articleContents.style = { display: "" };
+                        self.refreshChild("contents");
+                    });
+                }
+            });
+            const related: Hje.DescriptionContract[] = [];
+            fillParagraph(article.getNotes(options), related);
+            fillRelatedLinks(article.related(options), related, options);
+            if (related.length > 0) children.push({
+                tagName: "section",
+                styleRefs: "x-part-blog-related",
+                children: related
+            });
+            children.push({
+                tagName: "section",
+                styleRefs: "x-part-blog-next",
+                children: [{
+                    tagName: "a",
+                    props: {
+                        href: "javascript:void(0)",
+                        title: getLocaleString("previous", mkt)
+                    },
+                    on: {
+                        click(ev) {
+                            ev.preventDefault();
+                            self.previous();
+                        }
+                    },
+                    children: [
+                        { "tagName": "span", children: "<" },
+                        { "tagName": "span", children: getLocaleString("previous", mkt) },
+                    ]
+                }, {
+                    tagName: "a",
+                    props: {
+                        href: "javascript:void(0)",
+                        title: getLocaleString("next", mkt)
+                    },
+                    on: {
+                        click(ev) {
+                            ev.preventDefault();
+                            self.next();
+                        }
+                    },
+                    children: [
+                        { "tagName": "span", children: getLocaleString("next", mkt) },
+                        { "tagName": "span", children: ">" },
+                    ]
+                }]
+            });
+            super.childModel("content", { children });
+            super.refreshChild("content");
+            this.__inner.select = article;
+            this.refreshMenu();
+            scrollToTop();
+            this.lifecycle()?.onselect?.(this, article);
+            return article;
+        }
+
+        next() {
+            const options = this.createLocaleOptions();
+            const blog = this.__inner.info?.nextArticle(this.__inner.select, options);
+            if (blog === undefined) return blog;
+            if (blog === null) {
+                this.home();
+                return blog;
+            }
+
+            this.select(blog);
+            return blog;
+        }
+
+        previous() {
+            const options = this.createLocaleOptions();
+            const blog = this.__inner.info?.previousArticle(this.__inner.select, options);
+            if (blog === undefined) return blog;
+            if (blog === null) {
+                this.home();
+                return blog;
+            }
+
+            this.select(blog);
+            return blog;
+        }
+
+        protected initRender(articles: Articles, select: string, lifecycle: IArticlesLifecycle) {
+            if (this.__inner.info === articles || !articles) return;
+            this.__inner.info = articles;
+            this.title = articles.name;
+            const options = this.createLocaleOptions();
+            const m = super.childModel("menu");
+            let arr = m.children;
+            if (!(arr instanceof Array)) {
+                arr = [];
+                m.children = arr;
+            }
+
+            this.genMenu(arr, articles.wiki(options), true);
+            this.genMenu(arr, articles.blogs(options), false);
+            m.style = arr.length > 0 ? { display: "" } : { display: "none" };
+            super.refreshChild("menu");
+            let article: ArticleInfo;
+            if (select) article = this.select(select);
+            if (!article) this.home();
+            if (!lifecycle.disable && typeof lifecycle.oninit === "function") lifecycle.oninit(this);
+        }
+
+        protected refreshMenu() {
+            const list = super.childModel("menu");
+            if (!(list.children instanceof Array)) list.children = [];
+            for (let i = 0; i < list.children.length; i++) {
+                const item = list.children[i];
+                if (!(item.data instanceof ArticleInfo)) continue;
+                item.styleRefs = this.__inner.select === item.data ? "state-sel" : null;
+            }
+
+            super.refreshChild("menu");
+        }
+
+        protected createLocaleOptions() {
+            const mkt = this.__inner.mkt;
+            return mkt == null || mkt === true ? undefined : { mkt };
+        }
+
+        protected lifecycle() {
+            const l = this.__inner.lifecycle;
+            return !l || l.disable ? undefined : l;
+        }
+
+        protected genMenu(arr: Hje.DescriptionContract[], params: (ArticleInfo | string)[], deep?: boolean | number) {
+            const self = this;
+            return generateMenu(arr, params, {
+                select: this.__inner.select,
+                mkt: this.createLocaleOptions()?.mkt,
+                deep,
+                click(ev, article) {
+                    ev.preventDefault();
+                    self.select(article);
+                }
+            });
+        }
+    }
+
+    function scrollToTop() {
+        window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+
+    function renderMd(element: HTMLElement, md: string) {
+        if (typeof hooks.renderMd === "function") {
+            hooks.renderMd(element, md);
+            return;
+        }
+
+        try {
+            if (typeof marked === "object" && typeof marked.parse === "function")
+                element.innerHTML = marked.parse(md);
+            else
+                element.innerText = md;
+            if (typeof hljs === "object" && typeof hljs.highlightElement === "function") {
+                let codes = codeElements(element);
+                if (codes) {
+                    for (let i = 0; i < codes.length; i++) {
+                        hljs.highlightElement(codes[i]);
+                    }
+                }
+            }
+        } catch (ex) {
+            element.innerText = getLocaleString("renderFailed");
+        }
+    }
+
+    function genHeadItem(ele: HTMLElement, level: number): IHeadingLevelInfo {
+        return {
+            text: ele.innerText,
+            level: level,
+            scroll() {
+                ele.scrollIntoView({ behavior: "smooth" });
+            }
+        };
+    }
+
+    function genHeadModel(item: IHeadingLevelInfo, sub?: boolean): Hje.DescriptionContract {
+        let text = item.text;
+        if (sub) text = "▹ " + text;
+        return {
+            tagName: "li",
+            children: [{
+                tagName: "a",
+                props: { href: "javascript:void(0)" },
+                on: {
+                    click(ev) {
+                        if (typeof item.scroll === 'function') item.scroll();
+                    }
+                },
+                children: text
+            }]
+        }
+    }
+
+    function getHeadings(container: HTMLElement) {
+        let arr: IHeadingLevelInfo[] = [];
+        for (let i = 0; i < container.children.length; i++) {
+            const para = container.children[i] as HTMLElement;
+            if (!para || !para.tagName) continue;
+            let tagName = para.tagName.toLowerCase();
+            switch (tagName) {
+                case "h1":
+                case "h2":
+                case "h3":
+                case "h4":
+                case "h5":
+                case "h6":
+                    arr.push(genHeadItem(para, parseInt(tagName.replace("h", ""))));
+                    break;
+            }
+        }
+
+        return arr;
+    }
+
+    function getHeadingLevels(arr: IHeadingLevelInfo[]) {
+        if (!arr || arr.length < 1) return [];
+        let list = [];
+        for (let level = 1; level < 7; level++) {
+            for (let i = 0; i < arr.length; i++) {
+                let item = arr[i];
+                if (!item || item.level != level) continue;
+                list.push(level);
+                break;
+            }
+        }
+
+        return list;
+    }
+
+    function fillParagraph(lines: string[], children: Hje.DescriptionContract[]) {
+        if (!lines || !children) return;
+        lines = lines.filter(n => n) || [];
+        for (let i = 0; i < lines.length; i++) {
+            const note = lines[i];
+            children.push({
+                tagName: "p",
+                children: [{
+                    tagName: "span",
+                    children: note
+                }]
+            });
+        }
+    }
+
+    function fillRelatedLinks(source: IArticleRelatedLinkItemInfo[], children: Hje.DescriptionContract[], options?: {
+        mkt?: string | boolean;
+    }) {
+        if (!source || !children) return;
+        source = source.filter(n => n?.name && n?.url);
+        if (source.length < 1) return;
+        children.push({
+            tagName: "h2",
+            children: getLocaleString("seeAlso", options?.mkt)
+        });
+        const relatedItems: Hje.DescriptionContract[] = [];
+        children.push({
+            tagName: "ul",
+            styleRefs: "link-tile-compact",
+            children: relatedItems
+        });
+        for (let i = 0; i < source.length; i++) {
+            const link = source[i];
+            relatedItems.push({
+                tagName: "li",
+                children: [{
+                    tagName: "a",
+                    props: {
+                        href: link.url,
+                        title: link.name + (link.subtitle ? ("\n" + link.subtitle) : "")
+                    },
+                    children: [{
+                        tagName: "span",
+                        children: link.name
+                    }, {
+                        tagName: "span",
+                        children: link.subtitle
+                    }]
+                }]
+            });
+        }
+    }
+}

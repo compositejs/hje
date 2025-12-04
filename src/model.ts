@@ -370,7 +370,7 @@ export interface CreatingBagContract<T> {
 
 function setProp(props: any, key: string, value?: any, disposable?: DisposableArray | boolean) {
     if (!key || typeof key !== "string") return false;
-    let ele = props[key];
+    const ele = props[key];
     if (ele && ele.value === value) return false;
     if (value === undefined) {
         delete props[key];
@@ -378,9 +378,9 @@ function setProp(props: any, key: string, value?: any, disposable?: DisposableAr
         if (!value) {
             props[key] = { value };
         } else if (typeof value.subscribe === "function") {
-            let v = props[key] = {} as any;
+            const v = props[key] = {} as any;
             if (typeof value.get === "function") v.value = value.get();
-            let subscriber = (value as ObservableCompatibleContract).subscribe(nv => {
+            const subscriber = (value as ObservableCompatibleContract).subscribe(nv => {
                 setProp(props, key, nv, false);
             });
             if (disposable instanceof DisposableArray) disposable.push(subscriber);
@@ -409,11 +409,27 @@ function setProp(props: any, key: string, value?: any, disposable?: DisposableAr
     return true;
 }
 
-export interface ComponentOptionsContract {
-    data?: any;
+/**
+ * The options to initialize a component.
+ */
+export interface ComponentOptionsContract<T = any> {
+    /**
+     * The data bound in this component.
+     */
+    data?: T;
+
+    /**
+     * The description models of children.
+     */
     children?: DescriptionContract[] | string | number,
+
+    /**
+     * Occurs to get the context of view.
+     * @param context 
+     */
     contextRef?(context: ViewGeneratingContextContract<any>): void;
-    [property: string]: any;
+
+    [property: string]: unknown;
 }
 
 /**
@@ -421,11 +437,12 @@ export interface ComponentOptionsContract {
  * by a) updating constructor to set new model and refreshing;
  * b) adding methods to update specific child model and refreshing.
  */
-export class BaseComponent {
+export class BaseComponent<T = any> {
     private readonly _inner = {
         props: {} as any,
         disposable: new DisposableArray(),
-        isDisposed: false
+        isDisposed: false,
+        data: undefined as T | undefined,
     };
     private _context: ViewGeneratingContextContract<any>;
 
@@ -434,13 +451,14 @@ export class BaseComponent {
      * @param element The element.
      * @param options The options.
      */
-    constructor(element: any, options?: ComponentOptionsContract) {
+    constructor(element: any, options?: ComponentOptionsContract<T>) {
         if (!options) options = {};
-        let self = this;
+        const self = this;
         if (typeof (options as any).disposeFlagHandler === "function") (options as any).disposeFlagHandler(() => {
             this._inner.isDisposed = true;
             this._inner.disposable.dispose();
         });
+        this._inner.data = options.data;
         render(element, {}, {
             onInit(c) {
                 self._context = c;
@@ -484,7 +502,7 @@ export class BaseComponent {
      * @param key The child key.
      */
     protected childControl<T extends BaseComponent = BaseComponent>(key: string) {
-        let c = this._context.childContext(key);
+        const c = this._context.childContext(key);
         return c ? c.control() as T : undefined;
     }
 
@@ -495,16 +513,16 @@ export class BaseComponent {
      * @param clearOriginal true if clear all properties of the original view model before set; otherwise, false.
      */
     protected childModel(key: string, value?: any, clearOriginal?: boolean) {
-        let context = this._context.childContext(key);
+        const context = this._context.childContext(key);
         if (!context) return undefined;
-        let m = context.model();
+        const m = context.model();
         if (arguments.length < 2 || !m) return m;
-        if (!clearOriginal) for (let key in m) {
+        if (!clearOriginal) for (const key in m) {
             delete (m as any)[key];
         }
 
         if (!value) return undefined;
-        for (let key in value) {
+        for (const key in value) {
             (m as any)[key] = value[key];
         }
 
@@ -520,12 +538,21 @@ export class BaseComponent {
     }
 
     /**
+     * Gets the data bound in this component.
+     */
+    protected get data() {
+        return this._inner.data;
+    }
+
+    /**
      * Refreshes a specific child by key.
      * @param key The child key; or null for updating the current component.
+     * @param handler An optional handler to process before refreshing.
      */
-    protected refreshChild(key?: string) {
-        let context = this._context.childContext(key);
+    protected refreshChild(key?: string, handler?: (context: ViewGeneratingContextContract<any>) => void) {
+        const context = this._context.childContext(key);
         if (!context) return;
+        if (typeof handler === "function") handler(context);
         context.refresh();
     }
 
@@ -537,11 +564,11 @@ export class BaseComponent {
      */
     protected childProps(childKey: string, propKey: string | number | string[] | any, v?: any) {
         if (!propKey || typeof propKey === "boolean") return undefined;
-        let h = viewGenerator();
-        let context = this._context.childContext(childKey);
+        const h = viewGenerator();
+        const context = this._context.childContext(childKey);
         if (!context) return undefined;
         if (arguments.length > 2) {
-            let m = context.model();
+            const m = context.model();
             if (!m.props) m.props = {};
             m.props[propKey] = v;
             h.setProp(context, propKey, v);
@@ -550,7 +577,7 @@ export class BaseComponent {
         if (typeof propKey === "string" || typeof propKey === "symbol" || typeof propKey === "number")
             return h.getProp(context, propKey.toString());
         
-        let result: any = {};
+        const result: any = {};
         if (propKey instanceof Array) {
             propKey.forEach(k => {
                 if (typeof k !== "string" && typeof k !== "symbol" && typeof k !== "number") return;
@@ -576,8 +603,8 @@ export class BaseComponent {
         subscribe(h: any): any;
         [property: string]: any;
     }) {
-        let h = viewGenerator();
-        let context = this._context.childContext(childKey);
+        const h = viewGenerator();
+        const context = this._context.childContext(childKey);
         if (!context || this._inner.isDisposed) return undefined;
         if (arguments.length > 2 && typeof styleRefs !== "boolean") {
             if (styleRefs) {
@@ -653,12 +680,12 @@ export class BaseComponent {
         if (arguments.length === 0) return Object.keys(this._inner.props);
         if (!key || this._inner.isDisposed) return undefined;
         if (typeof key === "object") {
-            let obj: any = {};
+            const obj: any = {};
             if (value === true) {
-                let oldKeys = Object.keys(this._inner.props);
-                let disposable = new DisposableArray();
-                for (let i in oldKeys) {
-                    let k = oldKeys[i];
+                const oldKeys = Object.keys(this._inner.props);
+                const disposable = new DisposableArray();
+                for (const i in oldKeys) {
+                    const k = oldKeys[i];
                     setProp(this._inner.props, k, undefined, disposable);
                     obj[k] = undefined;
                 }
@@ -673,10 +700,10 @@ export class BaseComponent {
                 obj[k] = (this._inner.props[k] || {}).value;
             });
 
-            let onPropsChanged = (this as any).onPropsChanged;
+            const onPropsChanged = (this as any).onPropsChanged;
             if (onPropsChanged === false) {
             } else if (!onPropsChanged || onPropsChanged === true) {
-                let h = viewGenerator();
+                const h = viewGenerator();
                 Object.keys(obj).forEach(k => {
                     h.setProp(this._context, k, obj[k]);
                 });
@@ -699,7 +726,7 @@ export class BaseComponent {
         }
 
         if (arguments.length > 1 && setProp(this._inner.props, key, value)) {
-            let obj = {} as any;
+            const obj = {} as any;
             obj[key] = value;
             this.prop(obj);
         }
@@ -713,14 +740,14 @@ export class BaseComponent {
      * @param handler The handler of the event to add.
      */
     on(key: string, handler: any) {
-        let g = viewGenerator();
+        const g = viewGenerator();
         if (this._inner.isDisposed) return undefined;
-        let selfContext = this._context;
+        const selfContext = this._context;
         if (typeof (this as any).onListened === "function") typeof (this as any).onListened(key, handler, {
             onChild(childKey: string, eventKey: string, h: any) {
-                let context = selfContext.childContext(childKey);
+                const context = selfContext.childContext(childKey);
                 if (!context) return undefined;
-                let c = context.control();
+                const c = context.control();
                 if (c) {
                     c.on(eventKey, h);
                     return;
@@ -767,9 +794,9 @@ export class BaseComponent {
         this._inner.isDisposed = true;
         this._inner.disposable.dispose();
         if (typeof (this as any).onUnmount === "function") (this as any).onUnmount();
-        let ele = this._context.element();
+        const ele = this._context.element();
         if (!ele) return;
-        let h = viewGenerator();
+        const h = viewGenerator();
         h.unmount(ele);
     }
 }

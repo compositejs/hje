@@ -342,6 +342,9 @@ declare namespace Hje {
          */
         [property: string]: any;
     }
+    /**
+     * View generator for HTML element.
+     */
     export class HtmlGenerator implements ViewGeneratorContract<HTMLElement> {
         defaultTagName: string;
         initView(context: ViewGeneratingContextContract<HTMLElement>, tagName: string): HTMLElement;
@@ -729,18 +732,31 @@ declare namespace Hje {
          */
         dispose(): void;
     }
-    interface ComponentOptionsContract {
-        data?: any;
+    /**
+     * The options to initialize a component.
+     */
+    interface ComponentOptionsContract<T = any> {
+        /**
+         * The data bound in this component.
+         */
+        data?: T;
+        /**
+         * The description models of children.
+         */
         children?: DescriptionContract[] | string | number;
+        /**
+         * Occurs to get the context of view.
+         * @param context
+         */
         contextRef?(context: ViewGeneratingContextContract<any>): void;
-        [property: string]: any;
+        [property: string]: unknown;
     }
     /**
      * The base component that you can extend customized business logic
      * by a) updating constructor to set new model and refreshing;
      * b) adding methods to update specific child model and refreshing.
      */
-    class BaseComponent {
+    class BaseComponent<T = any> {
         private readonly _inner;
         private _context;
         /**
@@ -748,7 +764,7 @@ declare namespace Hje {
          * @param element The element.
          * @param options The options.
          */
-        constructor(element: any, options?: ComponentOptionsContract);
+        constructor(element: any, options?: ComponentOptionsContract<T>);
         /**
          * Gets the generating context of the current instance.
          */
@@ -785,10 +801,15 @@ declare namespace Hje {
          */
         protected get disposableStore(): DisposableArray;
         /**
+         * Gets the data bound in this component.
+         */
+        protected get data(): T;
+        /**
          * Refreshes a specific child by key.
          * @param key The child key; or null for updating the current component.
+         * @param handler An optional handler to process before refreshing.
          */
-        protected refreshChild(key?: string): void;
+        protected refreshChild(key?: string, handler?: (context: ViewGeneratingContextContract<any>) => void): void;
         /**
          * Gets or sets the child property.
          * @param childKey The child key; or null for the current component.
@@ -873,4 +894,37 @@ declare namespace Hje {
          */
         dispose(): void;
     }
+}
+declare namespace Hje {
+    /**
+     * The relative path info.
+     */
+    class RelativePathInfo {
+        private _info;
+        /**
+         * Initializes a new instance of the RelativePathInfo class.
+         * @param path The current path.
+         */
+        constructor(path: string);
+        /**
+         * Gets the current relative path.
+         */
+        get value(): string;
+        get childPath(): string;
+        get parentLevel(): number;
+        get isAbsolute(): string | boolean;
+        toPathArray(onlyChildPathName?: boolean): string[];
+        relative(path: string | RelativePathInfo): RelativePathInfo;
+        toString(): string;
+        toJSON(): string;
+    }
+    function getCookie(key: string): string;
+    function getQuery(): (string | {
+        key: string;
+        value: string;
+    })[];
+    function getValueFromKeyedArray(arr: (string | {
+        key: string;
+        value: string;
+    })[], key: string): string;
 }
