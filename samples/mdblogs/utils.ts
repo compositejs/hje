@@ -1,5 +1,5 @@
 namespace DeepX.MdBlogs {
-    export function setElementProp(element: HTMLElement, key: string | null, value: any) {
+    export function setElementProp(element: HTMLElement | string, key: string | null, value: any) {
         if (!element) return;
         if (typeof element === "string") element = document.getElementById(element);
         if (!element || !element.tagName) return;
@@ -7,6 +7,19 @@ namespace DeepX.MdBlogs {
         else if (key === "display" && typeof value === "boolean") key = element.style.display = value ? "" : "none";
         else (element as any)[key] = value;
     };
+
+    export function firstQuery() {
+        var id = location.search;
+        if (!!id && id.length > 1) {
+            id = id.substring(1);
+            var idEndPos = id.indexOf("?");
+            if (idEndPos >= 0) id = id.substring(0, idEndPos);
+            idEndPos = id.indexOf("&");
+            if (idEndPos >= 0) id = id.substring(0, idEndPos);
+        }
+
+        return id;
+    }
 
     /* Copied from LangPack */
 

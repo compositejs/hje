@@ -188,7 +188,7 @@ export interface ViewGeneratingContextContract<T> {
         styleRefs(key: string | number): string | string[] | {
             subscribe(h: any): any;
             [property: string]: any;
-        };
+        } | undefined;
 
         /**
          * Gets the data of a specific child by specific key.
@@ -246,7 +246,7 @@ export interface ViewGeneratorContract<T> {
      * @param tagName  The preferred tag nam.
      */
     initView(context: ViewGeneratingContextContract<T>, tagName: string): T;
-    
+
     /**
      * Checks whether the element is still in the document.
      * @param element  The element to check.
@@ -437,12 +437,12 @@ export interface ComponentOptionsContract<T = any> {
  * by a) updating constructor to set new model and refreshing;
  * b) adding methods to update specific child model and refreshing.
  */
-export class BaseComponent<T = any> {
+export class BaseComponent {
     private readonly _inner = {
         props: {} as any,
         disposable: new DisposableArray(),
         isDisposed: false,
-        data: undefined as T | undefined,
+        data: undefined as any,
     };
     private _context: ViewGeneratingContextContract<any>;
 
@@ -451,7 +451,7 @@ export class BaseComponent<T = any> {
      * @param element The element.
      * @param options The options.
      */
-    constructor(element: any, options?: ComponentOptionsContract<T>) {
+    constructor(element: any, options?: ComponentOptionsContract<any>) {
         if (!options) options = {};
         const self = this;
         if (typeof (options as any).disposeFlagHandler === "function") (options as any).disposeFlagHandler(() => {

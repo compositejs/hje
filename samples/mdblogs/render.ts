@@ -10,7 +10,7 @@ namespace DeepX.MdBlogs {
             supplement?: Hje.DescriptionContract;
         };
 
-        constructor(element: any, options?: Hje.ComponentOptionsContract) {
+        constructor(element: any, options?: Hje.ComponentOptionsContract<IArticlesPartData>) {
             super(element, options);
             if (options?.data?.mkt != null) this.__inner.mkt = options.data.mkt;
             this.currentModel = {
@@ -133,7 +133,7 @@ namespace DeepX.MdBlogs {
             if (!already) this.lifecycle()?.onhome?.(this);
         }
 
-        select(article: ArticleInfo | string) {
+        select(article?: ArticleInfo | string) {
             const options = this.createLocaleOptions();
             if (typeof article === "number") {
                 if (article === -1) {

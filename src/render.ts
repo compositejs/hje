@@ -91,7 +91,7 @@ function createContext<T = any>(
         childModel(key: string | number) {
             if (typeof key === "number") {
                 const children = bag.model.children;
-                if (typeof children === "string" || typeof children === "number") return key === 0 ? children : undefined;
+                if (!children || typeof children === "string" || typeof children === "number") return key === 0 ? children : undefined;
                 const model = children[key];
                 return model;
             }
@@ -184,7 +184,7 @@ export class HtmlGenerator implements ViewGeneratorContract<HTMLElement> {
         let ele = context.element();
         const eleType = typeof ele;
         if (!ele || eleType === "symbol" || ele as any === true) {
-            let tagNs = (context.model() || {} as any).tagNamespace;
+            let tagNs = (context.model() as any || {} as any).tagNamespace;
             if (!tagNs && tagName && tagName.indexOf(":") >= 0) {
                 if (tagName.startsWith("svg:")) {
                     tagNs = "http://www.w3.org/2000/svg";
@@ -217,7 +217,7 @@ export class HtmlGenerator implements ViewGeneratorContract<HTMLElement> {
                 : document.createElement(tagName || this.defaultTagName || "div");
         }
 
-        if (eleType === "string") ele = document.getElementById(ele as any);
+        if (eleType === "string") ele = document.getElementById(ele as any)!;
         else if (eleType === "number") ele = document.body.children[ele as any] as HTMLElement;
         if (ele) ele.innerHTML = "";
         return ele;
@@ -232,7 +232,7 @@ export class HtmlGenerator implements ViewGeneratorContract<HTMLElement> {
     }
     unmount(element: HTMLElement) {
         if (!element) return;
-        element.innerHTML = null;
+        element.innerHTML = "";
         element.remove();
     }
     append(parent: HTMLElement, child: HTMLElement) {
@@ -369,7 +369,7 @@ export class MemoryJsonGenerator implements ViewGeneratorContract<MemoryJsonSour
             if (i >= 0) delete element.parent.children[i];
         }
 
-        element.parent = null;
+        element.parent = undefined;
         element.children = [];
     }
     append(parent: MemoryJsonSourceContract, child: MemoryJsonSourceContract) {

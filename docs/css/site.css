@@ -330,7 +330,7 @@ div.placeholder-after-loading:first-child > span::after {
     color: #808080;
     font-size: 14px;;
     margin-top: 10px;
-    margin-bottom: 40px;
+    margin-bottom: 20px;
     cursor: default;
     user-select: none;
 }
@@ -353,6 +353,9 @@ div.placeholder-after-loading:first-child > span::after {
 }
 #blog_content > article > section.x-part-blog-related > p {
     font-size: 14px;
+}
+#blog_content > article > main {
+    overflow-x: hidden;
 }
 #blog_content > article > main img {
     width: 100%;
@@ -386,6 +389,10 @@ div.placeholder-after-loading:first-child > span::after {
 }
 #blog_content > article > main > table {
     border-collapse: collapse;
+    min-width: 80%;
+}
+#blog_content > article > main table th {
+    background-color: #1A1A1A;
 }
 #blog_content > article > main > table > thead > tr > td,
 #blog_content > article > main > table > thead > tr > th,
@@ -414,6 +421,10 @@ div.placeholder-after-loading:first-child > span::after {
 }
 #blog_content > article > main > pre:has(> code.hljs) {
     padding: 0;
+}
+#blog_content > article > h1 + main.x-part-blog-menu,
+#blog_content > article > main + main.x-part-blog-menu {
+    margin-top: 40px;
 }
 #blog_content > article:has(> main.x-part-blog-menu) {
     max-width: none;

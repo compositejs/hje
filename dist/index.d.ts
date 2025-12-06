@@ -320,6 +320,15 @@ declare namespace Hje {
 }
 declare namespace Hje {
     /**
+     * Converts a text or string array into the description models.
+     * @param line The text or each line.
+     * @param arr true if always returns an array; otherwise, false.
+     * @returns The description model item or array.
+     */
+    function toSpan(line: string | number | boolean | Hje.DescriptionContract | (string | number | boolean | Hje.DescriptionContract)[], arr?: boolean): (Hje.DescriptionContract | Hje.DescriptionContract[]);
+}
+declare namespace Hje {
+    /**
      * The options on rendering.
      */
     export interface RenderingOptions {
@@ -579,7 +588,7 @@ declare namespace Hje {
             styleRefs(key: string | number): string | string[] | {
                 subscribe(h: any): any;
                 [property: string]: any;
-            };
+            } | undefined;
             /**
              * Gets the data of a specific child by specific key.
              * @param key  The key of context cached; or the zero-based index of child.
@@ -756,7 +765,7 @@ declare namespace Hje {
      * by a) updating constructor to set new model and refreshing;
      * b) adding methods to update specific child model and refreshing.
      */
-    class BaseComponent<T = any> {
+    class BaseComponent {
         private readonly _inner;
         private _context;
         /**
@@ -764,7 +773,7 @@ declare namespace Hje {
          * @param element The element.
          * @param options The options.
          */
-        constructor(element: any, options?: ComponentOptionsContract<T>);
+        constructor(element: any, options?: ComponentOptionsContract<any>);
         /**
          * Gets the generating context of the current instance.
          */
@@ -803,7 +812,7 @@ declare namespace Hje {
         /**
          * Gets the data bound in this component.
          */
-        protected get data(): T;
+        protected get data(): any;
         /**
          * Refreshes a specific child by key.
          * @param key The child key; or null for updating the current component.
@@ -897,6 +906,13 @@ declare namespace Hje {
 }
 declare namespace Hje {
     /**
+     * Gets the module name.
+     * @returns The name of module.
+     */
+    function name(): string;
+}
+declare namespace Hje {
+    /**
      * The relative path info.
      */
     class RelativePathInfo {
@@ -907,22 +923,74 @@ declare namespace Hje {
          */
         constructor(path: string);
         /**
-         * Gets the current relative path.
+         * Gets the relative path.
          */
         get value(): string;
+        /**
+         * Gets the path started from the directory marked.
+         */
         get childPath(): string;
+        /**
+         * Gets the post generator of target to describe the path.
+         */
         get parentLevel(): number;
+        /**
+         * Gets a value indicating whether current path is absolute.
+         */
         get isAbsolute(): string | boolean;
+        /**
+         * Gets an array about the path.
+         * @param onlyChildPathName true if only return the path name without upper information; otherwise, false.
+         * @returns An array of each directory name in the path.
+         */
         toPathArray(onlyChildPathName?: boolean): string[];
+        /**
+         * Creates a specific relative path info.
+         * @param path The path relatived with this one.
+         * @returns A new relative path info of the specific.
+         */
         relative(path: string | RelativePathInfo): RelativePathInfo;
+        /**
+         * Converts to a string.
+         * @returns A string about this path.
+         */
         toString(): string;
+        /**
+         * Converts to a JSON.
+         * @returns A JSON converted.
+         */
         toJSON(): string;
     }
+    /**
+     * Gets a specific cookie value.
+     * @param key The cookie key.
+     * @returns The value of cookie; or empty string, if not found.
+     */
     function getCookie(key: string): string;
-    function getQuery(): (string | {
+    /**
+     * Gets the location search (query) in an array.
+     * @returns The key-value pair of query in an array.
+     */
+    function queryArray(): (string | {
         key: string;
         value: string;
     })[];
+    /**
+     * Gets the specific query value.
+     * @param name The query name.
+     * @param options Additional options to control resolving.
+     * @returns The value of the query.
+     */
+    function getQuery(name: string, options?: {
+        notToDecode?: boolean;
+        fallback?: string | null | undefined;
+    }): string;
+    /**
+     * Gets the value with a specific key from a key-value pairs.
+     * @param arr The key-value pairs.
+     * @param key The key.
+     * @returns The value.
+     */
     function getValueFromKeyedArray(arr: (string | {
         key: string;
         value: string;

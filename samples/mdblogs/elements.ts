@@ -231,4 +231,91 @@ namespace DeepX.MdBlogs {
             }]
         };
     }
+
+    interface IButtonListItem {
+        styleRefs?: string[] | string | {
+            subscribe(h: any): any;
+            [property: string]: any;
+        };
+        style?: any;
+        text?: string;
+        url?: string;
+        title?: string;
+        click?(ev: Event): void;
+    }
+
+    export function buttonList(config: {
+        styleRefs?: string[] | string | {
+            subscribe(h: any): any;
+            [property: string]: any;
+        };
+        style?: any;
+        groupStyleRefs?: string[] | string | {
+            subscribe(h: any): any;
+            [property: string]: any;
+        };
+        data?: any;
+        props?: Record<string, unknown>;
+        text?: string;
+        item?: boolean | IButtonListItem;
+        list?: (IButtonListItem | string | number | boolean)[];
+        click?(ev: Event): void;
+    }) {
+        if (!config) return undefined;
+        let m: Hje.DescriptionContract = {};
+        if (config.styleRefs) m.styleRefs = config.styleRefs;
+        if (config.style) m.style = config.style;
+        if (config.props) m.props = config.props;
+        if (config.data) m.data = config.data;
+        if (config.item === true) {
+            if (!config.text) return undefined;
+            m.tagName = "a";
+            m.children = Hje.toSpan(config.text, true) as Hje.DescriptionContract[];
+            if (typeof config.click === "function") m.on = {
+                click(ev) {
+                    config.click(ev);
+                }
+            };
+            return m;
+        }
+
+        let itemConfig = config.item || {};
+        m.children = [];
+        if (config.list instanceof Array) {
+            for (let i = 0; i < config.list.length; i++) {
+                let item = config.list[i];
+                if (!item) continue;
+                if (typeof item === "number") item = item.toString(10);
+                if (typeof item === "string") {
+                    m.children.push({
+                        tagName: "span",
+                        styleRefs: config.groupStyleRefs,
+                        children: item
+                    });
+                    continue;
+                }
+
+                if (item === true) {
+                    m.children.push({
+                        tagName: "br"
+                    });
+                    continue;
+                }
+
+                let itemProps: any = {};
+                if (item.url) itemProps.href = item.url;
+                if (item.title) itemProps.title = item.title;
+                m.children.push(buttonList({
+                    text: item.text,
+                    styleRefs: item.styleRefs || itemConfig.styleRefs,
+                    style: item.style || itemConfig.style,
+                    props: itemProps,
+                    click: item.click || itemConfig.click,
+                    item: true
+                }));
+            }
+        }
+
+        return m;
+    }
 }

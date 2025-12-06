@@ -1,17 +1,17 @@
 declare namespace DeepX.MdBlogs {
-    const hooks: {
+    export const hooks: {
         renderMd: ((element: HTMLElement, md: string) => void);
     };
-    function showElements(show: string[], hide: string[]): void;
-    function codeElements(element: HTMLElement): HTMLElement[];
-    function generateMenu(arr: Hje.DescriptionContract[], params: (ArticleInfo | string)[], options: {
+    export function showElements(show: string[], hide: string[]): void;
+    export function codeElements(element: HTMLElement): HTMLElement[];
+    export function generateMenu(arr: Hje.DescriptionContract[], params: (ArticleInfo | string)[], options: {
         select?: ArticleInfo;
         deep?: boolean | number;
         mkt?: string | boolean;
         click?(ev: Event, article: ArticleInfo): void;
     }): void;
-    function generateMenuItem(article: ArticleInfo, level: number, click?: (ev: Event, article: ArticleInfo) => void, options?: ILocalePropOptions): Hje.DescriptionContract;
-    function generateCdnScript(name: string, ver: string, url: string, path: string): {
+    export function generateMenuItem(article: ArticleInfo, level: number, click?: (ev: Event, article: ArticleInfo) => void, options?: ILocalePropOptions): Hje.DescriptionContract;
+    export function generateCdnScript(name: string, ver: string, url: string, path: string): {
         tagName: string;
         styleRefs: string;
         children: {
@@ -27,6 +27,35 @@ declare namespace DeepX.MdBlogs {
             })[];
         }[];
     };
+    interface IButtonListItem {
+        styleRefs?: string[] | string | {
+            subscribe(h: any): any;
+            [property: string]: any;
+        };
+        style?: any;
+        text?: string;
+        url?: string;
+        title?: string;
+        click?(ev: Event): void;
+    }
+    export function buttonList(config: {
+        styleRefs?: string[] | string | {
+            subscribe(h: any): any;
+            [property: string]: any;
+        };
+        style?: any;
+        groupStyleRefs?: string[] | string | {
+            subscribe(h: any): any;
+            [property: string]: any;
+        };
+        data?: any;
+        props?: Record<string, unknown>;
+        text?: string;
+        item?: boolean | IButtonListItem;
+        list?: (IButtonListItem | string | number | boolean)[];
+        click?(ev: Event): void;
+    }): Hje.DescriptionContract;
+    export {};
 }
 declare namespace DeepX.MdBlogs {
     class Articles {
@@ -179,6 +208,14 @@ declare namespace DeepX.MdBlogs {
         disableMenu?: boolean;
         [property: string]: any;
     }
+    export interface IArticlesPartData {
+        mkt?: string | boolean;
+        banner?: Hje.DescriptionContract;
+        supplement?: Hje.DescriptionContract;
+        lifecycle?: IArticlesLifecycle;
+        articles?: string | Articles;
+        select?: string;
+    }
     export interface IArticleInfoOptions {
         rela: Hje.RelativePathInfo;
         year?: IYearConfig;
@@ -329,6 +366,13 @@ declare namespace DeepX.MdBlogs {
     export {};
 }
 declare namespace DeepX.MdBlogs {
+    /**
+     * Gets the module name.
+     * @returns The name of module.
+     */
+    function name(): string;
+}
+declare namespace DeepX.MdBlogs {
     class ArticlesPart extends Hje.BaseComponent {
         readonly __inner: {
             select?: ArticleInfo;
@@ -339,13 +383,13 @@ declare namespace DeepX.MdBlogs {
             banner?: Hje.DescriptionContract;
             supplement?: Hje.DescriptionContract;
         };
-        constructor(element: any, options?: Hje.ComponentOptionsContract);
+        constructor(element: any, options?: Hje.ComponentOptionsContract<IArticlesPartData>);
         get title(): string;
         set title(value: string);
         get mkt(): string | boolean;
         set mkt(value: string | boolean);
         home(): void;
-        select(article: ArticleInfo | string): ArticleInfo;
+        select(article?: ArticleInfo | string): ArticleInfo;
         next(): ArticleInfo;
         previous(): ArticleInfo;
         protected initRender(articles: Articles, select: string, lifecycle: IArticlesLifecycle): void;
@@ -358,7 +402,8 @@ declare namespace DeepX.MdBlogs {
     }
 }
 declare namespace DeepX.MdBlogs {
-    function setElementProp(element: HTMLElement, key: string | null, value: any): void;
+    function setElementProp(element: HTMLElement | string, key: string | null, value: any): void;
+    function firstQuery(): string;
     function getLocaleProp<T = any>(obj: T, key?: keyof (T) | null, options?: {
         mkt?: string | boolean;
         fallback?: any;

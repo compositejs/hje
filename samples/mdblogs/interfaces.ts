@@ -67,6 +67,15 @@ namespace DeepX.MdBlogs {
         [property: string]: any;
     }
 
+    export interface IArticlesPartData {
+        mkt?: string | boolean;
+        banner?: Hje.DescriptionContract;
+        supplement?: Hje.DescriptionContract;
+        lifecycle?: IArticlesLifecycle;
+        articles?: string | Articles;
+        select?: string;
+    }
+
     export interface IArticleInfoOptions {
         rela: Hje.RelativePathInfo;
         year?: IYearConfig;

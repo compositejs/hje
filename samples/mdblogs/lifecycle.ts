@@ -4,15 +4,18 @@ namespace DeepX.MdBlogs {
         banner?: Hje.DescriptionContract;
         supplement?: Hje.DescriptionContract;
     }) {
-        const q = Hje.getQuery();
+        const q = Hje.queryArray();
         if (!options) options = {};
         const defaultTitle = options.title ? (options.title === true ? document.title : options.title) : undefined;
         const monitor = {
             skip: true
         };
         const lifecycle: IArticlesLifecycle = {
-            oninit() {
+            oninit(instance) {
                 monitor.skip = false;
+                const path = instance.select()?.getRoutePath();
+                if (!path) return;
+                history.pushState({ select: path }, "", `?${path}`);
             },
             onselect(instance, article: ArticleInfo) {
                 if (monitor.skip) return;
@@ -23,7 +26,7 @@ namespace DeepX.MdBlogs {
             },
             onhome(instance) {
                 if (monitor.skip) return;
-                history.pushState({ select: "" }, "", "");
+                history.pushState({ select: "" }, "", "./");
                 document.title = defaultTitle || instance.title;
             }
         };

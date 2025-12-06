@@ -37,10 +37,10 @@ var curSite = {};
     };
 
     curSite.initHome = function (config) {
-        let installStr = site.getString("installation", "title-install");
-        site.getString("features", "title-features");
-        site.getString("sourceCode", "title-source");
-        site.getString("getDetails", "link-install");
+        let installStr = DeepX.MdBlogs.setElementText("title-install", "installation");
+        DeepX.MdBlogs.setElementText("title-features", "features");
+        DeepX.MdBlogs.setElementText("title-source", "sourceCode");
+        DeepX.MdBlogs.setElementText("link-install", "getDetails");
         if (!config || !config.name) return;
 
         let zh = installStr === "安装";
@@ -61,7 +61,7 @@ var curSite = {};
         for (let i = 0; i < config.cdn.length; i++) {
             let url = config.cdn[i];
             if (!url) continue;
-            let cdnM = site.cdnModel(config.name, config.version, url, config.path);
+            let cdnM = DeepX.MdBlogs.generateCdnScript(config.name, config.version, url, config.path);
             if (cdnM) installModel.push(cdnM);
         }
 
@@ -112,13 +112,13 @@ var curSite = {};
                         tagName: "a",
                         styleRefs: "x-link-more",
                         props: { href: "./articles/?installation" },
-                        children: [{ tagName: "span", children: site.getString("getDetails") }]
+                        children: [{ tagName: "span", children: DeepX.MdBlogs.getLocaleString("getDetails") }]
                     }]
                 }]
             }]
         };
         Hje.render("part-install", m);
-        let tutorial = site.codeElements("part-tutorial");
+        let tutorial = DeepX.MdBlogs.codeElements("part-tutorial");
         if (tutorial && typeof hljs === "object") {
             for (let i = 0; i < tutorial.length; i++) {
                 hljs.highlightElement(tutorial[i]);
@@ -127,10 +127,11 @@ var curSite = {};
     };
 
     curSite.initWiki = function (config) {
-        if (!config) config = {};
-        if (!config.rootPath) config.rootPath = "articles";
-        if (!config.menuPath) config.menuPath = site.getString("name") === "名称" ? "zh-Hans.json" : "en.json";
-        site.blogs(config);
-    }
+        return DeepX.MdBlogs.render("blog_content", "../articles/config.json", {
+            title: true,
+            banner: config.banner,
+            supplement: config.supplement
+        });
+    };
 
 })(curSite || (curSite = {}));

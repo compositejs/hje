@@ -1,0 +1,36 @@
+{
+    "name": "Hje",
+    "docs": [
+        "Install",
+        {
+            "name": "Installation",
+            "name#zh": "安装",
+            "dir": "wiki/installation",
+            "dir#zh": "wiki/anzhuang",
+            "file": true,
+            "categories": ["install", "prepare", "npm"],
+            "end": true
+        },
+        "Spec",
+        {
+            "name": "To HTML",
+            "name#zh": "动态生成页面",
+            "dir": "wiki/tohtml",
+            "dir#zh": "wiki/yemian",
+            "file": true,
+            "end": true
+        },
+        {
+            "name": "Component",
+            "name#zh": "组件",
+            "dir": "wiki/component",
+            "dir#zh": "wiki/zujian",
+            "file": true,
+            "end": true
+        }
+    ],
+    "redir": {
+        "install": "installation",
+        "render": "tohtml"
+    }
+}
