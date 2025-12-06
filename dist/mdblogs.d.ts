@@ -4,13 +4,16 @@ declare namespace DeepX.MdBlogs {
     };
     export function showElements(show: string[], hide: string[]): void;
     export function codeElements(element: HTMLElement): HTMLElement[];
-    export function generateMenu(arr: Hje.DescriptionContract[], params: (ArticleInfo | string)[], options: {
+    export function generateMenu(params: (ArticleInfo | string)[], options: {
         select?: ArticleInfo;
         deep?: boolean | number;
         mkt?: string | boolean;
+        arr?: Hje.DescriptionContract[];
+        path?: string | ((original: string, article: ArticleInfo) => string);
+        styleRefs?: string | string[];
         click?(ev: Event, article: ArticleInfo): void;
-    }): void;
-    export function generateMenuItem(article: ArticleInfo, level: number, click?: (ev: Event, article: ArticleInfo) => void, options?: ILocalePropOptions): Hje.DescriptionContract;
+    }): Hje.DescriptionContract;
+    export function generateMenuItem(article: ArticleInfo, level: number, path?: string | ((original: string, article: ArticleInfo) => string), click?: (ev: Event, article: ArticleInfo) => void, options?: ILocalePropOptions): Hje.DescriptionContract;
     export function generateCdnScript(name: string, ver: string, url: string, path: string): {
         tagName: string;
         styleRefs: string;
@@ -398,7 +401,7 @@ declare namespace DeepX.MdBlogs {
             mkt: string | false;
         };
         protected lifecycle(): IArticlesLifecycle;
-        protected genMenu(arr: Hje.DescriptionContract[], params: (ArticleInfo | string)[], deep?: boolean | number): void;
+        protected genMenu(arr: Hje.DescriptionContract[], params: (ArticleInfo | string)[], deep?: boolean | number): Hje.DescriptionContract;
     }
 }
 declare namespace DeepX.MdBlogs {

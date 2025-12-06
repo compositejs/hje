@@ -32,18 +32,23 @@ namespace DeepX.MdBlogs {
         return arr;
     }
 
-    export function generateMenu(arr: Hje.DescriptionContract[], params: (ArticleInfo | string)[], options: {
+    export function generateMenu(params: (ArticleInfo | string)[], options: {
         select?: ArticleInfo;
         deep?: boolean | number;
         mkt?: string | boolean;
+        arr?: Hje.DescriptionContract[];
+        path?: string | ((original: string, article: ArticleInfo) => string);
+        styleRefs?: string | string[];
         click?(ev: Event, article: ArticleInfo): void;
-    }) {
-        if (!params || params.length < 1) return;
-        const deep = options?.deep;
-        const select = options?.select;
-        const mkt = options?.mkt;
-        const click = options?.click;
-        const localeOptions = mkt != null ? { mkt: mkt } : undefined;
+    }): Hje.DescriptionContract {
+        if (!options) options = {};
+        if (!params || params.length < 1) return {
+            tagName: "ul",
+            styleRefs: options.styleRefs
+        };
+        const arr = options.arr || [];
+        const deep = options.deep;
+        const localeOptions = options.mkt != null ? { mkt: options.mkt } : undefined;
         const level = deep === true ? 1 : (typeof deep === "number" && deep >= 0 ? (deep + 1) : 0);
         let group = undefined;
         for (let i = 0; i < params.length; i++) {
@@ -68,20 +73,28 @@ namespace DeepX.MdBlogs {
                 });
             }
 
-            const result = generateMenuItem(article, deep === -1 ? -1 : level, click, localeOptions);
-            if (select === article) result.styleRefs = "state-sel";
+            const result = generateMenuItem(article, deep === -1 ? -1 : level, options.path, options.click, localeOptions);
+            if (options.select === article) result.styleRefs = "state-sel";
             arr.push(result);
             if (level < 1) continue;
             const children = article.children(localeOptions);
-            generateMenu(arr, children, {
-                select,
-                mkt,
+            generateMenu(children, {
+                arr,
+                select: options.select,
+                mkt: options.mkt,
+                path: options.path,
                 deep: level
             });
         }
+
+        return {
+            tagName: "ul",
+            styleRefs: options.styleRefs,
+            children: arr
+        };
     }
 
-    export function generateMenuItem(article: ArticleInfo, level: number, click?: (ev: Event, article: ArticleInfo) => void, options?: ILocalePropOptions) {
+    export function generateMenuItem(article: ArticleInfo, level: number, path?: string | ((original: string, article: ArticleInfo) => string), click?: (ev: Event, article: ArticleInfo) => void, options?: ILocalePropOptions) {
         const mkt = options?.mkt;
         const localeOptions = mkt != null ? { mkt: mkt } : undefined;
         const intro = article.getIntro(localeOptions);
@@ -103,10 +116,16 @@ namespace DeepX.MdBlogs {
             title = prefix + title;
         }
 
+        let path1 = `${typeof path === "string" ? path : ""}?${article.getRoutePath(localeOptions)}`;
+        if (typeof path === "function") {
+            const path2 = path(path1, article);
+            if (path2) path1 = path2;
+        }
+
         const text = {
             tagName: "a",
             props: {
-                href: `?${article.getRoutePath(localeOptions)}`,
+                href: path1,
                 title: tips,
             },
             on: {

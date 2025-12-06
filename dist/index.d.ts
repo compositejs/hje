@@ -1,4 +1,237 @@
 declare namespace Hje {
+    /**
+     * The base component that you can extend customized business logic
+     * by a) updating constructor to set new model and refreshing;
+     * b) adding methods to update specific child model and refreshing.
+     */
+    class BaseComponent {
+        private readonly _inner;
+        private _context;
+        /**
+         * Initializes a new instance of the BaseComponent class.
+         * @param element The element.
+         * @param options The options.
+         */
+        constructor(element: any, options?: ComponentOptionsContract<any>);
+        /**
+         * Gets the generating context of the current instance.
+         */
+        protected get currentContext(): ViewGeneratingContextContract<any>;
+        /**
+         * Gets the view model of the current instance.
+         */
+        protected get currentModel(): DescriptionContract;
+        /**
+         * Sets the view model of the current instance.
+         * @param value The view model.
+         */
+        protected set currentModel(value: DescriptionContract);
+        /**
+         * Gets the generating context of a specific child.
+         * @param key The child key.
+         */
+        protected childContext(key: string): ViewGeneratingContextContract<any>;
+        /**
+         * Gets the control of a specific child.
+         * @param key The child key.
+         */
+        protected childControl<T extends BaseComponent = BaseComponent>(key: string): T;
+        /**
+         * Gets or sets the view model of the current instance.
+         * @param key The child key.
+         * @param value The optional view model to override by setting its properties. The original reference will not replace but keep.
+         * @param clearOriginal true if clear all properties of the original view model before set; otherwise, false.
+         */
+        protected childModel(key: string, value?: any, clearOriginal?: boolean): any;
+        /**
+         * Gets a disposable array attached in this component
+         * which will dispose automatically when the component is disposed.
+         */
+        protected get disposableStore(): DisposableArray;
+        /**
+         * Gets the data bound in this component.
+         */
+        protected get data(): any;
+        /**
+         * Refreshes a specific child by key.
+         * @param key The child key; or null for updating the current component.
+         * @param handler An optional handler to process before refreshing.
+         */
+        protected refreshChild(key?: string, handler?: (context: ViewGeneratingContextContract<any>) => void): void;
+        /**
+         * Gets or sets the child property.
+         * @param childKey The child key; or null for the current component.
+         * @param propKey The property key.
+         * @param v An opitonal value to set.
+         */
+        protected childProps(childKey: string, propKey: string | number | string[] | any, v?: any): any;
+        /**
+         * Gets or sets the style information of the specific child.
+         * @param childKey The child key; or null for the current component.
+         * @param style The inner style object.
+         * @param styleRefs The style class reference name list.
+         */
+        protected childStyle(childKey: string, style?: any, styleRefs?: string[] | string | boolean | {
+            subscribe(h: any): any;
+            [property: string]: any;
+        }): {
+            inline: any;
+            refs: string[] | undefined;
+        };
+        /**
+         * Sets the style references of the specific child.
+         * @param childKey The child key; or null for the current component.
+         * @param value The style class reference name list.
+         */
+        protected childStyleRefs(childKey: string, value: string[]): {
+            inline: any;
+            refs: string[] | undefined;
+        };
+        /**
+         * Gets a value indicating whether the component is disposed.
+         */
+        get isDisposed(): boolean;
+        /**
+         * Adds disposable objects so that they will be disposed when this instance is disposed.
+         * @param items  The objects to add.
+         */
+        pushDisposable(...items: DisposableContract[]): number;
+        /**
+         * Removes the disposable objects added in this instance.
+         * @param items  The objects to remove.
+         */
+        removeDisposable(...items: DisposableContract[]): number;
+        /**
+         * Gets or sets a property.
+         * @param key The property key.
+         * @param value The optional value of the property if need set.
+         */
+        prop<T = any>(key: string | any, value?: T | any): any;
+        /**
+         * Adds an event listener.
+         * @param key The event key.
+         * @param handler The handler of the event to add.
+         */
+        on(key: string, handler: any): DisposableContract;
+        /**
+         * Gets or sets the style information.
+         * @param value The inner style object.
+         * @param refs The style class reference name list.
+         */
+        style(value?: any, refs?: string[] | string | boolean | {
+            subscribe(h: any): any;
+            [property: string]: any;
+        }): {
+            inline: any;
+            refs: string[] | undefined;
+        };
+        /**
+         * Sets the style references.
+         * @param value The style class reference name list.
+         */
+        styleRefs(value: string[]): {
+            inline: any;
+            refs: string[] | undefined;
+        };
+        /**
+         * Gets the raw element.
+         */
+        element(): any;
+        /**
+         * Disposeses this instance and remove the element from the tree.
+         */
+        dispose(): void;
+    }
+}
+declare namespace Hje {
+    /**
+     * Internal injection pool.
+     */
+    const InternalInjectionPool: {
+        /**
+         * Gets or sets the HitTask class from DataSense library.
+         * @param value The HitTask class.
+         */
+        hittask(value?: any): any;
+    };
+    /**
+     * A container for store and manage a number of disposable object.
+     * @param items  The objects to add.
+     */
+    class DisposableArray {
+        private _list;
+        /**
+         * Adds disposable objects so that they will be disposed when this instance is disposed.
+         * @param items  The objects to add.
+         */
+        push(...items: DisposableContract[]): number;
+        /**
+         * Adds disposable objects so that they will be disposed when this instance is disposed.
+         * @param items  The objects to add.
+         */
+        pushDisposable(...items: DisposableContract[]): number;
+        /**
+         * Removes the ones added here.
+         * @param items  The objects to remove.
+         */
+        remove(...items: DisposableContract[]): number;
+        /**
+         * Removes the ones added here.
+         * @param items  The objects to remove.
+         */
+        removeDisposable(...items: DisposableContract[]): number;
+        /**
+         * Gets the count.
+         */
+        count(): number;
+        /**
+         * Disposes the instance.
+         */
+        dispose(): void;
+    }
+}
+declare namespace Hje {
+    /**
+     * Converts a text or string array into the description models.
+     * @param line The text or each line.
+     * @param arr true if always returns an array; otherwise, false.
+     * @returns The description model item or array.
+     */
+    function toSpan(line: string | number | boolean | Hje.DescriptionContract | (string | number | boolean | Hje.DescriptionContract)[], arr?: boolean): (Hje.DescriptionContract | Hje.DescriptionContract[]);
+}
+declare namespace Hje {
+    /**
+     * View generator for HTML element.
+     */
+    class HtmlGenerator implements ViewGeneratorContract<HTMLElement> {
+        defaultTagName: string;
+        initView(context: ViewGeneratingContextContract<HTMLElement>, tagName: string): HTMLElement;
+        alive(element: HTMLElement): boolean;
+        unmount(element: HTMLElement): void;
+        append(parent: HTMLElement, child: HTMLElement): void;
+        setProp(context: ViewGeneratingContextContract<HTMLElement>, key: string, value: any): void;
+        getProp(context: ViewGeneratingContextContract<HTMLElement>, key: string): any;
+        setStyle(context: ViewGeneratingContextContract<HTMLElement>, style: any, styleRefs: string[]): void;
+        getStyle(context: ViewGeneratingContextContract<HTMLElement>): {
+            inline: any;
+            refs: string[];
+            computed(pseudoElt?: string): any;
+        };
+        setTextValue(context: ViewGeneratingContextContract<HTMLElement>, value: string): void;
+        bindProp(context: ViewGeneratingContextContract<HTMLElement>, keys: BindPropKeyInfoContract): void;
+        onInit(context: ViewGeneratingContextContract<HTMLElement>): void;
+        on(context: ViewGeneratingContextContract<HTMLElement>, key: string, handler: (ev: any) => void): {
+            dispose(): void;
+        };
+    }
+    /**
+     * Converts an HTML element to a description model.
+     * @param element The element to parse.
+     * @returns The description model.
+     */
+    function from(element: Element | string): DescriptionContract;
+}
+declare namespace Hje {
     type EventHandlerContract<T> = (ev: T) => void;
     type ChangeActionContract = "add" | "remove" | "update" | "delta" | "none" | "invalid" | "unknown";
     /**
@@ -273,65 +506,9 @@ declare namespace Hje {
 }
 declare namespace Hje {
     /**
-     * Internal injection pool.
-     */
-    const InternalInjectionPool: {
-        /**
-         * Gets or sets the HitTask class from DataSense library.
-         * @param value The HitTask class.
-         */
-        hittask(value?: any): any;
-    };
-    /**
-     * A container for store and manage a number of disposable object.
-     * @param items  The objects to add.
-     */
-    class DisposableArray {
-        private _list;
-        /**
-         * Adds disposable objects so that they will be disposed when this instance is disposed.
-         * @param items  The objects to add.
-         */
-        push(...items: DisposableContract[]): number;
-        /**
-         * Adds disposable objects so that they will be disposed when this instance is disposed.
-         * @param items  The objects to add.
-         */
-        pushDisposable(...items: DisposableContract[]): number;
-        /**
-         * Removes the ones added here.
-         * @param items  The objects to remove.
-         */
-        remove(...items: DisposableContract[]): number;
-        /**
-         * Removes the ones added here.
-         * @param items  The objects to remove.
-         */
-        removeDisposable(...items: DisposableContract[]): number;
-        /**
-         * Gets the count.
-         */
-        count(): number;
-        /**
-         * Disposes the instance.
-         */
-        dispose(): void;
-    }
-}
-declare namespace Hje {
-    /**
-     * Converts a text or string array into the description models.
-     * @param line The text or each line.
-     * @param arr true if always returns an array; otherwise, false.
-     * @returns The description model item or array.
-     */
-    function toSpan(line: string | number | boolean | Hje.DescriptionContract | (string | number | boolean | Hje.DescriptionContract)[], arr?: boolean): (Hje.DescriptionContract | Hje.DescriptionContract[]);
-}
-declare namespace Hje {
-    /**
      * The options on rendering.
      */
-    export interface RenderingOptions {
+    interface RenderingOptions {
         /**
          * true if append a new element to the target; otherwise, false.
          */
@@ -351,83 +528,6 @@ declare namespace Hje {
          */
         [property: string]: any;
     }
-    /**
-     * View generator for HTML element.
-     */
-    export class HtmlGenerator implements ViewGeneratorContract<HTMLElement> {
-        defaultTagName: string;
-        initView(context: ViewGeneratingContextContract<HTMLElement>, tagName: string): HTMLElement;
-        alive(element: HTMLElement): boolean;
-        unmount(element: HTMLElement): void;
-        append(parent: HTMLElement, child: HTMLElement): void;
-        setProp(context: ViewGeneratingContextContract<HTMLElement>, key: string, value: any): void;
-        getProp(context: ViewGeneratingContextContract<HTMLElement>, key: string): any;
-        setStyle(context: ViewGeneratingContextContract<HTMLElement>, style: any, styleRefs: string[]): void;
-        getStyle(context: ViewGeneratingContextContract<HTMLElement>): {
-            inline: any;
-            refs: string[];
-            computed(pseudoElt?: string): any;
-        };
-        setTextValue(context: ViewGeneratingContextContract<HTMLElement>, value: string): void;
-        bindProp(context: ViewGeneratingContextContract<HTMLElement>, keys: BindPropKeyInfoContract): void;
-        onInit(context: ViewGeneratingContextContract<HTMLElement>): void;
-        on(context: ViewGeneratingContextContract<HTMLElement>, key: string, handler: (ev: any) => void): {
-            dispose(): void;
-        };
-    }
-    interface MemoryJsonSourceContract {
-        tagName: string;
-        parent?: MemoryJsonSourceContract;
-        props: any;
-        handlers: any;
-        style: any;
-        styleRefs: string[];
-        children: MemoryJsonSourceContract[];
-    }
-    export class MemoryJsonGenerator implements ViewGeneratorContract<MemoryJsonSourceContract> {
-        defaultTagName: string;
-        initView(context: ViewGeneratingContextContract<MemoryJsonSourceContract>, tagName: string): MemoryJsonSourceContract;
-        alive(element: MemoryJsonSourceContract): boolean;
-        unmount(element: MemoryJsonSourceContract): void;
-        append(parent: MemoryJsonSourceContract, child: MemoryJsonSourceContract): void;
-        setProp(context: ViewGeneratingContextContract<MemoryJsonSourceContract>, key: string, value: any): void;
-        getProp(context: ViewGeneratingContextContract<MemoryJsonSourceContract>, key: string): any;
-        setStyle(context: ViewGeneratingContextContract<MemoryJsonSourceContract>, style: any, styleRefs: string[]): void;
-        getStyle(context: ViewGeneratingContextContract<MemoryJsonSourceContract>): {
-            inline: any;
-            refs: string[];
-            computed(pseudoElt?: string): any;
-        };
-        setTextValue(context: ViewGeneratingContextContract<MemoryJsonSourceContract>, value: string): void;
-        bindProp(context: ViewGeneratingContextContract<MemoryJsonSourceContract>, keys: BindPropKeyInfoContract): void;
-        onInit(context: ViewGeneratingContextContract<MemoryJsonSourceContract>): void;
-        on(context: ViewGeneratingContextContract<MemoryJsonSourceContract>, key: string, handler: (ev: any) => void): {
-            dispose(): void;
-        };
-    }
-    export function viewGenerator<T = any>(h?: ViewGeneratorContract<T>): ViewGeneratorContract<any>;
-    /**
-     * Gets the children by tag name.
-     * @param model The model.
-     * @param key The tag name.
-     */
-    export function getChildrenByTagName(model: DescriptionContract, ...key: string[]): any;
-    /**
-     * Gets the first child by tag name.
-     * @param model The model.
-     * @param key The tag name.
-     */
-    export function getChildByTagName(model: DescriptionContract, ...key: string[]): any;
-    /**
-     * Renders.
-     * @param target  The target element to present the view.
-     * @param model  The instance of view description.
-     * @param options  Additional options.
-     */
-    export function render<T = any>(target: T, model: DescriptionContract, options?: RenderingOptions | "html"): (ViewGeneratingContextContract<T> | undefined);
-    export {};
-}
-declare namespace Hje {
     /**
      * The view description model.
      */
@@ -760,149 +860,70 @@ declare namespace Hje {
         contextRef?(context: ViewGeneratingContextContract<any>): void;
         [property: string]: unknown;
     }
+}
+declare namespace Hje {
+    function viewGenerator<T = any>(h?: ViewGeneratorContract<T>): ViewGeneratorContract<any>;
     /**
-     * The base component that you can extend customized business logic
-     * by a) updating constructor to set new model and refreshing;
-     * b) adding methods to update specific child model and refreshing.
+     * Gets the children by tag name.
+     * @param model The model.
+     * @param key The tag name.
      */
-    class BaseComponent {
-        private readonly _inner;
-        private _context;
-        /**
-         * Initializes a new instance of the BaseComponent class.
-         * @param element The element.
-         * @param options The options.
-         */
-        constructor(element: any, options?: ComponentOptionsContract<any>);
-        /**
-         * Gets the generating context of the current instance.
-         */
-        protected get currentContext(): ViewGeneratingContextContract<any>;
-        /**
-         * Gets the view model of the current instance.
-         */
-        protected get currentModel(): DescriptionContract;
-        /**
-         * Sets the view model of the current instance.
-         * @param value The view model.
-         */
-        protected set currentModel(value: DescriptionContract);
-        /**
-         * Gets the generating context of a specific child.
-         * @param key The child key.
-         */
-        protected childContext(key: string): ViewGeneratingContextContract<any>;
-        /**
-         * Gets the control of a specific child.
-         * @param key The child key.
-         */
-        protected childControl<T extends BaseComponent = BaseComponent>(key: string): T;
-        /**
-         * Gets or sets the view model of the current instance.
-         * @param key The child key.
-         * @param value The optional view model to override by setting its properties. The original reference will not replace but keep.
-         * @param clearOriginal true if clear all properties of the original view model before set; otherwise, false.
-         */
-        protected childModel(key: string, value?: any, clearOriginal?: boolean): any;
-        /**
-         * Gets a disposable array attached in this component
-         * which will dispose automatically when the component is disposed.
-         */
-        protected get disposableStore(): DisposableArray;
-        /**
-         * Gets the data bound in this component.
-         */
-        protected get data(): any;
-        /**
-         * Refreshes a specific child by key.
-         * @param key The child key; or null for updating the current component.
-         * @param handler An optional handler to process before refreshing.
-         */
-        protected refreshChild(key?: string, handler?: (context: ViewGeneratingContextContract<any>) => void): void;
-        /**
-         * Gets or sets the child property.
-         * @param childKey The child key; or null for the current component.
-         * @param propKey The property key.
-         * @param v An opitonal value to set.
-         */
-        protected childProps(childKey: string, propKey: string | number | string[] | any, v?: any): any;
-        /**
-         * Gets or sets the style information of the specific child.
-         * @param childKey The child key; or null for the current component.
-         * @param style The inner style object.
-         * @param styleRefs The style class reference name list.
-         */
-        protected childStyle(childKey: string, style?: any, styleRefs?: string[] | string | boolean | {
-            subscribe(h: any): any;
-            [property: string]: any;
-        }): {
-            inline: any;
-            refs: string[] | undefined;
-        };
-        /**
-         * Sets the style references of the specific child.
-         * @param childKey The child key; or null for the current component.
-         * @param value The style class reference name list.
-         */
-        protected childStyleRefs(childKey: string, value: string[]): {
-            inline: any;
-            refs: string[] | undefined;
-        };
-        /**
-         * Gets a value indicating whether the component is disposed.
-         */
-        get isDisposed(): boolean;
-        /**
-         * Adds disposable objects so that they will be disposed when this instance is disposed.
-         * @param items  The objects to add.
-         */
-        pushDisposable(...items: DisposableContract[]): number;
-        /**
-         * Removes the disposable objects added in this instance.
-         * @param items  The objects to remove.
-         */
-        removeDisposable(...items: DisposableContract[]): number;
-        /**
-         * Gets or sets a property.
-         * @param key The property key.
-         * @param value The optional value of the property if need set.
-         */
-        prop<T = any>(key: string | any, value?: T | any): any;
-        /**
-         * Adds an event listener.
-         * @param key The event key.
-         * @param handler The handler of the event to add.
-         */
-        on(key: string, handler: any): DisposableContract;
-        /**
-         * Gets or sets the style information.
-         * @param value The inner style object.
-         * @param refs The style class reference name list.
-         */
-        style(value?: any, refs?: string[] | string | boolean | {
-            subscribe(h: any): any;
-            [property: string]: any;
-        }): {
-            inline: any;
-            refs: string[] | undefined;
-        };
-        /**
-         * Sets the style references.
-         * @param value The style class reference name list.
-         */
-        styleRefs(value: string[]): {
-            inline: any;
-            refs: string[] | undefined;
-        };
-        /**
-         * Gets the raw element.
-         */
-        element(): any;
-        /**
-         * Disposeses this instance and remove the element from the tree.
-         */
-        dispose(): void;
+    function getChildrenByTagName(model: DescriptionContract, ...key: string[]): any;
+    /**
+     * Gets the first child by tag name.
+     * @param model The model.
+     * @param key The tag name.
+     */
+    function getChildByTagName(model: DescriptionContract, ...key: string[]): any;
+    /**
+     * Registers the component type with a specific key.
+     * @param name The key to reference in factory to the component type. It should be unique.
+     * @param component The component type.
+     */
+    function registerComponentType(name: string, component: typeof BaseComponent): void;
+    /**
+     * Renders.
+     * @param target  The target element to present the view.
+     * @param model  The instance of view description.
+     * @param options  Additional options.
+     */
+    function render<T = any>(target: T, model: DescriptionContract, options?: RenderingOptions | "html"): (ViewGeneratingContextContract<T> | undefined);
+}
+declare namespace Hje {
+    interface MemoryJsonSourceContract {
+        tagName: string;
+        parent?: MemoryJsonSourceContract;
+        props: any;
+        handlers: any;
+        style: any;
+        styleRefs: string[];
+        children: MemoryJsonSourceContract[];
     }
+    /**
+     * View generator for mock in memory.
+     */
+    export class MemoryJsonGenerator implements ViewGeneratorContract<MemoryJsonSourceContract> {
+        defaultTagName: string;
+        initView(context: ViewGeneratingContextContract<MemoryJsonSourceContract>, tagName: string): MemoryJsonSourceContract;
+        alive(element: MemoryJsonSourceContract): boolean;
+        unmount(element: MemoryJsonSourceContract): void;
+        append(parent: MemoryJsonSourceContract, child: MemoryJsonSourceContract): void;
+        setProp(context: ViewGeneratingContextContract<MemoryJsonSourceContract>, key: string, value: any): void;
+        getProp(context: ViewGeneratingContextContract<MemoryJsonSourceContract>, key: string): any;
+        setStyle(context: ViewGeneratingContextContract<MemoryJsonSourceContract>, style: any, styleRefs: string[]): void;
+        getStyle(context: ViewGeneratingContextContract<MemoryJsonSourceContract>): {
+            inline: any;
+            refs: string[];
+            computed(pseudoElt?: string): any;
+        };
+        setTextValue(context: ViewGeneratingContextContract<MemoryJsonSourceContract>, value: string): void;
+        bindProp(context: ViewGeneratingContextContract<MemoryJsonSourceContract>, keys: BindPropKeyInfoContract): void;
+        onInit(context: ViewGeneratingContextContract<MemoryJsonSourceContract>): void;
+        on(context: ViewGeneratingContextContract<MemoryJsonSourceContract>, key: string, handler: (ev: any) => void): {
+            dispose(): void;
+        };
+    }
+    export {};
 }
 declare namespace Hje {
     /**

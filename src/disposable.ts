@@ -1,5 +1,3 @@
-/// <reference path="./interfaces.ts" />
-
 namespace Hje {
 
 /**

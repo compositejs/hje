@@ -75,7 +75,7 @@ namespace DeepX.MdBlogs {
                 },
                 children: value
             }];
-            m.style = value ? { display: "" } : { display: "none" };
+            m.style = value ? {} : { display: "none" };
             super.refreshChild("title");
         }
 
@@ -263,7 +263,7 @@ namespace DeepX.MdBlogs {
                             }
                         }
 
-                        articleContents.style = { display: "" };
+                        articleContents.style = {};
                         self.refreshChild("contents");
                     });
                 }
@@ -362,7 +362,7 @@ namespace DeepX.MdBlogs {
 
             this.genMenu(arr, articles.wiki(options), true);
             this.genMenu(arr, articles.blogs(options), false);
-            m.style = arr.length > 0 ? { display: "" } : { display: "none" };
+            m.style = arr.length > 0 ? {} : { display: "none" };
             super.refreshChild("menu");
             let article: ArticleInfo;
             if (select) article = this.select(select);
@@ -394,10 +394,11 @@ namespace DeepX.MdBlogs {
 
         protected genMenu(arr: Hje.DescriptionContract[], params: (ArticleInfo | string)[], deep?: boolean | number) {
             const self = this;
-            return generateMenu(arr, params, {
+            return generateMenu(params, {
                 select: this.__inner.select,
                 mkt: this.createLocaleOptions()?.mkt,
                 deep,
+                arr,
                 click(ev, article) {
                     ev.preventDefault();
                     self.select(article);

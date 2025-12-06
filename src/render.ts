@@ -2,40 +2,14 @@
 
 namespace Hje {
 
-/**
- * The options on rendering.
- */
-export interface RenderingOptions {
-    /**
-     * true if append a new element to the target; otherwise, false.
-     */
-    appendMode?: boolean;
-
-    /**
-     * Occurs on initialization.
-     * @param context  The context.
-     */
-    onInit?(context: ViewGeneratingContextContract<any>): void;
-
-    /**
-     * Occurs on load completed.
-     * @param context  The context.
-     */
-    onLoad?(context: ViewGeneratingContextContract<any>): void;
-
-    /**
-     * Gets or sets the property.
-     */
-    [property: string]: any;
-}
-
 const inner = {
     contextHandlers: {
         alive() {
             return false;
         },
         refresh() {}
-    }
+    },
+    controls: {} as Record<string, typeof BaseComponent>
 };
 
 function createContext<T = any>(
@@ -175,275 +149,6 @@ function createContext<T = any>(
 let viewGen: ViewGeneratorContract<any>;
 let htmlGen: HtmlGenerator;
 
-/**
- * View generator for HTML element.
- */
-export class HtmlGenerator implements ViewGeneratorContract<HTMLElement> {
-    defaultTagName = "div";
-    initView(context: ViewGeneratingContextContract<HTMLElement>, tagName: string) {
-        let ele = context.element();
-        const eleType = typeof ele;
-        if (!ele || eleType === "symbol" || ele as any === true) {
-            let tagNs = (context.model() as any || {} as any).tagNamespace;
-            if (!tagNs && tagName && tagName.indexOf(":") >= 0) {
-                if (tagName.startsWith("svg:")) {
-                    tagNs = "http://www.w3.org/2000/svg";
-                    tagName = tagName.substring(4);
-                    if (!tagName) tagName = "svg";
-                } else if (tagName.startsWith("mathml:")) {
-                    tagNs = "http://www.w3.org/1998/Math/MathML";
-                    tagName = tagName.substring(7);
-                    if (!tagName) tagName = "math";
-                } else if (tagName.startsWith("math:")) {
-                    tagNs = "http://www.w3.org/1998/Math/MathML";
-                    tagName = tagName.substring(5);
-                    if (!tagName) tagName = "math";
-                } else if (tagName.startsWith("html:")) {
-                    tagNs = "http://www.w3.org/1999/xhtml";
-                    tagName = tagName.substring(5);
-                } else if (tagName.startsWith("xbl:")) {
-                    tagNs = "http://www.mozilla.org/xbl";
-                    tagName = tagName.substring(4);
-                } else if (tagName.startsWith("xul:")) {
-                    tagNs = "http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul";
-                    tagName = tagName.substring(4);
-                } else if (tagName.startsWith(":")) {
-                    tagName = tagName.substring(1);
-                }
-            }
-
-            return tagNs
-                ? document.createElementNS(tagNs, tagName || this.defaultTagName || "div")
-                : document.createElement(tagName || this.defaultTagName || "div");
-        }
-
-        if (eleType === "string") ele = document.getElementById(ele as any)!;
-        else if (eleType === "number") ele = document.body.children[ele as any] as HTMLElement;
-        if (ele) ele.innerHTML = "";
-        return ele;
-    }
-    alive(element: HTMLElement) {
-        if (!element || !element.parentElement) return false;
-        try {
-            if (!element.parentElement.parentElement && element != document.body) return false;
-        }
-        catch (ex) {}
-        return true;
-    }
-    unmount(element: HTMLElement) {
-        if (!element) return;
-        element.innerHTML = "";
-        element.remove();
-    }
-    append(parent: HTMLElement, child: HTMLElement) {
-        if (!parent || !child) return;
-        parent.appendChild(child);
-    }
-    setProp(context: ViewGeneratingContextContract<HTMLElement>, key: string, value: any) {
-        const element = context.element();
-        if (!element) return;
-        if (!value || typeof value === "string") element.setAttribute(key, value);
-        else (element as any)[key] = value;
-    }
-    getProp(context: ViewGeneratingContextContract<HTMLElement>, key: string) {
-        const element = context.element();
-        if (!element) return undefined;
-        return (element as any)[key] || element.getAttribute(key);
-    }
-    setStyle(context: ViewGeneratingContextContract<HTMLElement>, style: any, styleRefs: string[]) {
-        const element = context.element();
-        if (!element) return;
-        if (style) Object.keys(style).forEach(key => {
-            (element.style as any)[key] = style[key];
-        });
-        if (!styleRefs) return;
-        if (typeof styleRefs === "string") {
-            element.className = styleRefs;
-            return;
-        }
-
-        element.className = Array.prototype.join.call(styleRefs, " ");
-    }
-    getStyle(context: ViewGeneratingContextContract<HTMLElement>) {
-        const element = context.element();
-        const result = {
-            inline: undefined as any,
-            refs: [] as string[],
-            computed(pseudoElt?: string): any {
-                return element ? getComputedStyle(element, pseudoElt) : undefined;
-            }
-        };
-        if (!element) return result;
-        result.inline = element.style;
-        result.refs = (element.classList as any) || (element.className || "").split(" ");
-        return result;
-    }
-    setTextValue(context: ViewGeneratingContextContract<HTMLElement>, value: string) {
-        const element = context.element();
-        if (!element) return;
-        if (element.tagName === "input") {
-            (element as HTMLInputElement).value = value;
-            return;
-        }
-        
-        element.innerHTML = "";
-        element.appendChild(new Text(value));
-    }
-    bindProp(context: ViewGeneratingContextContract<HTMLElement>, keys: BindPropKeyInfoContract) {
-        keys.reg("value", setter => {
-            const element = context.element() as HTMLInputElement;
-            if (!element) return;
-            keys.on("change", ev => {
-                setter(element.value);
-            });
-        });
-    }
-    onInit(context: ViewGeneratingContextContract<HTMLElement>) {
-    }
-    on(context: ViewGeneratingContextContract<HTMLElement>, key: string, handler: (ev: any) => void) {
-        const element = context.element();
-        if (!element) return;
-        if (element.addEventListener) {
-            element.addEventListener(key, handler, false);
-            return {
-                dispose() {
-                    element.removeEventListener(key, handler, false);
-                }
-            };
-        } else if ((element as any).attachEvent) {
-            (element as any).attachEvent("on" + key, handler);
-            return {
-                dispose() {
-                    if ((element as any).detachEvent) (element as any).detachEvent(key, handler, false);
-                }
-            };
-        }
-    }
-}
-
-interface MemoryJsonSourceContract {
-    tagName: string;
-    parent?: MemoryJsonSourceContract;
-    props: any;
-    handlers: any;
-    style: any;
-    styleRefs: string[];
-    children: MemoryJsonSourceContract[];
-}
-
-export class MemoryJsonGenerator implements ViewGeneratorContract<MemoryJsonSourceContract> {
-    defaultTagName = "default";
-    initView(context: ViewGeneratingContextContract<MemoryJsonSourceContract>, tagName: string) {
-        const ele = context.element();
-        const eleType = typeof ele;
-        if (!ele || eleType !== "object") return {
-            tagName: tagName || "default",
-            props: {},
-            handlers: {},
-            style: {},
-            styleRefs: [],
-            children: []
-        };
-        if (!ele.props) ele.props = {};
-        if (!ele.handlers) ele.handlers = {};
-        if (!ele.style) ele.style = {};
-        if (!ele.styleRefs) {
-            const className = (ele as any).className;
-            ele.styleRefs = className && className instanceof Array ? className : [];
-        } else if (!(ele.styleRefs instanceof Array)) {
-            ele.styleRefs = typeof ele.styleRefs === "string" ? [ele.styleRefs] : [];
-        }
-
-        if (!ele.children || !(ele.children instanceof Array)) ele.children = [];
-        else while (ele.children.length) ele.children.pop();
-        return ele;
-    }
-    alive(element: MemoryJsonSourceContract) {
-        if (!element || !element.parent) return false;
-        return true;
-    }
-    unmount(element: MemoryJsonSourceContract) {
-        if (!element) return;
-        if (element.parent) {
-            const i = element.parent.children.indexOf(element);
-            if (i >= 0) delete element.parent.children[i];
-        }
-
-        element.parent = undefined;
-        element.children = [];
-    }
-    append(parent: MemoryJsonSourceContract, child: MemoryJsonSourceContract) {
-        if (!parent || !child) return;
-        if (child.parent) {
-            const i = child.parent.children.indexOf(child);
-            if (i >= 0) delete child.parent.children[i];
-        }
-
-        child.parent = parent;
-        if (parent.children.indexOf(child) < 0) parent.children.push(child);
-    }
-    setProp(context: ViewGeneratingContextContract<MemoryJsonSourceContract>, key: string, value: any) {
-        const element = context.element();
-        if (!element) return;
-        element.props[key] = value;
-    }
-    getProp(context: ViewGeneratingContextContract<MemoryJsonSourceContract>, key: string) {
-        const element = context.element();
-        if (!element) return undefined;
-        return element.props[key];
-    }
-    setStyle(context: ViewGeneratingContextContract<MemoryJsonSourceContract>, style: any, styleRefs: string[]) {
-        const element = context.element();
-        if (!element) return;
-        if (style) element.style = style;
-        if (!styleRefs) element.styleRefs = [];
-        if (typeof styleRefs === "string") element.styleRefs = [styleRefs];
-        else element.styleRefs = styleRefs;
-    }
-    getStyle(context: ViewGeneratingContextContract<MemoryJsonSourceContract>) {
-        const element = context.element();
-        const result = {
-            inline: undefined as any,
-            refs: [] as string[],
-            computed(pseudoElt?: string): any {
-                return element.style || {};
-            }
-        };
-        if (!element) return result;
-        result.inline = element.style || {};
-        result.refs = element.styleRefs || (element as any).className || [];
-        return result;
-    }
-    setTextValue(context: ViewGeneratingContextContract<MemoryJsonSourceContract>, value: string) {
-        const element = context.element();
-        if (!element) return;
-        const text: MemoryJsonSourceContract = {
-            tagName: "text",
-            parent: element,
-            props: { value },
-            handlers: {},
-            style: {},
-            styleRefs: [],
-            children: []
-        };
-        element.children = [text];
-    }
-    bindProp(context: ViewGeneratingContextContract<MemoryJsonSourceContract>, keys: BindPropKeyInfoContract) {
-    }
-    onInit(context: ViewGeneratingContextContract<MemoryJsonSourceContract>) {
-    }
-    on(context: ViewGeneratingContextContract<MemoryJsonSourceContract>, key: string, handler: (ev: any) => void) {
-        const element = context.element();
-        if (!element) return;
-        element.handlers[key] = handler;
-        return {
-            dispose() {
-                delete element.handlers[key];
-            }
-        };
-    }
-}
-
 function getHtmlGen() {
     if (!htmlGen) htmlGen = new HtmlGenerator();
     return htmlGen;
@@ -499,13 +204,15 @@ function updateContext<T = any>(h: ViewGeneratorContract<T>, bag: CreatingBagCon
     if (!bag.element) return undefined;
 
     // Control controlling logic.
-    if (typeof model.control === "function") {
+    let componentType = model.control;
+    if (typeof componentType === "string") componentType = inner.controls[componentType];
+    if (typeof componentType === "function") {
         if (appendMode) {
             if (options.parent) h.append(options.parent, bag.element);
             appendMode = false;
         }
 
-        let cc: any = bag.c = new model.control(bag.element, {
+        let cc: any = bag.c = new componentType(bag.element, {
             data: model.data,
             children: model.children,
             disposeFlagHandler(h: Function) {
@@ -725,6 +432,17 @@ export function getChildrenByTagName(model: DescriptionContract, ...key: string[
 export function getChildByTagName(model: DescriptionContract, ...key: string[]) {
     const c = getChildrenByTagName(model, ...key);
     return c && c.length ? c[0] : undefined;
+}
+
+/**
+ * Registers the component type with a specific key.
+ * @param name The key to reference in factory to the component type. It should be unique.
+ * @param component The component type.
+ */
+export function registerComponentType(name: string, component: typeof BaseComponent) {
+    if (!name) return;
+    if (component === undefined) delete inner.controls[name];
+    else inner.controls[name] = component;
 }
 
 /**
