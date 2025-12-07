@@ -212,7 +212,7 @@ namespace DeepX.MdBlogs {
             }
 
             const localeOptions = { mkt: options?.mkt };
-            let dirName = getLocaleProp(data, "dir");
+            let dirName = getLocaleProp(data, "dir", localeOptions);
             if (dirName && !dirName.endsWith("/")) dirName += "/";
             let dirName2 = data.dir;
             if (dirName2 && !dirName2.endsWith("/")) dirName2 += "/";
