@@ -28,7 +28,11 @@
         }
     ],
     "redir": {
-        "install": "installation",
-        "render": "tohtml"
+        "install": "wiki/installation",
+        "installation": "wiki/installation",
+        "anzhuang": "wiki/installation",
+        "wiki/install": "wiki/installation",
+        "render": "wiki/tohtml",
+        "wiki/render": "wiki/tohtml"
     }
 }

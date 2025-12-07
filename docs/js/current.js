@@ -127,6 +127,7 @@ var curSite = {};
     };
 
     curSite.initWiki = function (config) {
+        if (!config) config = {};
         return DeepX.MdBlogs.render("blog_content", "../articles/config.json", {
             title: true,
             banner: config.banner,

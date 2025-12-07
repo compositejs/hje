@@ -214,11 +214,15 @@ namespace DeepX.MdBlogs {
             const localeOptions = { mkt: options?.mkt };
             let dirName = getLocaleProp(data, "dir");
             if (dirName && !dirName.endsWith("/")) dirName += "/";
+            let dirName2 = data.dir;
+            if (dirName2 && !dirName2.endsWith("/")) dirName2 += "/";
             if (kind === "auto" || kind === "full") {
                 let dir = name.startsWith("/") ? "/" : "";
                 if (this._inner.year) dir += this._inner.year + "/";
+                let dir2 = dir;
                 if (dirName) dir += dirName;
-                if (isSamePath(name, data.file, dir)
+                if (dirName2) dir2 += dirName2;
+                if (isSamePath(name, data.file, dir2)
                     || isSamePath(name, getLocaleProp(data, "file", localeOptions), dir)) {
                     bind.kind = "full";
                     return true;
