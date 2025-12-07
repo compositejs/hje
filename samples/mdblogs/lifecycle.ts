@@ -15,7 +15,7 @@ namespace DeepX.MdBlogs {
                 monitor.skip = false;
                 const path = instance.select()?.getRoutePath();
                 if (!path) return;
-                history.pushState({ select: path }, "", `?${path}`);
+                history.replaceState({ select: path }, "", `?${path}`);
             },
             onselect(instance, article: ArticleInfo) {
                 if (monitor.skip) return;

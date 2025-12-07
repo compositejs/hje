@@ -31,6 +31,7 @@ namespace DeepX.MdBlogs {
             rela: undefined as Hje.RelativePathInfo,
             data: undefined as IArticleInfo,
             date: undefined as Date,
+            y: false as IArticleYearConfig,
             year: undefined as string,
             children: undefined as ArticleInfo[],
             fetch: undefined as ((url: Hje.RelativePathInfo) => Promise<string>),
@@ -52,6 +53,7 @@ namespace DeepX.MdBlogs {
             this._inner.date = toDate(data.date);
             let p = "./";
             const y = options?.year;
+            this._inner.y = y;
             if (y && this._inner.date) {
                 if (typeof y === "string") {
                     const d = this._inner.date;
@@ -164,10 +166,6 @@ namespace DeepX.MdBlogs {
 
         get location() {
             return this._inner.data.location;
-        }
-
-        get end() {
-            return this._inner.data?.end;
         }
 
         get data() {
@@ -299,33 +297,75 @@ namespace DeepX.MdBlogs {
                 : fetch(path.value).then(function (r) {
                     if (r?.ok) return r.text();
                     return r.text().then(s => {
-                        return Promise.resolve(s);
+                        return Promise.reject(new Error("fetch error\n" + s));
                     });
                 });
-            if (!result) return Promise.reject();
-            return result.then(r => {
-                if (r) r = r
-                    .replace(/\(..\/..\/..\/..\//g, "(..4./")
-                    .replace(/\(..\/..\/..\//g, "(..3./")
-                    .replace(/\(..\/..\//g, "(..2./")
-                    .replace(/\(..\//g, "(" + path.relative("../").value)
-                    .replace(/\(..4.\//g, "(" + path.relative("../../../../").value)
-                    .replace(/\(..3.\//g, "(" + path.relative("../../../").value)
-                    .replace(/\(..2.\//g, "(" + path.relative("../../").value)
-                    .replace(/\(.\//g, "(" + path.relative("./").value);
-                this._inner.content = r;
-                return r;
+            if (!result) return Promise.reject(new Error("fetch handler error"));
+            const name = this.getName(options);
+            let end2 = this._inner.data?.end;
+            const end = typeof end2 === "boolean" || typeof end2 === "string"
+                ? { end: end2 }
+                : (!end2 ? {} : end2);
+            return result.then(md => {
+                if (!md) {
+                    this._inner.content = "";
+                    return Promise.reject(new Error("empty"));
+                }
+
+                if (end.start) {
+                    let endTag = "<!-- " + (end.start === true ? "Start" : end) + " -->\n";
+                    let endIndex = md.indexOf(endTag);
+                    if (endIndex < 0) {
+                        endTag = "<!-- " + (end.start === true ? "Start" : end) + " -->\r\n";
+                        endIndex = md.indexOf(endTag);
+                    }
+
+                    if (endIndex > 1) md = md.substring(endIndex + endTag.length);
+                }
+
+                if (end.end) {
+                    let endTag = "\n<!-- " + (end.end === true ? "End" : end) + " -->";
+                    let endIndex = md.lastIndexOf(endTag);
+                    if (endIndex > 1) md = md.substring(0, endIndex);
+                }
+
+                let header1 = "# " + name + "\n";
+                if (md.startsWith(header1)) md = md.substring(header1.length);
+                header1 = "# " + name + "\r\n";
+                if (md.startsWith(header1)) md = md.substring(header1.length);
+                if (end.urls instanceof Array) {
+                    for (let i = 0; i < end.urls.length; i++) {
+                        const replaceItem = end.urls[i];
+                        if (!replaceItem?.old || typeof replaceItem.old !== "string" || typeof replaceItem.by !== "string") continue;
+                        md = md.replace(`(${replaceItem.old})`, `(${replaceItem.by})`);
+                    }
+                }
+
+                md = md
+                    .replace(/\]\(..\/..\/..\/..\//g, "](..4./")
+                    .replace(/\]\(..\/..\/..\//g, "](..3./")
+                    .replace(/\]\(..\/..\//g, "](..2./")
+                    .replace(/\]\(..\//g, "](" + path.relative("../").value)
+                    .replace(/\]\(..4.\//g, "](" + path.relative("../../../../").value)
+                    .replace(/\]\(..3.\//g, "](" + path.relative("../../../").value)
+                    .replace(/\]\(..2.\//g, "](" + path.relative("../../").value)
+                    .replace(/\]\(.\//g, "](" + path.relative("./").value);
+                this._inner.content = md;
+                return md;
             });
         }
 
         related(options?: {
             mkt?: string | boolean;
-        }): IArticleRelatedLinkItemInfo[] {
+        }): (IArticleRelatedLinkItemInfo | string)[] {
             const arr = this._inner.data?.related;
             if (!arr || arr.length < 1) return [];
             return arr.filter(function (link) {
-                return link?.name != null && !getLocaleProp<any>(link, "disable", options);
+                if (!link) return false;
+                if (typeof link === "string") return true;
+                return link.name != null && !getLocaleProp<any>(link, "disable", options);
             }).map(function (link) {
+                if (typeof link === "string") return link;
                 return {
                     name: getLocaleProp(link, null, options),
                     subtitle: getLocaleProp(link, "subtitle", options),
@@ -344,12 +384,13 @@ namespace DeepX.MdBlogs {
                 mkt: options?.mkt
             };
             const rela = this._inner.rela;
+            const y = this._inner.y;
             const fetchHandler = this._inner.fetch;
             const list = arr.map(function (blog) {
                 if (!blog || !blog.name || getLocaleProp(blog, "disable", localeOptions)) return null;
                 return new ArticleInfo(blog, {
                     rela,
-                    year: false,
+                    year: y,
                     fetch: fetchHandler,
                     authors: authors,
                 });

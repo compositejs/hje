@@ -95,12 +95,14 @@ namespace DeepX.MdBlogs {
                 if (!blog || !blog.name || getLocaleProp(blog, "disable", localeOptions)) return null;
                 return new ArticleInfo(blog, {
                     rela,
-                    year: true,
+                    year: blogInfo.year || true,
                     fetch: fetchHandler,
                     authors: authors,
                 });
             }).filter(function (blog) {
-                return blog != null && blog.dateObj != null && blog.getPath() != null;
+                if (!blog || !blog.dateObj || !blog.getPath()) return false;
+                blog.children();
+                return true;
             });
             if (!blogInfo.reverse) list.reverse();
             if (!specificMkt) this._inner.blogs = list;
@@ -150,6 +152,12 @@ namespace DeepX.MdBlogs {
                 if (isNaN(name) || name < 0) return undefined;
                 const blogs = this.blogs(options);
                 return blogs[name];
+            }
+
+            const redir = this._inner.data.redir;
+            if (redir && typeof name === "string") {
+                const name2 = redir[name];
+                if (name2 && typeof name2 === "string") name = name2;
             }
 
             let result = getArticle(this.wiki({ mkt }) as ArticleInfo[], name, options);
@@ -217,8 +225,21 @@ namespace DeepX.MdBlogs {
                 temp = article;
                 return false;
             }, undefined, options);
-
             return target;
+        }
+
+        parentArticle(current: ArticleInfo, options?: {
+            mkt?: string | boolean
+        }) {
+            const blogs = this.blogs(options);
+            for (let i = 0; i < blogs.length; i++) {
+                const item = blogs[i];
+                if (item === current) return null;
+                const test = isParent(item, current);
+                if (test) return test;
+            }
+
+            return undefined;
         }
     }
 
@@ -239,15 +260,16 @@ namespace DeepX.MdBlogs {
         let result: ArticleInfo;
         for (let i = 0; i < list.length; i++) {
             const item = list[i];
-            if (!(item instanceof ArticleInfo)) continue;
-            const children = item.children({ mkt });
             if (!item || !(item instanceof ArticleInfo)) continue
             const bind = {} as { kind: string };
             const options2 = { kind: bind, mkt };
-            if (!item.is(name, options2)) continue;
-            if (bind.kind === "id" || bind.kind === "full") return item;
-            if (result) continue;
-            result = item;
+            if (item.is(name, options2)) {
+                if (bind.kind === "id" || bind.kind === "full") return item;
+                if (result) continue;
+                result = item;
+            }
+
+            const children = item.children({ mkt });
             if (!children) continue;
             const child: ArticleInfo = getArticle(children, name, options2);
             if (!child) continue;
@@ -283,5 +305,18 @@ namespace DeepX.MdBlogs {
         }
 
         return false;
+    }
+
+    function isParent(parent: ArticleInfo, child: ArticleInfo): ArticleInfo | undefined {
+        const children = parent.children();
+        for (let i = 0; i < children.length; i++) {
+            const item = children[i];
+            if (!item) continue;
+            if (item === child) return parent;
+            const test = isParent(item, child);
+            if (test) return test;
+        }
+
+        return undefined;
     }
 }

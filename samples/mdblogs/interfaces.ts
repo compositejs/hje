@@ -1,5 +1,5 @@
 namespace DeepX.MdBlogs {
-    type IYearConfig = boolean | "y" | "year" | "m" | "month" | "d" | "date" | "day";
+    export type IArticleYearConfig = boolean | "y" | "year" | "m" | "month" | "d" | "date" | "day" | undefined;
 
     export interface IAuthorInfo {
         name: string;
@@ -49,7 +49,14 @@ namespace DeepX.MdBlogs {
             disable?: boolean;
             [property: string]: any;
         })[];
-        end?: boolean | string;
+        end?: boolean | string | {
+            start?: boolean | string;
+            end?: boolean | string;
+            urls?: {
+                old: string;
+                by: string;
+            }[];
+        };
         notes?: string[];
         children?: IArticleInfo[];
         data?: any;
@@ -64,6 +71,7 @@ namespace DeepX.MdBlogs {
         dir?: string;
         futher?: string[];
         disableMenu?: boolean;
+        year?: IArticleYearConfig & string;
         [property: string]: any;
     }
 
@@ -78,7 +86,7 @@ namespace DeepX.MdBlogs {
 
     export interface IArticleInfoOptions {
         rela: Hje.RelativePathInfo;
-        year?: IYearConfig;
+        year?: IArticleYearConfig;
         fetch?: ((url: Hje.RelativePathInfo) => Promise<string>);
         authors?: IAuthorInfo[];
     }

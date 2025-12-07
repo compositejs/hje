@@ -97,6 +97,9 @@ declare namespace DeepX.MdBlogs {
         previousArticle(current: ArticleInfo, options?: {
             mkt?: string | boolean;
         }): ArticleInfo;
+        parentArticle(current: ArticleInfo, options?: {
+            mkt?: string | boolean;
+        }): ArticleInfo;
     }
     function fetchArticles(url: string, fetchHandler?: ((url: Hje.RelativePathInfo) => Promise<string>)): Promise<Articles>;
 }
@@ -123,7 +126,6 @@ declare namespace DeepX.MdBlogs {
         };
         get dateString(): string;
         get location(): string;
-        get end(): string | boolean;
         get data(): any;
         get disableMenu(): boolean;
         getRoutePath(options?: {
@@ -142,25 +144,25 @@ declare namespace DeepX.MdBlogs {
         getContent(options: IArticleLocaleOptions): Promise<string>;
         related(options?: {
             mkt?: string | boolean;
-        }): IArticleRelatedLinkItemInfo[];
+        }): (IArticleRelatedLinkItemInfo | string)[];
         children(options?: IArticleLocaleOptions): ArticleInfo[];
         toJSON(): IArticleInfo;
         protected getDirPath(options?: ILocalePropOptions<string>): string;
     }
 }
 declare namespace DeepX.MdBlogs {
-    type IYearConfig = boolean | "y" | "year" | "m" | "month" | "d" | "date" | "day";
-    export interface IAuthorInfo {
+    type IArticleYearConfig = boolean | "y" | "year" | "m" | "month" | "d" | "date" | "day" | undefined;
+    interface IAuthorInfo {
         name: string;
         url?: string;
         email?: string;
         avatar?: string;
     }
-    export interface IArticleLocaleOptions {
+    interface IArticleLocaleOptions {
         reload?: boolean;
         mkt?: string | boolean;
     }
-    export interface IArticleRelatedLinkItemInfo {
+    interface IArticleRelatedLinkItemInfo {
         name: string;
         subtitle?: string;
         url: string | {
@@ -169,7 +171,7 @@ declare namespace DeepX.MdBlogs {
         };
         data?: any;
     }
-    export interface IArticleInfo {
+    interface IArticleInfo {
         id?: string;
         name: string;
         disable?: boolean;
@@ -195,23 +197,31 @@ declare namespace DeepX.MdBlogs {
             disable?: boolean;
             [property: string]: any;
         })[];
-        end?: boolean | string;
+        end?: boolean | string | {
+            start?: boolean | string;
+            end?: boolean | string;
+            urls?: {
+                old: string;
+                by: string;
+            }[];
+        };
         notes?: string[];
         children?: IArticleInfo[];
         data?: any;
         disableMenu?: boolean;
         [property: string]: any;
     }
-    export interface IArticleBlogsConfig {
+    interface IArticleBlogsConfig {
         name?: string;
         count?: number;
         list: IArticleInfo[];
         dir?: string;
         futher?: string[];
         disableMenu?: boolean;
+        year?: IArticleYearConfig & string;
         [property: string]: any;
     }
-    export interface IArticlesPartData {
+    interface IArticlesPartData {
         mkt?: string | boolean;
         banner?: Hje.DescriptionContract;
         supplement?: Hje.DescriptionContract;
@@ -219,13 +229,13 @@ declare namespace DeepX.MdBlogs {
         articles?: string | Articles;
         select?: string;
     }
-    export interface IArticleInfoOptions {
+    interface IArticleInfoOptions {
         rela: Hje.RelativePathInfo;
-        year?: IYearConfig;
+        year?: IArticleYearConfig;
         fetch?: ((url: Hje.RelativePathInfo) => Promise<string>);
         authors?: IAuthorInfo[];
     }
-    export interface IArticleCollection {
+    interface IArticleCollection {
         name?: string;
         home?: string;
         blog?: IArticleInfo[] | IArticleBlogsConfig;
@@ -243,22 +253,21 @@ declare namespace DeepX.MdBlogs {
         };
         [property: string]: any;
     }
-    export interface IArticlesLifecycle {
+    interface IArticlesLifecycle {
         disable?: boolean;
         oninit?(instance: ArticlesPart): void;
         onselect?(instance: ArticlesPart, article: ArticleInfo): void;
         onhome?(instance: ArticlesPart): void;
     }
-    export interface IHeadingLevelInfo {
+    interface IHeadingLevelInfo {
         level: number;
         text: string;
         scroll(): void;
     }
-    export interface ILocalePropOptions<T = any> {
+    interface ILocalePropOptions<T = any> {
         mkt?: string | boolean;
         fallback?: T;
     }
-    export {};
 }
 declare namespace DeepX.MdBlogs {
     function render(element: any, data: string | Articles, options: {
@@ -395,6 +404,7 @@ declare namespace DeepX.MdBlogs {
         select(article?: ArticleInfo | string): ArticleInfo;
         next(): ArticleInfo;
         previous(): ArticleInfo;
+        parent(): ArticleInfo;
         protected initRender(articles: Articles, select: string, lifecycle: IArticlesLifecycle): void;
         protected refreshMenu(): void;
         protected createLocaleOptions(): {

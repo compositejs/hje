@@ -1,7 +1,6 @@
 {
     "name": "Hje",
     "docs": [
-        "Install",
         {
             "name": "Installation",
             "name#zh": "安装",
@@ -11,7 +10,6 @@
             "categories": ["install", "prepare", "npm"],
             "end": true
         },
-        "Spec",
         {
             "name": "To HTML",
             "name#zh": "动态生成页面",

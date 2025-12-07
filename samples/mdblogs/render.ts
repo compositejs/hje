@@ -220,16 +220,6 @@ namespace DeepX.MdBlogs {
                     const config = self.__inner.info.blogsInfo(options);
                     article.getContent(options).then(md => {
                         const mdEle = c.element();
-                        let header1 = "# " + article.name + "\n";
-                        if (md.startsWith(header1)) md = md.substring(header1.length);
-                        header1 = "# " + article.name + "\r\n";
-                        if (md.startsWith(header1)) md = md.substring(header1.length);
-                        if (article.end) {
-                            let endTag = "\n<!-- " + (article.end === true ? "End" : article.end) + " -->";
-                            let endIndex = md.lastIndexOf(endTag);
-                            if (endIndex > 1) md = md.substring(0, endIndex);
-                        }
-
                         renderMd(c.element(), md);
                         if (article.disableMenu || config.disableMenu) return;
                         const articleContents = self.childModel("contents");
@@ -288,7 +278,9 @@ namespace DeepX.MdBlogs {
                     on: {
                         click(ev) {
                             ev.preventDefault();
-                            self.previous();
+                            if (self.previous() !== undefined) return;
+                            if (self.parent() !== undefined) return;
+                            self.home();
                         }
                     },
                     children: [
@@ -304,7 +296,9 @@ namespace DeepX.MdBlogs {
                     on: {
                         click(ev) {
                             ev.preventDefault();
-                            self.next();
+                            if (self.next() !== undefined) return;
+                            if (self.parent() !== undefined) return;
+                            self.home();
                         }
                     },
                     children: [
@@ -338,6 +332,19 @@ namespace DeepX.MdBlogs {
         previous() {
             const options = this.createLocaleOptions();
             const blog = this.__inner.info?.previousArticle(this.__inner.select, options);
+            if (blog === undefined) return blog;
+            if (blog === null) {
+                this.home();
+                return blog;
+            }
+
+            this.select(blog);
+            return blog;
+        }
+
+        parent() {
+            const options = this.createLocaleOptions();
+            const blog = this.__inner.info?.parentArticle(this.__inner.select, options);
             if (blog === undefined) return blog;
             if (blog === null) {
                 this.home();
@@ -514,11 +521,15 @@ namespace DeepX.MdBlogs {
         }
     }
 
-    function fillRelatedLinks(source: IArticleRelatedLinkItemInfo[], children: Hje.DescriptionContract[], options?: {
+    function fillRelatedLinks(source: (IArticleRelatedLinkItemInfo | string)[], children: Hje.DescriptionContract[], options?: {
         mkt?: string | boolean;
     }) {
         if (!source || !children) return;
-        source = source.filter(n => n?.name && n?.url);
+        source = source.filter(n => {
+            if (!n) return false;
+            if (typeof n === "string") return true;
+            return n.name && n.url;
+        });
         if (source.length < 1) return;
         children.push({
             tagName: "h2",
@@ -532,6 +543,15 @@ namespace DeepX.MdBlogs {
         });
         for (let i = 0; i < source.length; i++) {
             const link = source[i];
+            if (typeof link === "string") {
+                relatedItems.push({
+                    tagName: "li",
+                    styleRefs: "grouping-header",
+                    children: link
+                });
+                continue;
+            }
+
             relatedItems.push({
                 tagName: "li",
                 children: [{
