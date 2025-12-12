@@ -45,6 +45,10 @@ namespace DeepX.MdBlogs {
         path?: string | ((original: string, article: ArticleInfo) => string);
         styleRefs?: string | string[];
         click?(ev: Event, article: ArticleInfo): void;
+        render?(model: Hje.DescriptionContract, article: ArticleInfo, options: {
+            level: number;
+            mkt: string | boolean;
+        }): void;
     }
 
     export interface IArticleInfo {

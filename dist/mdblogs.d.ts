@@ -4,15 +4,8 @@ declare namespace DeepX.MdBlogs {
     };
     export function showElements(show: string[], hide: string[]): void;
     export function codeElements(element: HTMLElement): HTMLElement[];
-    export function generateMenu(params: (ArticleInfo | string)[], options: {
-        select?: ArticleInfo;
-        deep?: boolean | number;
-        mkt?: string | boolean;
-        arr?: Hje.DescriptionContract[];
-        path?: string | ((original: string, article: ArticleInfo) => string);
-        styleRefs?: string | string[];
-        click?(ev: Event, article: ArticleInfo): void;
-    }): Hje.DescriptionContract;
+    export function generateMenu(params: (ArticleInfo | string)[], options?: IArticleMenuOptions): Hje.DescriptionContract;
+    export function generateMenuPromise(articles: Promise<Articles> | string, filter: "blogs" | "blog" | "docs" | "wiki" | ((articles: Articles) => (ArticleInfo | string)[]), options?: IArticleMenuOptions): Promise<Hje.DescriptionContract>;
     export function generateMenuItem(article: ArticleInfo, level: number, path?: string | ((original: string, article: ArticleInfo) => string), click?: (ev: Event, article: ArticleInfo) => void, options?: ILocalePropOptions): Hje.DescriptionContract;
     export function generateCdnScript(name: string, ver: string, url: string, path: string): {
         tagName: string;
@@ -186,6 +179,19 @@ declare namespace DeepX.MdBlogs {
         name: string;
         disable: "label" | "header";
         [property: string]: unknown;
+    }
+    interface IArticleMenuOptions {
+        select?: ArticleInfo;
+        deep?: boolean | number;
+        mkt?: string | boolean;
+        arr?: Hje.DescriptionContract[];
+        path?: string | ((original: string, article: ArticleInfo) => string);
+        styleRefs?: string | string[];
+        click?(ev: Event, article: ArticleInfo): void;
+        render?(model: Hje.DescriptionContract, article: ArticleInfo, options: {
+            level: number;
+            mkt: string | boolean;
+        }): void;
     }
     interface IArticleInfo {
         id?: string;

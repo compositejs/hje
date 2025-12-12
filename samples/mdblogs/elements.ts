@@ -73,6 +73,10 @@ namespace DeepX.MdBlogs {
 
             const result = generateMenuItem(article, deep === -1 ? -1 : level, options.path, options.click, localeOptions);
             if (options.select === article) result.styleRefs = "state-sel";
+            if (typeof options.render === "function") options.render(result, article, {
+                level,
+                mkt: options.mkt,
+            });
             arr.push(result);
             if (level < 1) continue;
             const children = article.children(localeOptions);
@@ -81,7 +85,8 @@ namespace DeepX.MdBlogs {
                 select: options.select,
                 mkt: options.mkt,
                 path: options.path,
-                deep: level
+                deep: level,
+                render: options.render,
             });
         }
 
@@ -92,8 +97,9 @@ namespace DeepX.MdBlogs {
         };
     }
 
-    export async function generateMenuPromise(articles: Promise<Articles>, filter: "blogs" | "blog" | "docs" | "wiki" | ((articles: Articles) => (ArticleInfo | string)[]), options?: IArticleMenuOptions) {
+    export async function generateMenuPromise(articles: Promise<Articles> | string, filter: "blogs" | "blog" | "docs" | "wiki" | ((articles: Articles) => (ArticleInfo | string)[]), options?: IArticleMenuOptions) {
         if (!articles) return undefined;
+        if (typeof articles === "string") articles = fetchArticles(articles);
         const result = await articles;
         if (!result) return undefined;
         if (!options) options = {};
@@ -179,7 +185,7 @@ namespace DeepX.MdBlogs {
                 text.children.push({ tagName: "span", children: intro });
                 const publishDate = article.dateObj;
                 const dateStr = article.dateString;
-                if (dateStr) text.children.push({
+                if (dateStr) text.children.push({ tagName: "br" }, {
                     tagName: "time",
                     props: {
                         datetime: `${publishDate.year.toString(10)}-${publishDate.month.toString(10)}-${publishDate.date.toString(10)}`
