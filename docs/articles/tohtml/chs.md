@@ -1,15 +1,17 @@
-# To HTML
+# 动态生成页面
 
-You can use this to convert a JSON model to HTML view part.
+你可以将描述页面内容的 JSON 模型轻松转化为 HTML 部件。
 
-Following is a sample.
+以下是个示例。
 
 ```typescript
 import * as Hje from 'hje';
 
-let ele = document.createElement("div");
-document.body.appendChild(ele);
+// 获取或创建一个元素，用于后续渲染。
+// 本处示例为在 document.body 末尾增加了一个元素。
+const ele = Hje.appendElement(null);
 
+// 用描述性语言，在指定元素中执行渲染。
 Hje.render(ele, {
   props: {
     type: "circle",
@@ -33,4 +35,4 @@ Hje.render(ele, {
 <!-- End -->
 ---
 
-[Next](../component/)
+[Next](../zujian/)

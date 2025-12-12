@@ -1,12 +1,12 @@
 {
   "name": "hje",
-  "version": "2.3.0",
+  "version": "2.4.0",
   "description": "A javascript library to generate HTML view by JSON.",
   "main": "index.js",
   "types": "./index.d.ts",
   "scripts": {
     "build": "tsc --project ./src/ && terser ./dist/index.js --source-map \"content='./dist/index.js.map'\" --compress -o ./dist/index.js",
-    "build-mdblogs": "tsc --project ./samples/mdblogs/ && terser ./dist/mdblogs.js --source-map \"content='./dist/mdblogs.js.map'\" --compress -o ./dist/mdblogs.js",
+    "build-mdblogs": "tsc --project ./samples/mdblogs/ && terser ./dist/mdblogs.js --source-map \"content='./dist/mdblogs.js.map'\" --compress -o ./dist/mdblogs.js && node ./tools/build.js",
     "test": "node ./test/index.js"
   },
   "repository": {

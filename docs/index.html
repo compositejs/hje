@@ -19,19 +19,19 @@
         let ww = DeepX.MdBlogs.getLocaleString("name") !== "名称";
         curSite.listModel(ww ? [{
             name: "To HTML",
-            url: "./articles/?wiki/tohtml",
+            url: "./articles/?tohtml",
             desc: "Convert the description model to DOMs with interactive."
         }, {
             name: "Component",
-            url: "./articles/?wiki/component",
+            url: "./articles/?component",
             desc: "Build reusable rich component."
         }] : [{
             name: "动态生成页面",
-            url: "./articles/?wiki/yemian",
+            url: "./articles/?tohtml",
             desc: "通过 JS 友好的描述模型，生成具有交互能力的 DOM。"
         }, {
             name: "组件",
-            url: "./articles/?wiki/zujian",
+            url: "./articles/?component",
             desc: "创建可复用的富交互组件。"
         }], "part-features");
         if (ww) return;
@@ -89,13 +89,13 @@
         </section>
         <h2 id="title-features">Features</h2>
         <section id="part-features" class="x-part-features">
-            <a class="link-long-button" href="./articles/?wiki/tohtml" >
+            <a class="link-long-button" href="./articles/?tohtml" >
                 <span>To HTML</span><br />
                 <span>
                     <span>Convert the description in JSON to DOMs.</span>
                 </span>
             </a>
-            <a class="link-long-button" href="./articles/?wiki/component" >
+            <a class="link-long-button" href="./articles/?component" >
                 <span>Component</span><br />
                 <span>
                     <span>Build reusable rich component.</span>

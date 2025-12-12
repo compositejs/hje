@@ -6,8 +6,6 @@ namespace DeepX.MdBlogs {
             mkt?: string | boolean;
             lifecycle?: IArticlesLifecycle;
             title?: string;
-            banner?: Hje.DescriptionContract;
-            supplement?: Hje.DescriptionContract;
         };
 
         constructor(element: any, options?: Hje.ComponentOptionsContract<IArticlesPartData>) {
@@ -43,8 +41,6 @@ namespace DeepX.MdBlogs {
             };
             this.refreshChild();
             if (!options?.data) return;
-            this.__inner.banner = options.data.banner;
-            this.__inner.supplement = options.data.supplement;
             const lifecycle: IArticlesLifecycle = options.data.lifecycle || { disable: true };
             this.__inner.lifecycle = lifecycle;
             if (typeof options.data.articles === "string") {
@@ -61,22 +57,22 @@ namespace DeepX.MdBlogs {
         }
 
         set title(value: string) {
-            const m = super.childModel("title");
             this.__inner.title = value;
             const self = this;
-            m.children = [{
-                tagName: "a",
-                props: { href: "./" },
-                on: {
-                    click(ev: Event) {
-                        ev.preventDefault();
-                        self.home();
-                    }
-                },
-                children: value
-            }];
-            m.style = value ? {} : { display: "none" };
-            super.refreshChild("title");
+            super.childModel("title", {
+                children: [{
+                    tagName: "a",
+                    props: { href: "./" },
+                    on: {
+                        click(ev: Event) {
+                            ev.preventDefault();
+                            self.home();
+                        }
+                    },
+                    children: value
+                }],
+                style: value ? {} : { display: "none" }
+            })
         }
 
         get mkt() {
@@ -97,7 +93,8 @@ namespace DeepX.MdBlogs {
                 tagName: "h1",
                 children: this.__inner.info.getName(options)
             });
-            if (this.__inner.banner) children.push(this.__inner.banner);
+            const data: IArticlesPartData = this.data || {};
+            if (data.banner) children.push(data.banner);
             const part = this.__inner.info.home(options);
             if (part) children.push({
                 tagName: "main",
@@ -121,14 +118,18 @@ namespace DeepX.MdBlogs {
                     children: menu
                 }]
             });
-            if (this.__inner.supplement) children.push(this.__inner.supplement);
-            super.childModel("content", { children });
-            super.refreshChild("content");
-            const articleContents = this.childModel("contents");
-            articleContents.children = [];
-            articleContents.style = { display: "none" };
-            super.refreshChild("contents");
+            if (data.supplement) children.push(data.supplement);
+            const model = super.childModel("content", { children });
+            super.childModel("contents", {
+                children: [],
+                style: { display: "none" }
+            });
             scrollToTop();
+            if (typeof data.onselect === "function") data.onhome({
+                model,
+                mkt: options?.mkt,
+                store: data.store
+            });
             this.refreshMenu();
             if (!already) this.lifecycle()?.onhome?.(this);
         }
@@ -158,59 +159,95 @@ namespace DeepX.MdBlogs {
             if (!article || this.__inner.select === article) return this.__inner.select;
             const children: Hje.DescriptionContract[] = [];
             const self = this;
+            const title = article.getName(options);
+            let banner = article.bannerImage;
+            banner = typeof banner === "string" ? { url: banner } : banner;
+            if (banner?.url) {
+                const bannerStyle: {
+                    objectFit?: "cover" | "contain";
+                    maxHeight?: string;
+                    width?: string;
+                } = {};
+                if (banner.maxHeight && typeof banner.maxHeight === "number")
+                    bannerStyle.maxHeight = `${banner.maxHeight.toString(10)}px`;
+                if (banner.cover) {
+                    bannerStyle.objectFit = "cover";
+                    bannerStyle.width = "100%";
+                }
+
+                children.push({
+                    tagName: "section",
+                    styleRefs: "x-part-blog-note",
+                    children: [{
+                        tagName: "div",
+                        styleRefs: "x-part-blog-banner",
+                        children: [{
+                            tagName: "img",
+                            props: {
+                                alt: banner.name || title,
+                                src: banner.url
+                            },
+                            style: bannerStyle
+                        }]
+                    }]
+                });
+            }
+
             children.push({
                 tagName: "h1",
-                children: article.getName(options)
+                children: title
             });
-            const infoChildren: Hje.DescriptionContract[] = [];
-            const author = article.author;
-            if (author) {
-                for (let i = 0; i < author.length; i++) {
-                    const authorItem = author[i];
-                    infoChildren.push(authorItem.url ? {
-                        tagName: "a",
-                        props: { href: authorItem.url },
-                        children: authorItem.name
-                    } : {
-                        tagName: "span",
-                        children: authorItem.name
-                    });
-                }
-            }
-
-            const publishDate = article.dateObj;
-            if (publishDate) {
-                let dateStr = article.dateString || publishDate.year.toString(10);
-                if (article.location) dateStr += " " + article.location;
-                infoChildren.push({
-                    tagName: "time",
-                    props: {
-                        datetime: `${publishDate.year.toString(10)}-${publishDate.month.toString(10)}-${publishDate.date.toString(10)}`
-                    },
-                    children: dateStr
-                })
-            }
-
-            const keywords = article.keywords;
-            const mkt = options?.mkt;
-            if (keywords instanceof Array) {
-                for (let i = 0; i < keywords.length; i++) {
-                    let keyword = keywords[i];
-                    if (!keyword) continue;
-                    if (typeof keyword !== "string") {
-                        keyword = getLocaleProp(keyword, null, options) as string || keyword.value;
-                    }
-
-                    if (!keyword) continue;
-                    infoChildren.push({ tagName: "span", children: keyword });
-                }
-            }
-
-            if (infoChildren.length > 0) children.push({
+            const infoModel = {
                 tagName: "section",
                 styleRefs: "x-part-blog-note",
-                children: infoChildren
+                children: [] as Hje.DescriptionContract[]
+            };
+            const subtitle = article.getSubtitle(options);
+            if (subtitle) infoModel.children.push({
+                tagName: "div",
+                styleRefs: "x-part-blog-subtitle",
+                children: [{
+                    tagName: "strong",
+                    children: subtitle
+                }]
             });
+            const disableAuthors = article.disableAuthors || this.__inner.info.blogsInfo(options).disableAuthors;
+            if (!disableAuthors) {
+                let infoChildren = getMembersModel(toMembers(article.authors?.priorityList()), null, options);
+                if (infoChildren.length > 0) infoModel.children.push({
+                    tagName: "div",
+                    styleRefs: "x-part-blog-authors",
+                    children: infoChildren
+                });
+
+                const publishDate = article.dateObj;
+                if (publishDate) {
+                    const dateArr: Hje.DescriptionContract[] = [{
+                        tagName: "time",
+                        props: {
+                            datetime: `${publishDate.year.toString(10)}-${publishDate.month.toString(10)}-${publishDate.date.toString(10)}`
+                        },
+                        children: article.dateString || publishDate.year.toString(10)
+                    }];
+                    if (article.location) dateArr.push({
+                        tagName: "span",
+                        children: article.location
+                    });
+                    if (infoChildren.length === 1) {
+                        infoChildren.push(dateArr[0]);
+                        if (dateArr.length > 1) infoChildren.push(dateArr[1]);
+                    } else {
+                        infoModel.children.push({
+                            tagName: "div",
+                            styleRefs: "x-part-blog-date",
+                            children: dateArr
+                        })
+                    }
+                }
+            }
+
+            if (infoModel.children.length > 0) children.push(infoModel);
+            const mkt = options?.mkt;
             children.push({
                 tagName: "main",
                 children: [
@@ -220,46 +257,23 @@ namespace DeepX.MdBlogs {
                     const config = self.__inner.info.blogsInfo(options);
                     article.getContent(options).then(md => {
                         const mdEle = c.element();
-                        renderMd(c.element(), md);
+                        renderMd(mdEle, md);
                         if (article.disableMenu || config.disableMenu) return;
-                        const articleContents = self.childModel("contents");
-                        articleContents.children = [];
-                        let headers = getHeadings(mdEle);
-                        let levels = getHeadingLevels(headers);
-                        if (!headers || headers.length < 2 || levels.length < 1) return;
-                        articleContents.children.push({
-                            tagName: "li",
-                            children: [{
-                                tagName: "a",
-                                props: { href: "javascript:void(0)" },
-                                on: {
-                                    click(ev: Event) {
-                                        scrollToTop();
-                                    }
-                                },
-                                children: "⇮ " + getLocaleString("top", mkt)
-                            }]
+                        const model = self.childModel("contents", getContentsModel(mdEle, mkt));
+                        const data: IArticlesPartData = self.data || {};
+                        if (typeof data.onselect === "function") data.onselect({
+                            model,
+                            article,
+                            mkt,
+                            store: data.store
                         });
-                        if (levels.length == 1) levels.push(levels[0] + 1);
-                        for (let i = 0; i < headers.length; i++) {
-                            let item = headers[i];
-                            switch (item.level) {
-                                case levels[0]:
-                                    articleContents.children.push(genHeadModel(item));
-                                    break;
-                                case levels[1]:
-                                    articleContents.children.push(genHeadModel(item, true));
-                                    break;
-                            }
-                        }
-
-                        articleContents.style = {};
-                        self.refreshChild("contents");
                     });
                 }
             });
             const related: Hje.DescriptionContract[] = [];
             fillParagraph(article.getNotes(options), related);
+            fillKeywords(article.keywords, related, options);
+            if (!disableAuthors) fillContributors(article.authors, related, options);
             fillRelatedLinks(article.related(options), related, options);
             if (related.length > 0) children.push({
                 tagName: "section",
@@ -308,7 +322,6 @@ namespace DeepX.MdBlogs {
                 }]
             });
             super.childModel("content", { children });
-            super.refreshChild("content");
             this.__inner.select = article;
             this.refreshMenu();
             scrollToTop();
@@ -358,9 +371,9 @@ namespace DeepX.MdBlogs {
         protected initRender(articles: Articles, select: string, lifecycle: IArticlesLifecycle) {
             if (this.__inner.info === articles || !articles) return;
             this.__inner.info = articles;
-            this.title = articles.name;
             const options = this.createLocaleOptions();
-            const m = super.childModel("menu");
+            this.title = articles.getName(options);
+            const m: Hje.DescriptionContract = {};
             let arr = m.children;
             if (!(arr instanceof Array)) {
                 arr = [];
@@ -370,7 +383,7 @@ namespace DeepX.MdBlogs {
             this.genMenu(arr, articles.wiki(options), true);
             this.genMenu(arr, articles.blogs(options), false);
             m.style = arr.length > 0 ? {} : { display: "none" };
-            super.refreshChild("menu");
+            super.childModel("menu", m);
             let article: ArticleInfo;
             if (select) article = this.select(select);
             if (!article) this.home();
@@ -506,17 +519,152 @@ namespace DeepX.MdBlogs {
         return list;
     }
 
+    function getContentsModel(mdEle: HTMLElement, mkt?: string | boolean) {
+        const articleContents: Hje.DescriptionContract = {};
+        articleContents.children = [];
+        let headers = getHeadings(mdEle);
+        let levels = getHeadingLevels(headers);
+        if (!headers || headers.length < 2 || levels.length < 1) return articleContents;
+        articleContents.children.push({
+            tagName: "li",
+            children: [{
+                tagName: "a",
+                props: { href: "javascript:void(0)" },
+                on: {
+                    click(ev: Event) {
+                        scrollToTop();
+                    }
+                },
+                children: "⇮ " + getLocaleString("top", mkt)
+            }]
+        });
+        if (levels.length == 1) levels.push(levels[0] + 1);
+        for (let i = 0; i < headers.length; i++) {
+            let item = headers[i];
+            switch (item.level) {
+                case levels[0]:
+                    articleContents.children.push(genHeadModel(item));
+                    break;
+                case levels[1]:
+                    articleContents.children.push(genHeadModel(item, true));
+                    break;
+            }
+        }
+
+        articleContents.style = {};
+        return articleContents;
+    }
+
+    function getMembersModel(authors: IContributorInfo[], role: NameValueModel | null, options?: {
+        mkt?: string | boolean;
+    }) {
+        let arr: Hje.DescriptionContract[] = [];
+        if (!authors) return arr;
+        const roleName = role?.getName(options);
+        if (roleName) arr.push({
+            tagName: "strong",
+            children: roleName
+        });
+        for (let i = 0; i < authors.length; i++) {
+            const authorItem = authors[i];
+            if (!authorItem) continue;
+            let email = authorItem.email;
+            const atPos = email && typeof email === "string" ? email.indexOf("@") : -1;
+            if (atPos < 1) email = undefined;
+            let authorName = getLocaleProp(authorItem, null, options);
+            if (!authorName) {
+                if (!email) continue;
+                authorName = email.substring(0, atPos);
+            }
+
+            let link = authorItem.url;
+            if (!link && email) link = `mailto:${email}`;
+            arr.push(link ? {
+                tagName: "a",
+                props: { href: link, target: "_blank" },
+                children: authorName
+            } : {
+                tagName: "span",
+                children: authorName
+            });
+        }
+
+        if (roleName && arr.length === 1) arr.pop();
+        return arr;
+    }
+
     function fillParagraph(lines: string[], children: Hje.DescriptionContract[]) {
         if (!lines || !children) return;
-        lines = lines.filter(n => n) || [];
         for (let i = 0; i < lines.length; i++) {
             const note = lines[i];
+            if (!note) continue;
+            if (note.startsWith("![img]\n")) {
+                const records = note.split("\n");
+                children.push({
+                    tagName: "p",
+                    children: [{
+                        tagName: "img",
+                        props: {
+                            src: records[1],
+                            alt: records.length > 2 ? records[2] : ""
+                        }
+                    }]
+                });
+                continue;
+            }
+
             children.push({
                 tagName: "p",
                 children: [{
                     tagName: "span",
                     children: note
                 }]
+            });
+        }
+    }
+
+    function fillKeywords(keywords: NameValueModel[], children: Hje.DescriptionContract[], options?: {
+        mkt?: string | boolean;
+    }) {
+        const arr: Hje.DescriptionContract[] = [];
+        if (keywords instanceof Array) {
+            for (let i = 0; i < keywords.length; i++) {
+                let keyword = keywords[i];
+                if (!keyword) continue;
+                arr.push({ tagName: "span", children: keyword.getName(options) });
+            }
+        }
+
+        if (arr.length > 0) children.push({
+            tagName: "h2",
+            children: getLocaleString("keywords")
+        }, {
+            tagName: "div",
+            styleRefs: "x-part-blog-keywords",
+            children: arr
+        });
+        return arr;
+    }
+
+    function fillContributors(source: ContributorCollection, children: Hje.DescriptionContract[], options?: {
+        mkt?: string | boolean;
+    }) {
+        const contributors = source?.all();
+        if (!contributors || contributors.length < 1) return;
+        if (contributors.length === 1 && contributors[0].role?.value === "author") return;
+        children.push({
+            tagName: "h2",
+            children: getLocaleString("contentCreator")
+        });
+        for (let i = 0; i < contributors.length; i++) {
+            const list = contributors[i];
+            if (!list?.role?.name) continue;
+            const members = getMembersModel(list.members, list.role, options);
+            if (members.length < 1) continue;
+            children.push({
+                tagName: "div",
+                styleRefs: "x-part-blog-authors",
+                children: members
             });
         }
     }
@@ -541,15 +689,21 @@ namespace DeepX.MdBlogs {
             styleRefs: "link-tile-compact",
             children: relatedItems
         });
+        let label: string;
         for (let i = 0; i < source.length; i++) {
             const link = source[i];
             if (typeof link === "string") {
+                label = link;
+                continue;
+            }
+
+            if (label) {
                 relatedItems.push({
                     tagName: "li",
                     styleRefs: "grouping-header",
-                    children: link
+                    children: label
                 });
-                continue;
+                label = undefined;
             }
 
             relatedItems.push({

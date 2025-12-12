@@ -32,15 +32,7 @@ namespace DeepX.MdBlogs {
         return arr;
     }
 
-    export function generateMenu(params: (ArticleInfo | string)[], options: {
-        select?: ArticleInfo;
-        deep?: boolean | number;
-        mkt?: string | boolean;
-        arr?: Hje.DescriptionContract[];
-        path?: string | ((original: string, article: ArticleInfo) => string);
-        styleRefs?: string | string[];
-        click?(ev: Event, article: ArticleInfo): void;
-    }): Hje.DescriptionContract {
+    export function generateMenu(params: (ArticleInfo | string)[], options?: IArticleMenuOptions): Hje.DescriptionContract {
         if (!options) options = {};
         if (!params || params.length < 1) return {
             tagName: "ul",
@@ -50,16 +42,22 @@ namespace DeepX.MdBlogs {
         const deep = options.deep;
         const localeOptions = options.mkt != null ? { mkt: options.mkt } : undefined;
         const level = deep === true ? 1 : (typeof deep === "number" && deep >= 0 ? (deep + 1) : 0);
-        let group = undefined;
+        let group: number | string = undefined;
+        let label: string;
         for (let i = 0; i < params.length; i++) {
             const article = params[i];
             if (typeof article === "string") {
+                label = article;
+                continue;
+            }
+
+            if (label) {
                 arr.push({
                     tagName: "li",
                     styleRefs: "grouping-header",
-                    children: article
+                    children: label
                 });
-                continue;
+                label = undefined;
             }
 
             if (!article || !article.name || !(article instanceof ArticleInfo)) continue;
@@ -92,6 +90,30 @@ namespace DeepX.MdBlogs {
             styleRefs: options.styleRefs,
             children: arr
         };
+    }
+
+    export async function generateMenuPromise(articles: Promise<Articles>, filter: "blogs" | "blog" | "docs" | "wiki" | ((articles: Articles) => (ArticleInfo | string)[]), options?: IArticleMenuOptions) {
+        if (!articles) return undefined;
+        const result = await articles;
+        if (!result) return undefined;
+        if (!options) options = {};
+        let arr: (string | ArticleInfo)[];
+        if (!filter) {
+            arr = [
+                ...result.wiki({ mkt: options.mkt }),
+                ...result.blogs({ mkt: options.mkt })
+            ];
+        } else if (typeof filter === "function") {
+            arr = filter(result);
+        } else if (filter === "blogs" || filter === "blog") {
+            arr = result.blogs({ mkt: options.mkt });
+        } else if (filter === "docs" || filter === "wiki") {
+            arr = result.wiki({ mkt: options.mkt });
+        } else {
+            return undefined;
+        }
+
+        return generateMenu(arr, options);
     }
 
     export function generateMenuItem(article: ArticleInfo, level: number, path?: string | ((original: string, article: ArticleInfo) => string), click?: (ev: Event, article: ArticleInfo) => void, options?: ILocalePropOptions) {

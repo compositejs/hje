@@ -1,11 +1,19 @@
 namespace DeepX.MdBlogs {
     export type IArticleYearConfig = boolean | "y" | "year" | "m" | "month" | "d" | "date" | "day" | undefined;
+    export type INameValueModelValue = (INameValueModel | string)[];
+    export type INameValueModelDefinitions = INameValueModel[] | Record<string, INameValueModel | string | boolean>;
+    export type IContributorsInfo = string | (string | IContributorInfo)[] | Record<string, string | (string | IContributorInfo)[]>;
 
-    export interface IAuthorInfo {
+    export interface IContributorInfo {
         name: string;
         url?: string;
         email?: string;
         avatar?: string;
+    }
+
+    export interface IRoleContributorInfo {
+        role: NameValueModel;
+        members: IContributorInfo[];
     }
 
     export interface IArticleLocaleOptions {
@@ -23,6 +31,22 @@ namespace DeepX.MdBlogs {
         data?: any;
     }
 
+    export interface IArticleLabelInfo {
+        name: string;
+        disable: "label" | "header";
+        [property: string]: unknown;
+    }
+
+    export interface IArticleMenuOptions {
+        select?: ArticleInfo;
+        deep?: boolean | number;
+        mkt?: string | boolean;
+        arr?: Hje.DescriptionContract[];
+        path?: string | ((original: string, article: ArticleInfo) => string);
+        styleRefs?: string | string[];
+        click?(ev: Event, article: ArticleInfo): void;
+    }
+
     export interface IArticleInfo {
         id?: string;
         name: string;
@@ -37,18 +61,14 @@ namespace DeepX.MdBlogs {
         };
         dir?: string;
         file?: string | boolean;
-        keywords?: (string | {
-            name?: string;
-            value: string;
-            [property: string]: unknown;
-        })[];
+        keywords?: INameValueModelValue;
         date?: string;
-        author?: string | IAuthorInfo | (string | IAuthorInfo)[];
+        author?: IContributorsInfo;
         location?: string;
         related?: (IArticleRelatedLinkItemInfo | {
             disable?: boolean;
             [property: string]: any;
-        })[];
+        } | IArticleLabelInfo | string)[];
         end?: boolean | string | {
             start?: boolean | string;
             end?: boolean | string;
@@ -60,7 +80,16 @@ namespace DeepX.MdBlogs {
         notes?: string[];
         children?: IArticleInfo[];
         data?: any;
-        disableMenu?: boolean;
+        options?: {
+            disableMenu?: boolean;
+            disableAuthors?: boolean;
+            banner: string | {
+                name?: string;
+                url: string;
+                maxHeight?: number;
+                cover?: boolean;
+            }
+        };
         [property: string]: any;
     }
 
@@ -71,6 +100,7 @@ namespace DeepX.MdBlogs {
         dir?: string;
         futher?: string[];
         disableMenu?: boolean;
+        disableAuthors?: boolean;
         year?: IArticleYearConfig & string;
         [property: string]: any;
     }
@@ -82,31 +112,47 @@ namespace DeepX.MdBlogs {
         lifecycle?: IArticlesLifecycle;
         articles?: string | Articles;
         select?: string;
+        store?: any;
+        onselect(ev: {
+            model: Hje.DescriptionContract;
+            article: ArticleInfo;
+            mkt: string | boolean | undefined;
+            store: any;
+        }): void;
+        onhome(ev: {
+            model: Hje.DescriptionContract;
+            mkt: string | boolean | undefined;
+            store: any;
+        }): void;
     }
 
     export interface IArticleInfoOptions {
         rela: Hje.RelativePathInfo;
         year?: IArticleYearConfig;
         fetch?: ((url: Hje.RelativePathInfo) => Promise<string>);
-        authors?: IAuthorInfo[];
+        definitions?: IArticlesDefinitions;
+    }
+
+    export interface IArticlesDefinitions {
+        keywords?: INameValueModelDefinitions;
+        roles?: INameValueModelDefinitions;
+        contributors?: IContributorInfo[];
+        [property: string]: any;
     }
 
     export interface IArticleCollection {
         name?: string;
         home?: string;
         blog?: IArticleInfo[] | IArticleBlogsConfig;
-        docs?: (IArticleInfo | string | {
-            name: string;
-            disable: "label" | "header";
-            [property: string]: unknown;
-        })[];
-        authors?: IAuthorInfo[];
+        docs?: (IArticleInfo | IArticleLabelInfo | string)[];
+        hiddenArticles?: IArticleInfo[];
         redir?: {
             [alias: string]: string;
         };
         config?: {
             disableName?: boolean;
         };
+        "$defs"?: IArticlesDefinitions;
         [property: string]: any;
     }
 
@@ -121,6 +167,12 @@ namespace DeepX.MdBlogs {
         level: number;
         text: string;
         scroll(): void;
+    }
+
+    export interface INameValueModel {
+        name?: string;
+        value: string;
+        [property: string]: any;
     }
 
     export interface ILocalePropOptions<T = any> {

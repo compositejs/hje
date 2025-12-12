@@ -1,6 +1,10 @@
 namespace DeepX.MdBlogs {
     const en = {
         name: "Name",
+        publisher: "Publisher",
+        author: "Author",
+        dev: "Developer",
+        contentCreator: "Content creator",
         refresh: "Refresh",
         keywords: "Keywords",
         status: "Status",
@@ -92,12 +96,18 @@ namespace DeepX.MdBlogs {
         relatedLinks: "Related links",
         xp: "Experience",
         experience: "Experience",
+        page: "Page",
         more: "More…",
+        details: "Details",
         getDetails: "Get details"
     };
-    
+
     const hans: Record<keyof typeof en, string> = {
         name: "名称",
+        publisher: "发行商",
+        author: "作者",
+        dev: "研发",
+        contentCreator: "内容创作者",
         refresh: "刷新",
         keywords: "关键词",
         status: "状态",
@@ -189,7 +199,9 @@ namespace DeepX.MdBlogs {
         relatedLinks: "相关链接",
         xp: "体验",
         experience: "经历",
+        page: "页面",
         more: "更多…",
+        details: "详情",
         getDetails: "获取详情"
     };
 

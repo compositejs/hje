@@ -689,11 +689,72 @@ div.placeholder-after-loading:first-child > span::after {
     cursor: default;
     user-select: none;
 }
-#blog_content > article > h1 + section.x-part-blog-note > a + time::before,
-#blog_content > article > h1 + section.x-part-blog-note > span + time::before,
-#blog_content > article > h1 + section.x-part-blog-note > time + span::before,
-#blog_content > article > h1 + section.x-part-blog-note > span + span::before {
+#blog_content > article > section.x-part-blog-note > div > img,
+#blog_content > article > section.x-part-blog-related > p > img {
+    max-width: 100%;
+    object-position: left top;
+}
+#blog_content > article > h1 + section.x-part-blog-note > div + div {
+    margin-top: 10px;
+}
+#blog_content > article > h1 + section.x-part-blog-note > div.x-part-blog-subtitle > strong:first-child {
+    color: #DDD;
+    font-size: 20px;
+    font-weight: normal;
+}
+#blog_content > article > h1 + section.x-part-blog-note > div.x-part-blog-subtitle > strong:first-child:before {
+    color: #808080;
+    content: "—— ";
+    font-weight: normal;
+}
+#blog_content > article > section > div.x-part-blog-authors > a,
+#blog_content > article > section > div.x-part-blog-authors > span {
+    line-height: 20px;
+    background-color: rgba(128, 128, 128, 0.2);
+    padding: 2px 8px;
+    margin: 0 2px 0 0;
+    border-radius: 12px;
+    user-select: text;
+}
+#blog_content > article > section > div.x-part-blog-authors > span {
+    color: #DDD;
+}
+#blog_content > article > section > div.x-part-blog-authors > time,
+#blog_content > article > section > div.x-part-blog-authors > time + span {
+    color: #808080;
+    line-height: 20px;
+    background-color: transparent;
+    padding: 2px 0;
+    margin: 0 0px 0 16px;
+    user-select: none;
+}
+#blog_content > article > section > div.x-part-blog-authors > strong:first-child {
+    color: #808080;
+    font-weight: normal;
+    line-height: 20px;
+    padding: 2px 0;
+    margin: 0 20px 0 0;
+    user-select: none;
+}
+#blog_content > article > section.x-part-blog-related > div.x-part-blog-authors {
+    margin: 10px 0;
+}
+#blog_content > article > section.x-part-blog-note > div.x-part-blog-date > time + span {
+    margin-left: 16px;
+}
+#blog_content > article > h1 + section.x-part-blog-note > div.x-part-blog-keywords > a + a::before,
+#blog_content > article > h1 + section.x-part-blog-note > div.x-part-blog-keywords > a + span::before,
+#blog_content > article > h1 + section.x-part-blog-note > div.x-part-blog-keywords > span + a::before,
+#blog_content > article > h1 + section.x-part-blog-note > div.x-part-blog-keywords > span + span::before,
+#blog_content > article > section.x-part-blog-related > div.x-part-blog-keywords > a + a::before,
+#blog_content > article > section.x-part-blog-related > div.x-part-blog-keywords > a + span::before,
+#blog_content > article > section.x-part-blog-related > div.x-part-blog-keywords > span + a::before,
+#blog_content > article > section.x-part-blog-related > div.x-part-blog-keywords > span + span::before {
     content: "  ·  ";
+    color: #808080;
+}
+#blog_content > article > section.x-part-blog-related > div.x-part-blog-keywords {
+    margin: 10px 0;
 }
 #blog_content > article > section.x-part-blog-related {
     margin-top: 20px;

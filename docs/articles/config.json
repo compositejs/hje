@@ -4,35 +4,43 @@
         {
             "name": "Installation",
             "name#zh": "安装",
-            "dir": "wiki/installation",
-            "dir#zh": "wiki/anzhuang",
-            "file": true,
-            "categories": ["install", "prepare", "npm"],
+            "dir": "installation",
+            "file#zh": "chs.md",
+            "keywords": ["install", "prepare", "npm"],
             "end": true
         },
         {
             "name": "To HTML",
             "name#zh": "动态生成页面",
-            "dir": "wiki/tohtml",
-            "dir#zh": "wiki/yemian",
-            "file": true,
+            "dir": "tohtml",
+            "file#zh": "chs.md",
             "end": true
         },
         {
             "name": "Component",
             "name#zh": "组件",
-            "dir": "wiki/component",
-            "dir#zh": "wiki/zujian",
-            "file": true,
+            "dir": "component",
+            "file#zh": "chs.md",
             "end": true
         }
     ],
+    "$defs": {
+        "contributors": [
+            { "name": "Kingcean Tuan", "url": "https://kingcean.org" }
+        ],
+        "keywords": [
+            { "name": "Installation", "name#zh": "安装", "value": "install" },
+            { "name": "Prepare", "name#zh": "准备", "value": "prepare" },
+            { "name": "NPM", "value": "npm" }
+        ]
+    },
     "redir": {
-        "install": "wiki/installation",
-        "installation": "wiki/installation",
-        "anzhuang": "wiki/installation",
-        "wiki/install": "wiki/installation",
-        "render": "wiki/tohtml",
-        "wiki/render": "wiki/tohtml"
+        "install": "installation",
+        "anzhuang": "installation",
+        "setup": "installation",
+        "render": "tohtml",
+        "yemian": "tohtml",
+        "xuanran": "tohtml",
+        "zujian": "component"
     }
 }

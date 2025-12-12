@@ -40,4 +40,16 @@ namespace Hje {
 
         return arr ? [line] : line;
     }
+
+    /**
+     * Appends an element to a specific parent element.
+     * @param parent The parent to append child.
+     * @param tag The element tag.
+     * @returns The element created to append.
+     */
+    export function appendChild(parent: HTMLElement | null, tag?: string) {
+        const ele = document.createElement(tag || "div");
+        (parent || document.body).appendChild(ele);
+        return ele;
+    }
 }

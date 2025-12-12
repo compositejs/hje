@@ -11,6 +11,8 @@ export class BaseComponent {
         disposable: new DisposableArray(),
         isDisposed: false,
         data: undefined as any,
+        refreshKeys: [] as string[],
+        refreshToken: undefined as number,
     };
     private _context: ViewGeneratingContextContract<any>;
 
@@ -80,20 +82,27 @@ export class BaseComponent {
      * @param value The optional view model to override by setting its properties. The original reference will not replace but keep.
      * @param clearOriginal true if clear all properties of the original view model before set; otherwise, false.
      */
-    protected childModel(key: string, value?: any, clearOriginal?: boolean) {
+    protected childModel(key: string, value?: DescriptionContract, clearOriginal?: boolean) {
         const context = this._context.childContext(key);
         if (!context) return undefined;
         const m = context.model();
         if (arguments.length < 2 || !m) return m;
-        if (!clearOriginal) for (const key in m) {
-            delete (m as any)[key];
+        let change = false;
+        if (!clearOriginal) {
+            change = true;
+            for (const key in m) {
+                delete (m as any)[key];
+            }
+
+            this.refreshChild(key, true);
         }
 
         if (!value) return undefined;
         for (const key in value) {
-            (m as any)[key] = value[key];
+            (m as any)[key] = (value as any)[key];
         }
 
+        if (!change) this.refreshChild(key, true);
         return value;
     }
 
@@ -117,11 +126,38 @@ export class BaseComponent {
      * @param key The child key; or null for updating the current component.
      * @param handler An optional handler to process before refreshing.
      */
-    protected refreshChild(key?: string, handler?: (context: ViewGeneratingContextContract<any>) => void) {
+    protected refreshChild(key?: string | boolean, handler?: ((context: ViewGeneratingContextContract<any>) => void) | boolean) {
+        if (typeof key === "boolean") {
+            if (!key) return;
+            this._inner.refreshToken = undefined;
+            const keys2 = this._inner.refreshKeys;
+            if (keys2.length < 1) return;
+            this._inner.refreshKeys = [];
+            for (let i = 0; i < keys2.length; i++) {
+                const key2 = keys2[i];
+                const context2 = this._context.childContext(key2);
+                if (context2) context2.refresh();
+            }
+
+            return;
+        }
+
         const context = this._context.childContext(key);
         if (!context) return;
-        if (typeof handler === "function") handler(context);
-        context.refresh();
+        const keys = this._inner.refreshKeys;
+        if (keys.indexOf(key) < 0) keys.push(key);
+        if (typeof handler === "function") {
+            handler(context);
+            this.refreshChild(true);
+        } else if (handler === false) {
+        } else if (handler === true) {
+            if (this._inner.refreshToken) return;
+            this._inner.refreshToken = setTimeout(() => {
+                this.refreshChild(true);
+            });
+        } else {
+            this.refreshChild(true);
+        }
     }
 
     /**

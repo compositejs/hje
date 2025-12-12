@@ -8,6 +8,7 @@ namespace DeepX.MdBlogs {
             fetch?: (url: Hje.RelativePathInfo) => Promise<string>;
             blogs?: ArticleInfo[];
             docs?: (ArticleInfo | string)[];
+            hidden?: ArticleInfo[];
             home?: ArticleInfo;
         };
 
@@ -51,11 +52,11 @@ namespace DeepX.MdBlogs {
         blogsInfo(options?: {
             mkt?: string | boolean;
         }) {
-            const { count, disableMenu } = this._inner.blogConfig;
+            const { count, disableMenu, disableAuthors } = this._inner.blogConfig;
             const name = getLocaleProp(this._inner.blogConfig, null, options) || getLocaleProp(this._inner.data, null, options);
             const dir = getLocaleProp(this._inner.blogConfig, "dir");
             const further = getLocaleProp(this._inner.blogConfig, "further");
-            return { name, count, dir, further, disableMenu };
+            return { name, count, dir, further, disableMenu, disableAuthors };
         }
 
         getName(options?: ILocalePropOptions) {
@@ -90,14 +91,14 @@ namespace DeepX.MdBlogs {
             };
             const dir = getLocaleProp(blogInfo, "dir");
             const rela = dir ? path.relative(dir) : path;
-            const authors = this._inner.data.authors || [];
+            const defs = this._inner.data["$defs"];
             const list = blogInfo.list.map(function (blog) {
                 if (!blog || !blog.name || getLocaleProp(blog, "disable", localeOptions)) return null;
                 return new ArticleInfo(blog, {
                     rela,
                     year: blogInfo.year || true,
                     fetch: fetchHandler,
-                    authors: authors,
+                    definitions: defs,
                 });
             }).filter(function (blog) {
                 if (!blog || !blog.dateObj || !blog.getPath()) return false;
@@ -131,17 +132,44 @@ namespace DeepX.MdBlogs {
                 }
 
                 if (!item.name) continue;
-                const disable = getLocaleProp(item, "disable", localeOptions)
+                const disable = getLocaleProp(item, "disable", localeOptions);
                 if (disable) {
                     if (disable === "label" || disable === "header")
-                        store.push(item as any);
+                        store.push(getLocaleProp(item, null, localeOptions));
                     continue;
                 }
+
                 this.genInfo(item as IArticleInfo, store);
             }
 
             if (!specificMkt) this._inner.docs = store;
             return store;
+        }
+
+        hiddenArticles(options?: IArticleLocaleOptions) {
+            const specificMkt = options?.mkt && options.mkt !== true;
+            if (this._inner.hidden && !options?.reload && !specificMkt) return this._inner.hidden;
+            const localeOptions = {
+                mkt: options?.mkt
+            };
+            const path = this._inner.path;
+            const fetchHandler = this._inner.fetch;
+            const defs = this._inner.data["$defs"];
+            const col = this._inner.data.hiddenArticles || [];
+            const list = col.map(function (blog) {
+                if (!blog || !blog.name || getLocaleProp(blog, "disable", localeOptions)) return null;
+                return new ArticleInfo(blog, {
+                    rela: path,
+                    fetch: fetchHandler,
+                    definitions: defs,
+                });
+            }).filter(function (blog) {
+                if (!blog || !blog.dateObj || !blog.getPath()) return false;
+                blog.children();
+                return true;
+            });
+            if (!specificMkt) this._inner.hidden = list;
+            return list;
         }
 
         get(name: string, options?: {
@@ -162,7 +190,9 @@ namespace DeepX.MdBlogs {
 
             let result = getArticle(this.wiki({ mkt }) as ArticleInfo[], name, options);
             if (result) return result;
-            return getArticle(this.blogs({ mkt }), name, options);
+            result = getArticle(this.blogs({ mkt }), name, options);
+            if (result) return result;
+            return getArticle(this.hiddenArticles({ mkt }), name, options);
         }
 
         genInfo(article: IArticleInfo, list?: ArticleInfo[] | any[]) {
@@ -170,7 +200,7 @@ namespace DeepX.MdBlogs {
             var info = new ArticleInfo(article, {
                 rela: this._inner.path,
                 fetch: this._inner.fetch,
-                authors: this._inner.data.authors,
+                definitions: this._inner.data["$defs"],
             });
             if (list instanceof Array) list.push(info);
             return info;
@@ -253,32 +283,20 @@ namespace DeepX.MdBlogs {
     }
 
     function getArticle(list: ArticleInfo[], name: string, options?: {
-        kind?: { kind: string };
         mkt?: string | boolean;
     }) {
-        const mkt = options?.mkt;
-        let result: ArticleInfo;
         for (let i = 0; i < list.length; i++) {
             const item = list[i];
             if (!item || !(item instanceof ArticleInfo)) continue
-            const bind = {} as { kind: string };
-            const options2 = { kind: bind, mkt };
-            if (item.is(name, options2)) {
-                if (bind.kind === "id" || bind.kind === "full") return item;
-                if (result) continue;
-                result = item;
-            }
-
-            const children = item.children({ mkt });
+            if (item.is(name, options)) return item;
+            const children = item.children(options);
             if (!children) continue;
-            const child: ArticleInfo = getArticle(children, name, options2);
+            const child: ArticleInfo = getArticle(children, name, options);
             if (!child) continue;
-            if (bind.kind === "id" || bind.kind === "full") return child;
-            if (result) continue;
-            result = child;
+            return child;
         }
 
-        return result;
+        return undefined;
     }
 
     function someInternal(list: ArticleInfo[], callback: (item: ArticleInfo, index: number) => boolean, context?: {

@@ -27,30 +27,36 @@ namespace DeepX.MdBlogs {
     }
 
     export class ArticleInfo {
-        private _inner = {
-            rela: undefined as Hje.RelativePathInfo,
-            data: undefined as IArticleInfo,
-            date: undefined as Date,
-            y: false as IArticleYearConfig,
-            year: undefined as string,
-            children: undefined as ArticleInfo[],
-            fetch: undefined as ((url: Hje.RelativePathInfo) => Promise<string>),
-            content: undefined as string,
-            authors: undefined as IAuthorInfo[],
-            author: undefined as IAuthorInfo[],
+        private _inner: {
+            rela?: Hje.RelativePathInfo;
+            data?: IArticleInfo;
+            date?: Date;
+            definitions?: IArticlesDefinitions;
+            y: IArticleYearConfig;
+            year?: string;
+            children?: ArticleInfo[];
+            fetch?: ((url: Hje.RelativePathInfo) => Promise<string>);
+            content?: string;
+            author?: ContributorCollection;
+            keywords?: NameValueModel[];
+        } = {
+            y: false
         }
 
         constructor(data: IArticleInfo, options: IArticleInfoOptions) {
             this._inner.fetch = options?.fetch;
             this._inner.rela = options?.rela || new Hje.RelativePathInfo("./");
-            this._inner.authors = options?.authors || [];
+            const defs = options?.definitions || {};;
+            this._inner.definitions = defs;
             if (!data) {
                 this._inner.data = {} as any;
+                this._inner.keywords = []
                 return;
             }
 
             this._inner.data = data;
             this._inner.date = toDate(data.date);
+            this._inner.keywords = nameValueModels(data.keywords, defs.keywords);
             let p = "./";
             const y = options?.year;
             this._inner.y = y;
@@ -106,7 +112,7 @@ namespace DeepX.MdBlogs {
         }
 
         get keywords() {
-            return this._inner.data?.keywords || [] as string[];
+            return this._inner.keywords;
         }
 
         get intro() {
@@ -117,30 +123,11 @@ namespace DeepX.MdBlogs {
             return (getLocaleProp(this._inner.data, "notes") || []) as string[];
         }
 
-        get author() {
+        get authors() {
             if (this._inner.author) return this._inner.author;
-            let name = this._inner.data.author;
-            if (!name) {
-                this._inner.author = [];
-                return this._inner.author;
-            }
-
-            if (!(name instanceof Array)) name = [name];
-            const arr = [];
-            for (let i = 0; i < name.length; i++) {
-                const n = name[i];
-                if (!n) continue;
-                if (typeof n === "string") {
-                    const authorInfo = this._inner.authors.find(a => a.name === n || a.email === n);
-                    if (authorInfo) arr.push(authorInfo);
-                    else arr.push({ name: n });
-                } else if (n.name) {
-                    arr.push(n);
-                }
-            }
-
-            this._inner.author = arr;
-            return arr;
+            let name: IContributorsInfo = this._inner.data.author || this._inner.data.authors || this._inner.data.contributors;
+            this._inner.author = new ContributorCollection(name, this._inner.definitions.contributors, this._inner.definitions.roles, ["author", "translator"]);
+            return this._inner.author;
         }
 
         get contentCache() {
@@ -173,7 +160,17 @@ namespace DeepX.MdBlogs {
         }
 
         get disableMenu() {
-            return this._inner.data ? this._inner.data.disableMenu : true;
+            if (!this._inner.data) return true;
+            return this._inner.data.options ? this._inner.data.options.disableMenu : false;
+        }
+
+        get disableAuthors() {
+            if (!this._inner.data) return true;
+            return this._inner.data.options ? this._inner.data.options.disableAuthors : false;
+        }
+
+        get bannerImage() {
+            return this._inner.data?.options ? this._inner.data.options.banner : undefined;
         }
 
         getRoutePath(options?: {
@@ -184,7 +181,7 @@ namespace DeepX.MdBlogs {
             if (!data || !dir || dir.length < 4) return undefined;
             dir = dir.substring(2, dir.length - 1);
             const file = getLocaleProp(data, "file", { mkt: options?.mkt })
-            if (typeof file === "boolean") {
+            if (typeof data.file === "boolean" || data.file == null || typeof file === "boolean" || file == null) {
             } else if (typeof file === "string") {
                 dir += "/" + (file.toLowerCase().endsWith(".md") ? file.substring(0, file.length - 3) : file);
             }
@@ -194,52 +191,24 @@ namespace DeepX.MdBlogs {
         }
 
         is(name: string, options?: {
-            kind?: "id" | "full" | "simple" | "auto" | null | {},
             mkt?: string | boolean;
         }) {
             const data = this._inner.data;
             if (!data || !name) return false;
             if (name as any === this || name as any === data) return true;
-            let kind = options?.kind;
-            const bind = (typeof kind === "object" ? kind : {}) as { kind: string };
-            if (!kind) kind = "auto";
-            else if (kind === bind) kind = "auto";
-            if (kind === "auto" || kind === "id") {
-                if (typeof data.id === "string" && data.id.length > 10 && data.id === name) {
-                    bind.kind = "id";
-                    return true;
-                }
-            }
-
+            if (typeof data.id === "string" && data.id.length > 10 && data.id === name) return true;
             const localeOptions = { mkt: options?.mkt };
             let dirName = getLocaleProp(data, "dir", localeOptions);
             if (dirName && !dirName.endsWith("/")) dirName += "/";
-            let dirName2 = data.dir;
-            if (dirName2 && !dirName2.endsWith("/")) dirName2 += "/";
-            if (kind === "auto" || kind === "full") {
-                let dir = name.startsWith("/") ? "/" : "";
-                if (this._inner.year) dir += this._inner.year + "/";
-                let dir2 = dir;
-                if (dirName) dir += dirName;
-                if (dirName2) dir2 += dirName2;
-                if (isSamePath(name, data.file, dir2)
-                    || isSamePath(name, getLocaleProp(data, "file", localeOptions), dir)) {
-                    bind.kind = "full";
-                    return true;
-                }
-            }
-
-            if (kind === "auto" || kind === "simple") {
-                let dir = name.startsWith("/") ? "/" : "";
-                if (dirName) dir += dirName;
-                if (isSamePath(name, data.file, dir)
-                    || isSamePath(name, getLocaleProp(data, "file", localeOptions), dir)) {
-                    bind.kind = "simple";
-                    return true;
-                }
-            }
-
-            return false;
+            let dir = name.startsWith("/") ? "/" : "";
+            if (this._inner.year) dir += this._inner.year + "/";
+            let dir2 = dir;
+            if (dirName) dir += dirName;
+            if (isSamePath(name, getLocaleProp(data, "file", localeOptions), dir)) return true;
+            dirName = data.dir;
+            if (dirName && !dirName.endsWith("/")) dirName += "/";
+            if (dirName) dir2 += dirName;
+            return isSamePath(name, data.file, dir2);
         }
 
         getPath(options?: ILocalePropOptions<string>) {
@@ -364,24 +333,31 @@ namespace DeepX.MdBlogs {
         }): (IArticleRelatedLinkItemInfo | string)[] {
             const arr = this._inner.data?.related;
             if (!arr || arr.length < 1) return [];
-            return arr.filter(function (link) {
-                if (!link) return false;
-                if (typeof link === "string") return true;
-                return link.name != null && !getLocaleProp<any>(link, "disable", options);
-            }).map(function (link) {
+            return arr.map(function (link) {
+                if (!link) return undefined;
                 if (typeof link === "string") return link;
+                const name = getLocaleProp(link, null, options);
+                if (!name) return undefined;
+                const disable = getLocaleProp<any>(link, "disable", options);
+                if (disable) {
+                    if (disable === "label" || disable === "header") return name;
+                    return undefined;
+                }
+
                 return {
                     name: getLocaleProp(link, null, options),
                     subtitle: getLocaleProp(link, "subtitle", options),
                     url: getLocaleProp(link, "url", options),
                     data: link.data
                 };
+            }).filter(function (link) {
+                return link != null; 
             });
         }
 
         children(options?: IArticleLocaleOptions) {
             const specificMkt = options?.mkt && options.mkt !== true;
-            const authors = this._inner.authors;
+            const defs = this._inner.definitions;
             if (this._inner.children && !options?.reload && !specificMkt) return this._inner.children;
             const arr = this._inner.data?.children || [];
             const localeOptions = {
@@ -396,7 +372,7 @@ namespace DeepX.MdBlogs {
                     rela,
                     year: y,
                     fetch: fetchHandler,
-                    authors: authors,
+                    definitions: defs,
                 });
             }).filter(function (blog) {
                 return blog != null && blog.getPath() != null;

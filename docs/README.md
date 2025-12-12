@@ -2,7 +2,7 @@
 
 This is a javascript library to generate HTML view by JSON.
 
-[简体中文](https://github.com/compositejs/hje/wiki/shuoming)
+[简体中文](https://github.com/compositejs/hje/articles/shuoming)
 
 ## Installation and Usage
 

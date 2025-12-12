@@ -13,7 +13,7 @@ npm i datasense
 - `https://cdn.jsdelivr.net/npm/hje/dist/index.js`
 - `https://unpkg.com/hje/dist/index.js`
 
-具体安装和引用方法，请[点击此处](./anzhuang)来进行了解。
+具体安装和引用方法，请[点击此处](../install/zh.md)来进行了解。
 
 ## 功能
 

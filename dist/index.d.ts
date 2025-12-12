@@ -42,7 +42,7 @@ declare namespace Hje {
          * @param value The optional view model to override by setting its properties. The original reference will not replace but keep.
          * @param clearOriginal true if clear all properties of the original view model before set; otherwise, false.
          */
-        protected childModel(key: string, value?: any, clearOriginal?: boolean): any;
+        protected childModel(key: string, value?: DescriptionContract, clearOriginal?: boolean): DescriptionContract;
         /**
          * Gets a disposable array attached in this component
          * which will dispose automatically when the component is disposed.
@@ -57,7 +57,7 @@ declare namespace Hje {
          * @param key The child key; or null for updating the current component.
          * @param handler An optional handler to process before refreshing.
          */
-        protected refreshChild(key?: string, handler?: (context: ViewGeneratingContextContract<any>) => void): void;
+        protected refreshChild(key?: string | boolean, handler?: ((context: ViewGeneratingContextContract<any>) => void) | boolean): void;
         /**
          * Gets or sets the child property.
          * @param childKey The child key; or null for the current component.
@@ -198,6 +198,13 @@ declare namespace Hje {
      * @returns The description model item or array.
      */
     function toSpan(line: string | number | boolean | Hje.DescriptionContract | (string | number | boolean | Hje.DescriptionContract)[], arr?: boolean): (Hje.DescriptionContract | Hje.DescriptionContract[]);
+    /**
+     * Appends an element to a specific parent element.
+     * @param parent The parent to append child.
+     * @param tag The element tag.
+     * @returns The element created to append.
+     */
+    function appendChild(parent: HTMLElement | null, tag?: string): HTMLElement;
 }
 declare namespace Hje {
     /**
