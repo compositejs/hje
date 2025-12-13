@@ -6,6 +6,7 @@
             "name": "Installation",
             "name#zh": "安装",
             "dir": "installation",
+            "file": true,
             "file#zh": "chs.md",
             "keywords": ["install", "prepare", "npm"],
             "end": true
@@ -14,6 +15,7 @@
             "name": "To HTML",
             "name#zh": "动态生成页面",
             "dir": "tohtml",
+            "file": true,
             "file#zh": "chs.md",
             "end": true
         },
@@ -21,6 +23,7 @@
             "name": "Component",
             "name#zh": "组件",
             "dir": "component",
+            "file": true,
             "file#zh": "chs.md",
             "end": true
         }
