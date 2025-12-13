@@ -339,28 +339,10 @@ section.x-bg-stars, div.x-bg-stars {
     background-repeat: repeat;
     background-position: top center;
 }
-
-/* Highlight section */
-section.x-bg-emphasis, div.x-bg-emphasis {
-    background-image: url(https://cdn.jsdelivr.net/npm/hje@2.2.0/docs/images/bg/jc/heart_dark.jpg);
-    background-position: center top;
+section.x-bg-motley-light, div.x-bg-motley-light {
+    background-image: url(https://cdn.jsdelivr.net/npm/hje@2.2.0/docs/images/bg/jc/motley_333.jpg);
     background-repeat: repeat;
-    background-size: 240px;
-    background-attachment: fixed;
-}
-section.x-bg-outstanding, div.x-bg-outstanding {
-    background-image: url(https://cdn.jsdelivr.net/npm/hje@2.2.0/docs/images/bg/jc/heart_gray.jpg);
-    background-position: center top;
-    background-repeat: repeat;
-    background-size: 240px;
-    background-attachment: fixed;
-}
-section.x-zone-hl {
-    padding: 20px; margin: 0; position: sticky; top: 0; z-index: 100;
-}
-body > section > section.layout-wide-full.x-zone-hl > h1,
-body > section > section.layout-wide-full.x-zone-hl > h2 {
-    padding: 0; margin: 0 auto; line-height: 30px;
+    background-position: top center;
 }
 .x-font-size-xxs {
     font-size: 10px;
@@ -385,6 +367,29 @@ body > section > section.layout-wide-full.x-zone-hl > h2 {
 }
 .x-font-size-xxxl {
     font-size: 24px;
+}
+
+/* Highlight section */
+section.x-bg-emphasis, div.x-bg-emphasis {
+    background-image: url(https://cdn.jsdelivr.net/npm/hje@2.2.0/docs/images/bg/jc/heart_dark.jpg);
+    background-position: center top;
+    background-repeat: repeat;
+    background-size: 240px;
+    background-attachment: fixed;
+}
+section.x-bg-outstanding, div.x-bg-outstanding {
+    background-image: url(https://cdn.jsdelivr.net/npm/hje@2.2.0/docs/images/bg/jc/heart_gray.jpg);
+    background-position: center top;
+    background-repeat: repeat;
+    background-size: 240px;
+    background-attachment: fixed;
+}
+section.x-zone-hl {
+    padding: 20px; margin: 0; position: sticky; top: 0; z-index: 100;
+}
+body > section > section.layout-wide-full.x-zone-hl > h1,
+body > section > section.layout-wide-full.x-zone-hl > h2 {
+    padding: 0; margin: 0 auto; line-height: 30px;
 }
 
 /* Links */

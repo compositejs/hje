@@ -336,6 +336,11 @@ section.x-bg-stars, div.x-bg-stars {
     background-repeat: repeat;
     background-position: top center;
 }
+section.x-bg-motley-light, div.x-bg-motley-light {
+    background-image: url(https://cdn.jsdelivr.net/npm/hje@2.2.0/docs/images/bg/jc/motley_333.jpg);
+    background-repeat: repeat;
+    background-position: top center;
+}
 .x-font-size-xxs {
     font-size: 10px;
 }
