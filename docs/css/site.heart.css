@@ -854,6 +854,9 @@ div.placeholder-after-loading:first-child > span::after {
 #blog_content > article > section.x-part-blog-related > p {
     font-size: 14px;
 }
+#blog_content > article > main {
+    overflow-x: hidden;
+}
 #blog_content > article > main img {
     width: 100%;
     max-width: 660px;
