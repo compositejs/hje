@@ -1,4 +1,5 @@
 {
+    "$schema": "../../dist/mdblogs.schema.json",
     "name": "Hje",
     "docs": [
         {

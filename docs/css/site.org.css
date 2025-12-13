@@ -336,6 +336,30 @@ section.x-bg-stars, div.x-bg-stars {
     background-repeat: repeat;
     background-position: top center;
 }
+.x-font-size-xxs {
+    font-size: 10px;
+}
+.x-font-size-xs {
+    font-size: 11px;
+}
+.x-font-size-s {
+    font-size: 12px;
+}
+.x-font-size-m {
+    font-size: 14px;
+}
+.x-font-size-l {
+    font-size: 16px;
+}
+.x-font-size-xl {
+    font-size: 18px;
+}
+.x-font-size-xxl {
+    font-size: 20px;
+}
+.x-font-size-xxxl {
+    font-size: 24px;
+}
 
 /* Links */
 a.x-link-more > span:last-child, a.x-link-more:visited > span:last-child {
@@ -519,11 +543,39 @@ section.link-tile-wide > a > span > span, section.link-tile-wide > a > span > sp
     transition: 0.2s;
 }
 ul.link-tile-compact > li > a > span > span,
+ul.link-tile-compact > li > a > span > time,
 ul.link-tile-compact > li > a > span + span,
-ul.link-tile-compact > li > a > br + span {
+ul.link-tile-compact > li > a > time + span,
+ul.link-tile-compact > li > a > span + time,
+ul.link-tile-compact > li > a > br + span,
+ul.link-tile-compact > li > a > br + time {
     color: #888;
     font-size: 14px;
     transition: 0.2s;
+}
+ul.link-tile-compact > li > a > span > span.x-font-size-s,
+ul.link-tile-compact > li > a > span > time.x-font-size-s,
+ul.link-tile-compact > li > a > span.x-font-size-s,
+ul.link-tile-compact > li > a > time.x-font-size-s {
+    font-size: 12px;
+}
+ul.link-tile-compact > li > a > span > span.x-font-size-m,
+ul.link-tile-compact > li > a > span > time.x-font-size-m,
+ul.link-tile-compact > li > a > span.x-font-size-m,
+ul.link-tile-compact > li > a > time.x-font-size-m {
+    font-size: 14px;
+}
+ul.link-tile-compact > li > a > span > span.x-font-size-l,
+ul.link-tile-compact > li > a > span > time.x-font-size-l,
+ul.link-tile-compact > li > a > span.x-font-size-l,
+ul.link-tile-compact > li > a > time.x-font-size-l {
+    font-size: 16px;
+}
+ul.link-tile-compact > li > a > span > span.x-font-size-xl,
+ul.link-tile-compact > li > a > span > time.x-font-size-xl,
+ul.link-tile-compact > li > a > span.x-font-size-xl,
+ul.link-tile-compact > li > a > time.x-font-size-xl {
+    font-size: 18px;
 }
 a.link-long-button > span > span + span, a.link-tile-wide > span > span + span,
 section.link-tile-wide > a > span > span + span, ul.link-tile-compact > li > a > span + span {

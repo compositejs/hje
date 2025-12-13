@@ -71,11 +71,15 @@ namespace DeepX.MdBlogs {
                 });
             }
 
-            const result = generateMenuItem(article, deep === -1 ? -1 : level, options.path, options.click, localeOptions);
-            if (options.select === article) result.styleRefs = "state-sel";
+            const path = genArticlePath(article, options.path, localeOptions);
+            const result = generateMenuItemInternal(article, deep === -1 ? -1 : level, path, options.click, localeOptions);
+            const hasSelected = options.select === article;
+            if (hasSelected) result.styleRefs = "state-sel";
             if (typeof options.render === "function") options.render(result, article, {
                 level,
                 mkt: options.mkt,
+                select: hasSelected,
+                path,
             });
             arr.push(result);
             if (level < 1) continue;
@@ -123,79 +127,8 @@ namespace DeepX.MdBlogs {
     }
 
     export function generateMenuItem(article: ArticleInfo, level: number, path?: string | ((original: string, article: ArticleInfo) => string), click?: (ev: Event, article: ArticleInfo) => void, options?: ILocalePropOptions) {
-        const mkt = options?.mkt;
-        const localeOptions = mkt != null ? { mkt: mkt } : undefined;
-        const intro = article.getIntro(localeOptions);
-        let tips = intro;
-        let title = article.getName(localeOptions);
-        const subtitle = article.getSubtitle(localeOptions);
-        if (!tips) {
-            tips = title;
-            if (subtitle) tips += "\n" + subtitle;
-        }
-
-        if (level > 1) {
-            let prefix = "";
-            for (let j = 2; j < level; j++) {
-                prefix += "　";
-            }
-
-            prefix += "▹ ";
-            title = prefix + title;
-        }
-
-        let path1 = `${typeof path === "string" ? path : ""}?${article.getRoutePath(localeOptions)}`;
-        if (typeof path === "function") {
-            const path2 = path(path1, article);
-            if (path2) path1 = path2;
-        }
-
-        const text = {
-            tagName: "a",
-            props: {
-                href: path1,
-                title: tips,
-            },
-            on: {
-                click(ev) {
-                    if (typeof click === "function") click(ev, article);
-                }
-            },
-            children: subtitle ? [{
-                tagName: "span",
-                children: title
-            }, {
-                tagName: "span",
-                children: subtitle
-            }] : title
-        } as Hje.DescriptionContract;
-        const result = {
-            tagName: "li",
-            props: {},
-            children: [text],
-            data: article,
-        } as Hje.DescriptionContract;
-        if (level === -1 && intro) {
-            if (typeof text.children === "string") text.children = [{
-                tagName: "span",
-                children: text.children
-            }];
-            if (text.children instanceof Array) {
-                text.children.push({ tagName: "br" });
-                text.children.push({ tagName: "span", children: intro });
-                const publishDate = article.dateObj;
-                const dateStr = article.dateString;
-                if (dateStr) text.children.push({ tagName: "br" }, {
-                    tagName: "time",
-                    props: {
-                        datetime: `${publishDate.year.toString(10)}-${publishDate.month.toString(10)}-${publishDate.date.toString(10)}`
-                    },
-                    children: dateStr
-                });
-            }
-        }
-
-        return result;
+        path = genArticlePath(article, path, options);
+        return generateMenuItemInternal(article, level, path, click, options);
     }
 
     export function generateCdnScript(name: string, ver: string, url: string, path: string) {
@@ -289,6 +222,84 @@ namespace DeepX.MdBlogs {
         url?: string;
         title?: string;
         click?(ev: Event): void;
+    }
+
+    function generateMenuItemInternal(article: ArticleInfo, level: number, path: string, click?: (ev: Event, article: ArticleInfo) => void, options?: ILocalePropOptions) {
+        const mkt = options?.mkt;
+        const localeOptions = mkt != null ? { mkt: mkt } : undefined;
+        const intro = article.getIntro(localeOptions);
+        let tips = intro;
+        let title = article.getName(localeOptions);
+        const subtitle = article.getSubtitle(localeOptions);
+        if (!tips) {
+            tips = title;
+            if (subtitle) tips += "\n" + subtitle;
+        }
+
+        if (level > 1) {
+            let prefix = "";
+            for (let j = 2; j < level; j++) {
+                prefix += "　";
+            }
+
+            prefix += "▹ ";
+            title = prefix + title;
+        }
+
+        const text = {
+            tagName: "a",
+            props: { href: path, title: tips },
+            on: {
+                click(ev) {
+                    if (typeof click === "function") click(ev, article);
+                }
+            },
+            children: subtitle ? [{
+                tagName: "span",
+                children: title
+            }, {
+                tagName: "span",
+                children: subtitle
+            }] : title
+        } as Hje.DescriptionContract;
+        const result = {
+            tagName: "li",
+            props: {},
+            children: [text],
+            data: article,
+        } as Hje.DescriptionContract;
+        const dateStr = article.dateString;
+        if (level === -1 && (intro || dateStr)) {
+            if (typeof text.children === "string") text.children = [{
+                tagName: "span",
+                children: text.children
+            }];
+            if (text.children instanceof Array) {
+                const publishDate = article.dateObj;
+                if (dateStr) text.children.push({ tagName: "br" }, {
+                    tagName: "time",
+                    styleRefs: "x-font-size-s",
+                    props: {
+                        datetime: `${publishDate.year.toString(10)}-${publishDate.month.toString(10)}-${publishDate.date.toString(10)}`
+                    },
+                    children: dateStr
+                });
+                text.children.push({ tagName: "br" });
+                text.children.push({ tagName: "span", children: intro });
+            }
+        }
+
+        return result;
+    }
+
+    function genArticlePath(article: ArticleInfo, path: string | ((original: string, article: ArticleInfo) => string), localeOptions: { mkt?: string | boolean }) {
+        let path1 = `${typeof path === "string" ? path : ""}?${article.getRoutePath(localeOptions)}`;
+        if (typeof path === "function") {
+            const path2 = path(path1, article);
+            if (path2) path1 = path2;
+        }
+
+        return path1;
     }
 
     export function buttonList(config: {
