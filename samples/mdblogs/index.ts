@@ -273,6 +273,12 @@ namespace DeepX.MdBlogs {
         }
     }
 
+    /**
+     * Loads the collection and config of articles.
+     * @param url The URL of article collection and config.
+     * @param fetchHandler An additional handler to fetch markdown file of article.
+     * @returns A promise object of article collection and config.
+     */
     export async function fetchArticles(url: string, fetchHandler?: ((url: Hje.RelativePathInfo) => Promise<string>)) {
         const resp = await fetch(url);
         const json = await resp.json();

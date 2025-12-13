@@ -101,6 +101,13 @@ namespace DeepX.MdBlogs {
         };
     }
 
+    /**
+     * Generates the description model of the specific articles.
+     * @param articles The URL or promise object to fetch articles.
+     * @param filter The handler to filter the articles to display.
+     * @param options Additional options.
+     * @returns A promise object of description model. It is a `ul` element.
+     */
     export async function generateMenuPromise(articles: Promise<Articles> | string, filter: "blogs" | "blog" | "docs" | "wiki" | ((articles: Articles) => (ArticleInfo | string)[]), options?: IArticleMenuOptions) {
         if (!articles) return undefined;
         if (typeof articles === "string") articles = fetchArticles(articles);

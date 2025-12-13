@@ -1,4 +1,11 @@
 namespace DeepX.MdBlogs {
+    /**
+     * Renders a markdown blogs UX.
+     * @param element The element to render.
+     * @param data The URL of articles config or the collection of articles.
+     * @param options The options.
+     * @returns The view generating context.
+     */
     export function render(element: any, data: string | Articles, options: {
         title?: string | boolean;
         banner?: Hje.DescriptionContract;
