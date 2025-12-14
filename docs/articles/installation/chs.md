@@ -13,19 +13,10 @@ npm i hje
 ```typescript
 import * as Hje from 'hje';
 
-let ele = document.createElement("div");
-document.body.appendChild(ele);
-
+const ele = Hje.appendElement(null);
 Hje.render(ele, {
     children: "Hello world!"
 });
-```
-
-当然，你也可以将整个模块引入。
-
-
-```typescript
-import * as Hje from 'hje';
 ```
 
 ## CommonJS
@@ -41,9 +32,7 @@ npm i datasense
 ```typescript
 const Hje = require('hje');
 
-let ele = document.createElement("div");
-document.body.appendChild(ele);
-
+const ele = Hje.appendElement(null);
 Hje.render(ele, {
     children: "Hello world!"
 });
@@ -56,12 +45,10 @@ Hje.render(ele, {
 - `https://cdn.jsdelivr.net/npm/hje/dist/index.js`
 - `https://unpkg.com/hje/dist/index.js`
 
-然后，可以通过`Hje`命名空间来进行访问。如下示例。
+然后，可以通过 `Hje` 命名空间来进行访问。如下示例。
 
 ```typescript
-let ele = document.createElement("div");
-document.body.appendChild(ele);
-
+const ele = Hje.appendElement(null);
 Hje.render(ele, {
     children: "Hello world!"
 });

@@ -12,6 +12,11 @@
             "end": true
         },
         {
+            "disable": "label",
+            "name": "Functionality",
+            "name#zh": "功能"
+        },
+        {
             "name": "To HTML",
             "name#zh": "动态生成页面",
             "dir": "tohtml",
@@ -26,8 +31,31 @@
             "file": true,
             "file#zh": "chs.md",
             "end": true
+        },
+        {
+            "disable": "label",
+            "name": "Accessories",
+            "name#zh": "附加库"
+        },
+        {
+            "name": "MdBlogs",
+            "dir": "mdblogs",
+            "file": true,
+            "end": true
         }
+
     ],
+    "hiddenArticles": [
+    ],
+    "redir": {
+        "install": "installation",
+        "anzhuang": "installation",
+        "setup": "installation",
+        "render": "tohtml",
+        "yemian": "tohtml",
+        "xuanran": "tohtml",
+        "zujian": "component"
+    },
     "$defs": {
         "contributors": [
             { "name": "Kingcean Tuan", "url": "https://kingcean.org" }
@@ -37,14 +65,5 @@
             { "name": "Prepare", "name#zh": "准备", "value": "prepare" },
             { "name": "NPM", "value": "npm" }
         ]
-    },
-    "redir": {
-        "install": "installation",
-        "anzhuang": "installation",
-        "setup": "installation",
-        "render": "tohtml",
-        "yemian": "tohtml",
-        "xuanran": "tohtml",
-        "zujian": "component"
     }
 }

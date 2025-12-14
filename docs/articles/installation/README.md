@@ -11,9 +11,7 @@ Then you can import the ones you needed by patching. Following is a sample.
 ```typescript
 import * as Hje from 'hje';
 
-let ele = document.createElement("div");
-document.body.appendChild(ele);
-
+const ele = Hje.appendElement(null);
 Hje.render(ele, {
     children: "Hello world!"
 });
@@ -30,9 +28,7 @@ And you can require the library and patch what you needed. Following is a sample
 ```typescript
 const Hje = require('hje');
 
-let ele = document.createElement("div");
-document.body.appendChild(ele);
-
+const ele = Hje.appendElement(null);
 Hje.render(ele, {
     children: "Hello world!"
 });
@@ -48,9 +44,7 @@ You can download __one of__ bundle file and insert it into your web page.
 Then you can use the global namespace `Hje`. Following is a sample.
 
 ```typescript
-let ele = document.createElement("div");
-document.body.appendChild(ele);
-
+const ele = Hje.appendElement(null);
 Hje.render(ele, {
     children: "Hello world!"
 });

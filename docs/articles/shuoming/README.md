@@ -19,15 +19,15 @@ npm i datasense
 
 Hyper-JSON Engine (`Hje`) 提供一种通过 JS 描述视图的方案，并可扩展创建事件与绑定，最终生成 HTML 模块或其它自定义视图。
 
-- [JSON → HTML](../yemian/) - 从 JSON 生成 HTML。
-- [Component](../zujian/) - 组件。
+- [JSON → HTML](../tohtml/chs.md) - 从 JSON 生成 HTML。
+- [Component](../component/chs.md) - 组件。
 
 ## 编译和测试
 
-编译之前，需要先确保安装有 `gulp` 和 `tsc`。然后执行以下命令即可编译。
+编译之前，需要先确保安装有 `terser` 和 `tsc`。然后执行以下命令即可编译。
 
 ```sh
-npm run-script build
+npm run build
 ```
 
 编译之后，还可以通过执行以下命令来运行所有的单元测试。
