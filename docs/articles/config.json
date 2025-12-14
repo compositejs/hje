@@ -42,7 +42,6 @@
         {
             "name": "MdBlogs",
             "dir": "mdblogs",
-            "author": "Kingcean Tuan",
             "file": true,
             "end": true
         }
