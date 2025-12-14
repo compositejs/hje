@@ -10,6 +10,17 @@ namespace DeepX.MdBlogs {
         title?: string | boolean;
         banner?: Hje.DescriptionContract;
         supplement?: Hje.DescriptionContract;
+        onselect?(ev: {
+            children: Hje.DescriptionContract[];
+            article: ArticleInfo;
+            mkt: string | boolean | undefined;
+            store: any;
+        }): void;
+        onhome?(ev: {
+            model: Hje.DescriptionContract;
+            mkt: string | boolean | undefined;
+            store: any;
+        }): void;
     }) {
         const q = Hje.queryArray();
         if (!options) options = {};
@@ -42,7 +53,9 @@ namespace DeepX.MdBlogs {
             lifecycle,
             banner: options.banner,
             supplement: options.supplement,
-        } as any;
+            onselect: options.onselect,
+            onhome: options.onhome,
+        } as IArticlesPartData;
         if (q && q.length > 0) {
             if (typeof q[0] === "string") d.select = q[0];
             d.mkt = Hje.getValueFromKeyedArray(q, "mkt");

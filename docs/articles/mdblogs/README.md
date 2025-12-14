@@ -210,11 +210,13 @@ MdBlogs 内部内使用 Hyper-JSON Engine 作为渲染引擎。其汇总并路�
 
 ### 获取完整结构体
 
-函数 `fetchArticles` 可用于获取完整结构体，其内可继续通过相关属性或方法来获取具体信息。
+函数 `fetchArticles` 可用于获取完整结构体，返回的是 `Promise`，里面是 `Articles` 类型对象，其内可继续通过相关属性或方法来获取具体信息。
 
 ### 直接渲染
 
-函数 `render` 用于在指定 DOM 上渲染该博客或知识库前端组件。
+可以通过 Hyper-JSON Engine 控件 `ArticlesPart` 来执行渲染，其描述结构中的 `data` 字段为 `IArticlesPartData` 类型，通过其中 `articles` 字段接受配置文件的 URL 地址或 `Articles` 对象。
+
+或者，函数 `render` 用于在指定 DOM 上渲染该博客或知识库前端组件，并托管页面路由。
 
 ### 仅渲染目录
 
