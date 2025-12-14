@@ -244,6 +244,13 @@ namespace DeepX.MdBlogs {
          */
         year?: IArticleYearConfig & string;
 
+        /**
+         * The blog articles in `list` should order by publish `date` ascending (earliest to latest).
+         * Sets this field to `true` if the list is sort descending (latest to earlist).
+         * Default is `false`.
+         */
+        reverse?: boolean;
+
         [property: string]: any;
     }
 

@@ -67,7 +67,7 @@
               "type": "integer"
             },
             "list": {
-              "description": "The collection of blog",
+              "description": "The collection of blog order by publish date ascending (earlist to latest)",
               "type": "array",
               "items": {
                 "$ref": "#/$defs/articleInfo"
@@ -92,6 +92,10 @@
               "description": "A flag to indicate whether need hide the authors and publish date in article",
               "type": "boolean"
             },
+            "reverse": {
+              "description": "reverse the article list",
+              "type": "boolean"
+            },
             "year": {
               "description": "The root display path mode",
               "enum": ["y", "year", "m", "month", "d", "day"]
@@ -113,7 +117,6 @@
       "items": {
         "anyOf": [
           {
-            "description": "Header",
             "type": "string"
           },
           {
@@ -187,371 +190,374 @@
   },
   "$defs": {
     "articleInfo": {
-      "id": {
-        "description": "The identifier (should be a UUID/GUID)",
-        "type": "string"
-      },
-      "name": {
-        "description": "The name of article",
-        "type": "string"
-      },
-      "name#en": {
-        "description": "The name of article in English",
-        "type": "string"
-      },
-      "name#fr": {
-        "description": "The name of article in French",
-        "type": "string"
-      },
-      "name#zh": {
-        "description": "The name of article in Chinese",
-        "type": "string"
-      },
-      "name#zh-Hans": {
-        "description": "The name of article in Chinese simplified",
-        "type": "string"
-      },
-      "name#zh-Hant": {
-        "description": "The name of article in Chinese tranditional",
-        "type": "string"
-      },
-      "disable": {
-        "description": "A flag indicate whether disable this article",
-        "anyOf": [
-          {
-            "type": "boolean"
-          },
-          {
-            "type": "string"
-          }
-        ]
-      },
-      "subtitle": {
-        "description": "The subtitle of the article",
-        "type": "string"
-      },
-      "intro": {
-        "description": "The introduction of the article",
-        "type": "string"
-      },
-      "thumb": {
-        "description": "The relative URL of the article thumbnail",
-        "anyOf": [
-          {
-            "type": "object",
-            "properties": {
-              "square": {
-                "description": "The relative URL of the article thumbnail in square (1:1) ratio",
-                "type": "string"
-              },
-              "common": {
-                "description": "The relative URL of the article thumbnail in common (4:3 or 3:2) ratio",
-                "type": "string"
-              },
-              "wide": {
-                "description": "The relative URL of the article thumbnail in wide (16:9 or 16:10) ratio",
-                "type": "string"
-              },
-              "tall": {
-                "description": "The relative URL of the article thumbnail in tall (3:4 or 9:16) ratio",
-                "type": "string"
-              }
+      "type": "object",
+      "properties": {
+        "id": {
+          "description": "The identifier (should be a UUID/GUID)",
+          "type": "string"
+        },
+        "name": {
+          "description": "The name of article",
+          "type": "string"
+        },
+        "name#en": {
+          "description": "The name of article in English",
+          "type": "string"
+        },
+        "name#fr": {
+          "description": "The name of article in French",
+          "type": "string"
+        },
+        "name#zh": {
+          "description": "The name of article in Chinese",
+          "type": "string"
+        },
+        "name#zh-Hans": {
+          "description": "The name of article in Chinese simplified",
+          "type": "string"
+        },
+        "name#zh-Hant": {
+          "description": "The name of article in Chinese tranditional",
+          "type": "string"
+        },
+        "disable": {
+          "description": "A flag indicate whether disable this article",
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "string"
             }
-          },
-          {
-            "type": "string"
-          }
-        ]
-      },
-      "dir": {
-        "description": "The relative directory path with the article markdown file",
-        "type": "string"
-      },
-      "dir#en": {
-        "description": "The relative directory path with the article markdown file in English",
-        "type": "string"
-      },
-      "dir#fr": {
-        "description": "The relative directory path with the article markdown file in French",
-        "type": "string"
-      },
-      "dir#zh": {
-        "description": "The relative directory path with the article markdown file in Chinese",
-        "type": "string"
-      },
-      "dir#zh-Hans": {
-        "description": "The relative directory path with the article markdown file in Chinese simplified",
-        "type": "string"
-      },
-      "dir#zh-Hant": {
-        "description": "The relative directory path with the article markdown file in Chinese tranditional",
-        "type": "string"
-      },
-      "file": {
-        "description": "The file name of the article markdown file",
-        "anyOf": [
-          {
-            "type": "string"
-          },
-          {
-            "description": "true for README.md (default value) or false for no file name",
-            "type": "boolean"
-          }
-        ]
-      },
-      "file#en": {
-        "description": "The file name of the article markdown file in English",
-        "anyOf": [
-          {
-            "type": "string"
-          },
-          {
-            "description": "true for README.md (default value) or false for no file name",
-            "type": "boolean"
-          }
-        ]
-      },
-      "file#fr": {
-        "description": "The file name of the article markdown file in French",
-        "anyOf": [
-          {
-            "type": "string"
-          },
-          {
-            "description": "true for README.md (default value) or false for no file name",
-            "type": "boolean"
-          }
-        ]
-      },
-      "file#zh": {
-        "description": "The file name of the article markdown file in Chinese",
-        "anyOf": [
-          {
-            "type": "string"
-          },
-          {
-            "description": "true for README.md (default value) or false for no file name",
-            "type": "boolean"
-          }
-        ]
-      },
-      "file#zh-Hans": {
-        "description": "The file name of the article markdown file in Chinese simplified",
-        "anyOf": [
-          {
-            "type": "string"
-          },
-          {
-            "description": "true for README.md (default value) or false for no file name",
-            "type": "boolean"
-          }
-        ]
-      },
-      "file#zh-Hant": {
-        "description": "The file name of the article markdown file in Chinese tranditional",
-        "anyOf": [
-          {
-            "type": "string"
-          },
-          {
-            "description": "true for README.md (default value) or false for no file name",
-            "type": "boolean"
-          }
-        ]
-      },
-      "keywords": {
-        "description": "The keywords",
-        "type": "array",
-        "items": {
+          ]
+        },
+        "subtitle": {
+          "description": "The subtitle of the article",
+          "type": "string"
+        },
+        "intro": {
+          "description": "The introduction of the article",
+          "type": "string"
+        },
+        "thumb": {
+          "description": "The relative URL of the article thumbnail",
+          "anyOf": [
+            {
+              "type": "object",
+              "properties": {
+                "square": {
+                  "description": "The relative URL of the article thumbnail in square (1:1) ratio",
+                  "type": "string"
+                },
+                "common": {
+                  "description": "The relative URL of the article thumbnail in common (4:3 or 3:2) ratio",
+                  "type": "string"
+                },
+                "wide": {
+                  "description": "The relative URL of the article thumbnail in wide (16:9 or 16:10) ratio",
+                  "type": "string"
+                },
+                "tall": {
+                  "description": "The relative URL of the article thumbnail in tall (3:4 or 9:16) ratio",
+                  "type": "string"
+                }
+              }
+            },
+            {
+              "type": "string"
+            }
+          ]
+        },
+        "dir": {
+          "description": "The relative directory path with the article markdown file",
+          "type": "string"
+        },
+        "dir#en": {
+          "description": "The relative directory path with the article markdown file in English",
+          "type": "string"
+        },
+        "dir#fr": {
+          "description": "The relative directory path with the article markdown file in French",
+          "type": "string"
+        },
+        "dir#zh": {
+          "description": "The relative directory path with the article markdown file in Chinese",
+          "type": "string"
+        },
+        "dir#zh-Hans": {
+          "description": "The relative directory path with the article markdown file in Chinese simplified",
+          "type": "string"
+        },
+        "dir#zh-Hant": {
+          "description": "The relative directory path with the article markdown file in Chinese tranditional",
+          "type": "string"
+        },
+        "file": {
+          "description": "The file name of the article markdown file",
           "anyOf": [
             {
               "type": "string"
             },
             {
-              "$ref": "#/$defs/nameValueModel"
+              "description": "true for README.md (default value) or false for no file name",
+              "type": "boolean"
             }
           ]
-        }
-      },
-      "date": {
-        "description": "The publish date in YYYYMMDD format",
-        "type": "string"
-      },
-      "author": {
-        "description": "The article authors",
-        "anyOf": [
-          {
-            "type": "string"
-          },
-          {
-            "type": "array",
+        },
+        "file#en": {
+          "description": "The file name of the article markdown file in English",
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "description": "true for README.md (default value) or false for no file name",
+              "type": "boolean"
+            }
+          ]
+        },
+        "file#fr": {
+          "description": "The file name of the article markdown file in French",
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "description": "true for README.md (default value) or false for no file name",
+              "type": "boolean"
+            }
+          ]
+        },
+        "file#zh": {
+          "description": "The file name of the article markdown file in Chinese",
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "description": "true for README.md (default value) or false for no file name",
+              "type": "boolean"
+            }
+          ]
+        },
+        "file#zh-Hans": {
+          "description": "The file name of the article markdown file in Chinese simplified",
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "description": "true for README.md (default value) or false for no file name",
+              "type": "boolean"
+            }
+          ]
+        },
+        "file#zh-Hant": {
+          "description": "The file name of the article markdown file in Chinese tranditional",
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "description": "true for README.md (default value) or false for no file name",
+              "type": "boolean"
+            }
+          ]
+        },
+        "keywords": {
+          "description": "The keywords",
+          "type": "array",
+          "items": {
             "anyOf": [
               {
                 "type": "string"
               },
               {
-                "$ref": "#/$defs/contributorInfo"
+                "$ref": "#/$defs/nameValueModel"
               }
             ]
-          },
-          {
-            "type": "object"
           }
-        ]
-      },
-      "location": {
-        "description": "The city where the article publishes",
-        "type": "string"
-      },
-      "related": {
-        "description": "The related links (display in section see also)",
-        "type": "array",
-        "items": {
+        },
+        "date": {
+          "description": "The publish date in YYYYMMDD format",
+          "type": "string"
+        },
+        "author": {
+          "description": "The article authors",
           "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "array",
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "$ref": "#/$defs/contributorInfo"
+                }
+              ]
+            },
+            {
+              "type": "object"
+            }
+          ]
+        },
+        "location": {
+          "description": "The city where the article publishes",
+          "type": "string"
+        },
+        "related": {
+          "description": "The related links (display in section see also)",
+          "type": "array",
+          "items": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string"
+                  },
+                  "disable": {
+                    "anyOf": [
+                      {
+                        "type": "boolean"
+                      },
+                      {
+                        "enum": [ "label", "header" ]
+                      }
+                    ]
+                  },
+                  "subtitle": {
+                    "type": "string"
+                  },
+                  "url": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "object",
+                        "properties": {
+                          "type": {
+                            "type": "string"
+                          },
+                          "url": {
+                            "value": "string"
+                          }
+                        }
+                      }
+                    ]
+                  },
+                  "data": {
+                    "type": "object"
+                  }
+                }
+              }
+            ]
+          }
+        },
+        "end": {
+          "description": "The mark of end comment in markdown",
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
             {
               "type": "string"
             },
             {
               "type": "object",
               "properties": {
-                "name": {
-                  "type": "string"
-                },
-                "disable": {
+                "start": {
+                  "description": "The mark of start comment in markdow",
                   "anyOf": [
                     {
                       "type": "boolean"
                     },
                     {
-                      "enum": [ "label", "header" ]
+                      "type": "string"
                     }
                   ]
                 },
-                "subtitle": {
-                  "type": "string"
+                "end": {
+                  "description": "The mark of end comment in markdow",
+                  "anyOf": [
+                    {
+                      "type": "boolean"
+                    },
+                    {
+                      "type": "string"
+                    }
+                  ]
                 },
-                "url": {
+                "urls": {
+                  "description": "The replacement of URLS in markdown",
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "old": {
+                        "description": "The original text to replace",
+                        "type": "string"
+                      },
+                      "by": {
+                        "description": "The new text used to replace with",
+                        "type": "string"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          ]
+        },
+        "notes": {
+          "description": "The additional notes of the article to display at the end of content",
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "children": {
+          "description": "The child articles",
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/articleInfo"
+          }
+        },
+        "data": {
+          "description": "Addtional data for reference",
+          "type": "object"
+        },
+        "options": {
+          "description": "The options of the article",
+          "type": "string",
+          "properties": {
+              "disableMenu": {
+                  "description": "A flag to indicate whether need hide the contents in article",
+                  "type": "boolean"
+              },
+              "disableAuthors": {
+                  "description": "A flag to indicate whether need hide the authors and publish date in article",
+                  "type": "boolean"
+              },
+              "banner": {
+                  "description": "The banner image URL or info",
                   "anyOf": [
                     {
                       "type": "string"
                     },
                     {
-                      "type": "object",
-                      "properties": {
-                        "type": {
-                          "type": "string"
-                        },
-                        "url": {
-                          "value": "string"
-                        }
-                      }
+                      "type": "object"
                     }
                   ]
-                },
-                "data": {
-                  "type": "object"
-                }
               }
-            }
-          ]
-        }
-      },
-      "end": {
-        "description": "The mark of end comment in markdown",
-        "anyOf": [
-          {
-            "type": "boolean"
-          },
-          {
-            "type": "string"
-          },
-          {
-            "type": "object",
-            "properties": {
-              "start": {
-                "description": "The mark of start comment in markdow",
-                "anyOf": [
-                  {
-                    "type": "boolean"
-                  },
-                  {
-                    "type": "string"
-                  }
-                ]
-              },
-              "end": {
-                "description": "The mark of end comment in markdow",
-                "anyOf": [
-                  {
-                    "type": "boolean"
-                  },
-                  {
-                    "type": "string"
-                  }
-                ]
-              },
-              "urls": {
-                "description": "The replacement of URLS in markdown",
-                "type": "array",
-                "items": {
-                  "type": "object",
-                  "properties": {
-                    "old": {
-                      "description": "The original text to replace",
-                      "type": "string"
-                    },
-                    "by": {
-                      "description": "The new text used to replace with",
-                      "type": "string"
-                    }
-                  }
-                }
-              }
-            }
           }
-        ]
-      },
-      "notes": {
-        "description": "The additional notes of the article to display at the end of content",
-        "type": "array",
-        "items": {
-          "type": "string"
-        }
-      },
-      "children": {
-        "description": "The child articles",
-        "type": "array",
-        "items": {
-          "$ref": "#/$defs/articleInfo"
-        }
-      },
-      "data": {
-        "description": "Addtional data for reference",
-        "type": "object"
-      },
-      "options": {
-        "description": "The options of the article",
-        "type": "string",
-        "properties": {
-            "disableMenu": {
-                "description": "A flag to indicate whether need hide the contents in article",
-                "type": "boolean"
-            },
-            "disableAuthors": {
-                "description": "A flag to indicate whether need hide the authors and publish date in article",
-                "type": "boolean"
-            },
-            "banner": {
-                "description": "The banner image URL or info",
-                "anyOf": [
-                  {
-                    "type": "string"
-                  },
-                  {
-                    "type": "object"
-                  }
-                ]
-            }
         }
       }
     },
