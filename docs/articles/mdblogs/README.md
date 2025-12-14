@@ -96,7 +96,7 @@ MdBlogs 内部内使用 Hyper-JSON Engine 作为渲染引擎。其汇总并路�
 | 博客 | [Kingcean 前端博客](https://kingcean.org/blog/) | `https://kingcean.org/blog/config.json` |
 | 知识库 | [DataSense 库介绍](https://datasense.js.org/articles) | `https://datasense.js.org/articles/config.json` |
 
-配置文件的 JSON 各属性如下。
+配置文件的 JSON 各属性如下。（字段名后类型旁带有 * 星号的为必填项，其余均为可选。）
 
 > https://github.com/compositejs/hje/dist/mdblogs.schema.json
 
@@ -142,7 +142,7 @@ MdBlogs 内部内使用 Hyper-JSON Engine 作为渲染引擎。其汇总并路�
 - `dir` _字符串_：Markdown 文档所在目录路径，相对于本配置文件的相对 URL 地址，路径前后无需斜线或反斜线。本字段有以下要求。本字段支持语言扩展。
   - 对于博客，所有 Markdown 文件均需首先放置于以该文章发布日期的年份命名的文件夹中，但本字段中无需包含年份。例如，前面示例中 `/2025/blog-c/article.md` 需要配置为字符串 `blog-c`，另，`year` 字段中前4个字符必须为 `2025`，即该文章需发布于 2025 年。
   - 对于知识库和隐藏文档列表，则该路径需要包含完整目录路径。例如，前面示例中 `/tools/cli.md` 需要配置为字符串 `tools`。
-- `file` _字符串 或 布尔值_：Markdown 文件名（含扩展名）。当文件名为 `README.md` 时，此字段可设为布尔值 `true` 以简化书写；当仅访问路径而无文件名时亦能获取到该 Markdown 格式内容时，可设为布尔值 `false`。例如，前面示例中 `/tools/cli.md` 需要配置为字符串 `cli.md`，而 `/2025/blog-b/README.md` 则可配置为字符串 `README.md` 或布尔值 `true`。本字段支持语言扩展。
+- `file` _字符串 或 布尔值 *_：Markdown 文件名（含扩展名）。当文件名为 `README.md` 时，此字段可设为布尔值 `true` 以简化书写；当仅访问路径而无文件名时亦能获取到该 Markdown 格式内容时，可设为布尔值 `false`。例如，前面示例中 `/tools/cli.md` 需要配置为字符串 `cli.md`，而 `/2025/blog-b/README.md` 则可配置为字符串 `README.md` 或布尔值 `true`。本字段支持语言扩展。
 - `keywords` _字符串数组_：关键词列表。该列表中的项，可以是本配置文件中 `$defs.keywords` 字段下，各数组中其中一项的 `value` 值，此时会自动读取其尽可能适用于本地语言的 `name` 值进行呈现。
 - `author`
   - _字符串_：当只有一个作者时，可以为字符串，此时内容即为作者的姓名或显示名，如果配置文件 `$defs.contributors` 字段中包含了该作者，则会自动关联。
