@@ -164,7 +164,7 @@ namespace DeepX.MdBlogs {
                     definitions: defs,
                 });
             }).filter(function (blog) {
-                if (!blog || !blog.dateObj || !blog.getPath()) return false;
+                if (!blog || !blog.getPath()) return false;
                 blog.children();
                 return true;
             });

@@ -36,16 +36,15 @@
             "disable": "label",
             "name": "Accessories",
             "name#zh": "附加库"
-        },
+        }
+    ],
+    "hiddenArticles": [
         {
             "name": "MdBlogs",
             "dir": "mdblogs",
             "file": true,
             "end": true
         }
-
-    ],
-    "hiddenArticles": [
     ],
     "redir": {
         "install": "installation",

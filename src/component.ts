@@ -198,6 +198,19 @@ export class BaseComponent {
     }
 
     /**
+     * Gets the data of model.
+     * @param childKey The child key; or null for the current component.
+     * @returns The data in the specific model.
+     */
+    protected childModelData(childKey: string) {
+        const context = this.childContext(childKey);
+        if (!context) return undefined;
+        const m = context.model();
+        if (!m) return undefined;
+        return m.data;
+    }
+
+    /**
      * Gets or sets the style information of the specific child.
      * @param childKey The child key; or null for the current component.
      * @param style The inner style object.

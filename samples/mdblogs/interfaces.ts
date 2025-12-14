@@ -245,6 +245,8 @@ namespace DeepX.MdBlogs {
         year?: IArticleYearConfig & string;
 
         /**
+         * A flag to indicate whether reverse the article list to diplay.
+         * 
          * The blog articles in `list` should order by publish `date` ascending (earliest to latest).
          * Sets this field to `true` if the list is sort descending (latest to earlist).
          * Default is `false`.

@@ -66,6 +66,12 @@ declare namespace Hje {
          */
         protected childProps(childKey: string, propKey: string | number | string[] | any, v?: any): any;
         /**
+         * Gets the data of model.
+         * @param childKey The child key; or null for the current component.
+         * @returns The data in the specific model.
+         */
+        protected childModelData(childKey: string): any;
+        /**
          * Gets or sets the style information of the specific child.
          * @param childKey The child key; or null for the current component.
          * @param style The inner style object.

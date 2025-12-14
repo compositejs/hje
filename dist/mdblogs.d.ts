@@ -5,6 +5,13 @@ declare namespace DeepX.MdBlogs {
     export function showElements(show: string[], hide: string[]): void;
     export function codeElements(element: HTMLElement): HTMLElement[];
     export function generateMenu(params: (ArticleInfo | string)[], options?: IArticleMenuOptions): Hje.DescriptionContract;
+    /**
+     * Generates the description model of the specific articles.
+     * @param articles The URL or promise object to fetch articles.
+     * @param filter The handler to filter the articles to display.
+     * @param options Additional options.
+     * @returns A promise object of description model. It is a `ul` element.
+     */
     export function generateMenuPromise(articles: Promise<Articles> | string, filter: "blogs" | "blog" | "docs" | "wiki" | ((articles: Articles) => (ArticleInfo | string)[]), options?: IArticleMenuOptions): Promise<Hje.DescriptionContract>;
     export function generateMenuItem(article: ArticleInfo, level: number, path?: string | ((original: string, article: ArticleInfo) => string), click?: (ev: Event, article: ArticleInfo) => void, options?: ILocalePropOptions): Hje.DescriptionContract;
     export function generateCdnScript(name: string, ver: string, url: string, path: string): {
@@ -96,6 +103,12 @@ declare namespace DeepX.MdBlogs {
             mkt?: string | boolean;
         }): ArticleInfo;
     }
+    /**
+     * Loads the collection and config of articles.
+     * @param url The URL of article collection and config.
+     * @param fetchHandler An additional handler to fetch markdown file of article.
+     * @returns A promise object of article collection and config.
+     */
     function fetchArticles(url: string, fetchHandler?: ((url: Hje.RelativePathInfo) => Promise<string>)): Promise<Articles>;
 }
 declare namespace DeepX.MdBlogs {
@@ -382,6 +395,14 @@ declare namespace DeepX.MdBlogs {
          * The root display path mode.
          */
         year?: IArticleYearConfig & string;
+        /**
+         * A flag to indicate whether reverse the article list to diplay.
+         *
+         * The blog articles in `list` should order by publish `date` ascending (earliest to latest).
+         * Sets this field to `true` if the list is sort descending (latest to earlist).
+         * Default is `false`.
+         */
+        reverse?: boolean;
         [property: string]: any;
     }
     interface IArticlesPartData {
@@ -495,6 +516,13 @@ declare namespace DeepX.MdBlogs {
     }
 }
 declare namespace DeepX.MdBlogs {
+    /**
+     * Renders a markdown blogs UX.
+     * @param element The element to render.
+     * @param data The URL of articles config or the collection of articles.
+     * @param options The options.
+     * @returns The view generating context.
+     */
     function render(element: any, data: string | Articles, options: {
         title?: string | boolean;
         banner?: Hje.DescriptionContract;

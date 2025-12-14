@@ -108,7 +108,7 @@ MdBlogs 内部内使用 Hyper-JSON Engine 作为渲染引擎。其汇总并路�
   - `disableMenu` _布尔值_：指示是否禁用文章内目录。
   - `disableAuthors` _布尔值_：指示是否不显示贡献者信息及发布日期。
 - `docs` _对象数组_：知识库文档列表，支持树形结构。数组中的各项为文档信息（`IArticleInfo`）；数组中也可包含分组标签。
-- `hiddenArticles` _对象数组_：暂不支持本字段。隐藏文档列表，默认不会现实在目录中。数组中的各项为文档信息（`IArticleInfo`）。
+- `hiddenArticles` _对象数组_：隐藏文档列表，默认不会现实在目录中。数组中的各项为文档信息（`IArticleInfo`）。
 - `redir` _对象_：别名路由，其中 key 为预期的路径路由，value 为跳转到的路径路由。
 - `config` _对象_：其它配置信息。
   - `disableName` _布尔值_：首页不显示站点名称。
