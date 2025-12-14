@@ -84,14 +84,6 @@
                 "type": "string"
               }
             },
-            "disableMenu": {
-              "description": "A flag to indicate whether need hide the contents in article",
-              "type": "boolean"
-            },
-            "disableAuthors": {
-              "description": "A flag to indicate whether need hide the authors and publish date in article",
-              "type": "boolean"
-            },
             "reverse": {
               "description": "reverse the article list",
               "type": "boolean"
@@ -136,12 +128,20 @@
       "description": "The mapping of route",
       "type": "object"
     },
-    "config": {
+    "options": {
       "description": "The additional options of website",
       "type": "object",
       "properties": {
         "disableName": {
           "description": "A flag indicating whether hide website name",
+          "type": "boolean"
+        },
+        "disableMenu": {
+          "description": "A flag to indicate whether need hide the contents in article",
+          "type": "boolean"
+        },
+        "disableAuthors": {
+          "description": "A flag to indicate whether need hide the authors and publish date in article",
           "type": "boolean"
         }
       }
@@ -566,6 +566,26 @@
       "properties": {
         "name": {
           "description": "The name",
+          "type": "string"
+        },
+        "name#en": {
+          "description": "English name",
+          "type": "string"
+        },
+        "name#fr": {
+          "description": "French name",
+          "type": "string"
+        },
+        "name#zh": {
+          "description": "Chinese name",
+          "type": "string"
+        },
+        "name#zh-Hans": {
+          "description": "The name in Chinese simplified",
+          "type": "string"
+        },
+        "name#zh-Hant": {
+          "description": "The name in CHinese tranditional",
           "type": "string"
         },
         "value": {

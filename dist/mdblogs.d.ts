@@ -68,8 +68,11 @@ declare namespace DeepX.MdBlogs {
             fetch?: (url: Hje.RelativePathInfo) => Promise<string>;
         });
         get name(): any;
-        get config(): {
+        get description(): any;
+        get options(): {
             disableName?: boolean;
+            disableAuthors?: boolean;
+            disableMenu?: boolean;
         };
         blogsInfo(options?: {
             mkt?: string | boolean;
@@ -78,10 +81,9 @@ declare namespace DeepX.MdBlogs {
             count: number;
             dir: any;
             further: any;
-            disableMenu: boolean;
-            disableAuthors: boolean;
         };
-        getName(options?: ILocalePropOptions): any;
+        getName(options?: ILocalePropOptions<string>): any;
+        getDescription(optional?: ILocalePropOptions<string>): any;
         home(options?: IArticleLocaleOptions): ArticleInfo;
         blogs(options?: IArticleLocaleOptions): ArticleInfo[];
         wiki(options?: IArticleLocaleOptions): (string | ArticleInfo)[];
@@ -384,14 +386,6 @@ declare namespace DeepX.MdBlogs {
          */
         futher?: string[];
         /**
-         * A flag to indicate whether need hide the contents in article.
-         */
-        disableMenu?: boolean;
-        /**
-         * A flag to indicate whether need hide the authors and publish date in article.
-         */
-        disableAuthors?: boolean;
-        /**
          * The root display path mode.
          */
         year?: IArticleYearConfig & string;
@@ -414,7 +408,7 @@ declare namespace DeepX.MdBlogs {
         select?: string;
         store?: any;
         onselect(ev: {
-            model: Hje.DescriptionContract;
+            children: Hje.DescriptionContract[];
             article: ArticleInfo;
             mkt: string | boolean | undefined;
             store: any;
@@ -452,6 +446,10 @@ declare namespace DeepX.MdBlogs {
          */
         name?: string;
         /**
+         * The description of the website.
+         */
+        description?: string;
+        /**
          * The relative URL of home markdown file.
          */
         home?: string;
@@ -476,11 +474,19 @@ declare namespace DeepX.MdBlogs {
         /**
          * The additional options of website.
          */
-        config?: {
+        options?: {
             /**
              * A flag indicating whether hide website name.
              */
             disableName?: boolean;
+            /**
+             * A flag to indicate whether need hide the authors and publish date in article.
+             */
+            disableAuthors?: boolean;
+            /**
+             * A flag to indicate whether need hide the contents in article.
+             */
+            disableMenu?: boolean;
         };
         /**
          * The definitions.

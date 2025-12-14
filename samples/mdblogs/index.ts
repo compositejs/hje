@@ -45,22 +45,30 @@ namespace DeepX.MdBlogs {
             return getLocaleProp(this._inner.data);
         }
 
-        get config() {
-            return this._inner.data.config || {};
+        get description() {
+            return getLocaleProp(this._inner.data, "description")
+        }
+
+        get options() {
+            return this._inner.data.options || {};
         }
 
         blogsInfo(options?: {
             mkt?: string | boolean;
         }) {
-            const { count, disableMenu, disableAuthors } = this._inner.blogConfig;
+            const { count } = this._inner.blogConfig;
             const name = getLocaleProp(this._inner.blogConfig, null, options) || getLocaleProp(this._inner.data, null, options);
             const dir = getLocaleProp(this._inner.blogConfig, "dir");
             const further = getLocaleProp(this._inner.blogConfig, "further");
-            return { name, count, dir, further, disableMenu, disableAuthors };
+            return { name, count, dir, further };
         }
 
-        getName(options?: ILocalePropOptions) {
+        getName(options?: ILocalePropOptions<string>) {
             return getLocaleProp(this._inner.data, null, options);
+        }
+
+        getDescription(optional?: ILocalePropOptions<string>) {
+            return getLocaleProp(this._inner.data, "description", optional);
         }
 
         home(options?: IArticleLocaleOptions) {

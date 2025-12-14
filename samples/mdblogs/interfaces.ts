@@ -232,18 +232,9 @@ namespace DeepX.MdBlogs {
          */
         futher?: string[];
         /**
-         * A flag to indicate whether need hide the contents in article.
-         */
-        disableMenu?: boolean;
-        /**
-         * A flag to indicate whether need hide the authors and publish date in article.
-         */
-        disableAuthors?: boolean;
-        /**
          * The root display path mode.
          */
         year?: IArticleYearConfig & string;
-
         /**
          * A flag to indicate whether reverse the article list to diplay.
          * 
@@ -265,7 +256,7 @@ namespace DeepX.MdBlogs {
         select?: string;
         store?: any;
         onselect(ev: {
-            model: Hje.DescriptionContract;
+            children: Hje.DescriptionContract[];
             article: ArticleInfo;
             mkt: string | boolean | undefined;
             store: any;
@@ -307,6 +298,10 @@ namespace DeepX.MdBlogs {
          */
         name?: string;
         /**
+         * The description of the website.
+         */
+        description?: string;
+        /**
          * The relative URL of home markdown file.
          */
         home?: string;
@@ -331,11 +326,19 @@ namespace DeepX.MdBlogs {
         /**
          * The additional options of website.
          */
-        config?: {
+        options?: {
             /**
              * A flag indicating whether hide website name.
              */
             disableName?: boolean;
+            /**
+             * A flag to indicate whether need hide the authors and publish date in article.
+             */
+            disableAuthors?: boolean;
+            /**
+             * A flag to indicate whether need hide the contents in article.
+             */
+            disableMenu?: boolean;
         };
         /**
          * The definitions.

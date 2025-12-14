@@ -1,6 +1,8 @@
 {
     "$schema": "../../dist/mdblogs.schema.json",
     "name": "Hje",
+    "description": "Hyper-JSON Engine provides a way to describe the view by JavaScript with event and binding. It can render to HTML or customized view by the description model.",
+    "description#zh": "Hyper-JSON Engine 提供一种新的生成界面方式，只需在 JS 中描述文档结构和关键属性即可，也支持事件注册、数据绑定、按需刷新。",
     "docs": [
         {
             "name": "Installation",
@@ -42,6 +44,7 @@
         {
             "name": "MdBlogs",
             "dir": "mdblogs",
+            "author": "Kingcean Tuan",
             "file": true,
             "end": true
         }

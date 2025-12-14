@@ -87,12 +87,19 @@ namespace DeepX.MdBlogs {
             const already = !this.__inner.select;
             this.__inner.select = null;
             const children: Hje.DescriptionContract[] = [];
-            const config = this.__inner.info.config;
+            const config = this.__inner.info.options;
             const options = this.createLocaleOptions();
-            if (!config.disableName) children.push({
-                tagName: "h1",
-                children: this.__inner.info.getName(options)
-            });
+            if (!config.disableName) {
+                children.push({
+                    tagName: "h1",
+                    children: this.__inner.info.getName(options)
+                });
+                children.push({
+                    tagName: "p",
+                    children: this.__inner.info.getDescription(options)
+                });
+            }
+
             const data: IArticlesPartData = this.data || {};
             if (data.banner) children.push(data.banner);
             const part = this.__inner.info.home(options);
@@ -125,7 +132,7 @@ namespace DeepX.MdBlogs {
                 style: { display: "none" }
             });
             scrollToTop();
-            if (typeof data.onselect === "function") data.onhome({
+            if (typeof data.onhome === "function") data.onhome({
                 model,
                 mkt: options?.mkt,
                 store: data.store
@@ -211,7 +218,7 @@ namespace DeepX.MdBlogs {
                     children: subtitle
                 }]
             });
-            const disableAuthors = article.disableAuthors || this.__inner.info.blogsInfo(options).disableAuthors;
+            const disableAuthors = article.disableAuthors || this.__inner.info.options.disableAuthors;
             if (!disableAuthors) {
                 let infoChildren = getMembersModel(toMembers(article.authors?.priorityList()), null, options);
                 if (infoChildren.length > 0) infoModel.children.push({
@@ -248,25 +255,19 @@ namespace DeepX.MdBlogs {
 
             if (infoModel.children.length > 0) children.push(infoModel);
             const mkt = options?.mkt;
+            const data: IArticlesPartData = self.data || {};
             children.push({
                 tagName: "main",
                 children: [
                     { tagName: "em", children: getLocaleString("loading", mkt) }
                 ],
                 onInit(c) {
-                    const config = self.__inner.info.blogsInfo(options);
+                    const config = self.__inner.info.options;
                     article.getContent(options).then(md => {
                         const mdEle = c.element();
                         renderMd(mdEle, md);
                         if (article.disableMenu || config.disableMenu) return;
-                        const model = self.childModel("contents", getContentsModel(mdEle, mkt));
-                        const data: IArticlesPartData = self.data || {};
-                        if (typeof data.onselect === "function") data.onselect({
-                            model,
-                            article,
-                            mkt,
-                            store: data.store
-                        });
+                        self.childModel("contents", getContentsModel(mdEle, mkt));
                     });
                 }
             });
@@ -320,6 +321,12 @@ namespace DeepX.MdBlogs {
                         { "tagName": "span", children: ">" },
                     ]
                 }]
+            });
+            if (typeof data.onselect === "function") data.onselect({
+                children,
+                article,
+                mkt,
+                store: data.store
             });
             super.childModel("content", { children });
             this.__inner.select = article;
