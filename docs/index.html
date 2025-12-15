@@ -108,24 +108,22 @@
                     <span id="text-hint">You can convert a JSON model to HTML view part. Following is a sample.</span>
                 </div>
                 <div class="x-part-code">
+                    <pre><code class="html">&lt;main id=&quot;container-main&quot; &gt;&lt;/main&gt;</code></pre>
+                </div>
+                <div class="x-part-code">
                     <pre><code class="language-typescript">import * as Hje from 'hje';
 
-let ele = document.createElement("div");
-document.body.appendChild(ele);
-
-Hje.render(ele, {
-  props: {
-    type: "circle",
-  },
-  style: {
-    "color": "#808080", "font-size": "14px"
-  },
-  on: {
-    click(ev) { console.log("ul click", ev); }
-  },
+Hje.render("container-main", {
   children: [
     {
       tagName: "ul",
+      styleRefs: "list-alphabet",
+      props: {
+        type: "circle",
+      },
+      on: {
+        click(ev) { console.log("ul click", ev); }
+      },
       children: ["ABCDEFG", "HIJKLMN", "OPQ RST", "UVW XYZ"]
         .map(ele => ({ tag: "li", children: ele }))
     }
