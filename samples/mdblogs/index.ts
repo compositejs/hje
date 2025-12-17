@@ -10,6 +10,7 @@ namespace DeepX.MdBlogs {
             docs?: (ArticleInfo | string)[];
             hidden?: ArticleInfo[];
             home?: ArticleInfo;
+            pageIndex: number;
         };
 
         constructor(data: IArticleCollection, options: {
@@ -38,6 +39,7 @@ namespace DeepX.MdBlogs {
                 path: path,
                 blogConfig, 
                 fetch: options?.fetch,
+                pageIndex: 0,
             };
         }
 
@@ -180,6 +182,45 @@ namespace DeepX.MdBlogs {
             return list;
         }
 
+        async loadMoreBlogs() {
+            const { further, list } = this._inner.blogConfig;
+            if (!further || !(further instanceof Array)) return false;
+            let pg = this._inner.pageIndex;
+            if (pg >= further.length) return false;
+            while (!further[pg]) {
+                pg++;
+                this._inner.pageIndex = pg;
+                if (pg >= further.length) return false;
+            }
+
+            const url = this._inner.path.relative(further[pg])?.value;
+            if (typeof url !== "string") return false;
+            const result = await (hooks.fetchList || fetch)(url);
+            this._inner.pageIndex += 1;
+            if (!result || !result.ok) return false;
+            const json: IArticlePagingModel = await result.json();
+            if (!json || !json.blog || !(json.blog instanceof Array)) return false;
+            const arr = json.blog;
+            const options = json.options || {};
+            if (options.reverse) arr.reverse();
+            this._inner.blogs = undefined;
+            for (let i = 0; i < arr.length; i++) {
+                const item = arr[i];
+                if (!item) continue;
+                let has = false;
+                for (let j = 0; j < list.length; j++) {
+                    const test = list[j];
+                    if (!test) continue;
+                    if (test.date !== item.date || test.file !== item.file || test.dir !== item.dir) continue;
+                    has = true;
+                    break;
+                }
+
+                if (has) continue;
+                list.splice(0, 0, item);
+            }
+        }
+
         get(name: string, options?: {
             mkt?: string | boolean
         }) {
@@ -212,6 +253,10 @@ namespace DeepX.MdBlogs {
             });
             if (list instanceof Array) list.push(info);
             return info;
+        }
+
+        relative(path: string | Hje.RelativePathInfo) {
+            return this._inner.path.relative(path);
         }
 
         some(callback: (item: ArticleInfo, index: number) => boolean, thisArg?: any, options?: {
@@ -288,7 +333,7 @@ namespace DeepX.MdBlogs {
      * @returns A promise object of article collection and config.
      */
     export async function fetchArticles(url: string, fetchHandler?: ((url: Hje.RelativePathInfo) => Promise<string>)) {
-        const resp = await fetch(url);
+        const resp = await (hooks.fetchList || fetch)(url);
         const json = await resp.json();
         return new Articles(json, {
             path: url,

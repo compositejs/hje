@@ -108,6 +108,13 @@ declare namespace Hje {
          */
         removeDisposable(...items: DisposableContract[]): number;
         /**
+         * Appends an element to the end.
+         * @param childKey The child key; or null for the current component.
+         * @param model The description of model to append.
+         * @returns true if append succeeded; otherwise, false.
+         */
+        appendChild(childKey: string, model: Hje.DescriptionContract): boolean;
+        /**
          * Gets or sets a property.
          * @param key The property key.
          * @param value The optional value of the property if need set.

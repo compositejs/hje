@@ -922,6 +922,9 @@ div.placeholder-after-loading:first-child > span::after {
 #blog_content > article > main > table th > code:hover {
     background-color: #090909;
 }
+#blog_content > article > main > div.x-part-blog-notification:first-child {
+    min-height: 320px;
+}
 #blog_content > article > h1 + main.x-part-blog-menu,
 #blog_content > article > main + main.x-part-blog-menu {
     margin-top: 40px;
@@ -931,14 +934,18 @@ div.placeholder-after-loading:first-child > span::after {
     grid-column: 1 / -1;
 }
 #blog_content > article:has(> main.x-part-blog-menu) + aside,
-#blog_content > article:has(> main.x-part-blog-menu) > section.x-part-blog-next {
+#blog_content > article:has(> main.x-part-blog-menu) > section.x-part-blog-next,
+#blog_content > article:has(> main.x-part-blog-menu) > section.x-part-blog-back {
     display: none;
 }
-#blog_content > article > section.x-part-blog-next {
+#blog_content > article > section.x-part-blog-next,
+#blog_content > article > section.x-part-blog-back {
     margin-top: 40px;
 }
 #blog_content > article > section.x-part-blog-next > a,
-#blog_content > article > section.x-part-blog-next > a:visited {
+#blog_content > article > section.x-part-blog-next > a:visited,
+#blog_content > article > section.x-part-blog-back > a,
+#blog_content > article > section.x-part-blog-back > a:visited {
     color: #CCC;
     font-size: 16px;
     line-height: 20px;
@@ -955,7 +962,8 @@ div.placeholder-after-loading:first-child > span::after {
     cursor: pointer;
     transition: 0.4s;
 }
-#blog_content > article > section.x-part-blog-next > a:hover {
+#blog_content > article > section.x-part-blog-next > a:hover,
+#blog_content > article > section.x-part-blog-back > a:hover {
     color: #EEE;
     text-decoration: none;
     background-color: rgba(128, 128, 128, 0.2);
@@ -964,7 +972,8 @@ div.placeholder-after-loading:first-child > span::after {
     transition: 0.1s;
 }
 #blog_content > article > section.x-part-blog-next > a:first-child > span,
-#blog_content > article > section.x-part-blog-next > a:last-child > span:last-child {
+#blog_content > article > section.x-part-blog-next > a:last-child > span:last-child,
+#blog_content > article > section.x-part-blog-back > a:last-child > span:first-child {
     color: transparent;
 }
 #blog_content > article > section.x-part-blog-next > a:first-child,
@@ -985,6 +994,15 @@ div.placeholder-after-loading:first-child > span::after {
     width: 110px;
     padding-right: 19px;
 }
+#blog_content > article > section.x-part-blog-back > a:first-child,
+#blog_content > article > section.x-part-blog-back > a:first-child:visited {
+    background-image: url(https://cdn.jsdelivr.net/npm/hje@2.2.0/docs/images/ele/left_pos_white.png);
+    background-repeat: no-repeat;
+    background-size: 16px;
+    background-position: left 12px center;
+    width: 110px;
+    padding-left: 19px;
+}
 #blog_content > article > section.x-part-blog-next > a:first-child:hover {
     background-position: left 36px center;
     width: 85px;
@@ -994,6 +1012,11 @@ div.placeholder-after-loading:first-child > span::after {
     background-position: right 8px center;
     width: 115px;
     padding-right: 14px;
+}
+#blog_content > article > section.x-part-blog-back > a:first-child:hover {
+    background-position: left 8px center;
+    width: 115px;
+    padding-left: 14px;
 }
 #blog_content > article > section.x-part-blog-next > a:first-child:active {
     background-position: left 38px center;
@@ -1005,7 +1028,13 @@ div.placeholder-after-loading:first-child > span::after {
     width: 110px;
     padding-right: 19px;
 }
-#blog_content > article > section.x-part-blog-next > a:active {
+#blog_content > article > section.x-part-blog-back > a:first-child:active {
+    background-position: left 10px center;
+    width: 110px;
+    padding-left: 19px;
+}
+#blog_content > article > section.x-part-blog-next > a:active,
+#blog_content > article > section.x-part-blog-back > a:active {
     color: #9EF;
     background-color: rgba(128, 128, 128, 0.08);
     text-decoration: none;
@@ -1013,7 +1042,8 @@ div.placeholder-after-loading:first-child > span::after {
     box-shadow: #111 0 0 4px;
     transition: 0.1s;
 }
-#blog_content > article > section.x-part-blog-next > a:disabled {
+#blog_content > article > section.x-part-blog-next > a:disabled,
+#blog_content > article > section.x-part-blog-back > a:disabled {
     color: #999;
     background-color: rgba(128, 128, 128, 0.01);
     text-decoration: none;

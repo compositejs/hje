@@ -1,6 +1,7 @@
 declare namespace DeepX.MdBlogs {
     export const hooks: {
         renderMd: ((element: HTMLElement, md: string) => void);
+        fetchList: ((input: RequestInfo | URL, init?: RequestInit) => Promise<Response>);
     };
     export function showElements(show: string[], hide: string[]): void;
     export function codeElements(element: HTMLElement): HTMLElement[];
@@ -88,10 +89,12 @@ declare namespace DeepX.MdBlogs {
         blogs(options?: IArticleLocaleOptions): ArticleInfo[];
         wiki(options?: IArticleLocaleOptions): (string | ArticleInfo)[];
         hiddenArticles(options?: IArticleLocaleOptions): ArticleInfo[];
+        loadMoreBlogs(): Promise<boolean>;
         get(name: string, options?: {
             mkt?: string | boolean;
         }): ArticleInfo;
         genInfo(article: IArticleInfo, list?: ArticleInfo[] | any[]): ArticleInfo;
+        relative(path: string | Hje.RelativePathInfo): Hje.RelativePathInfo;
         some(callback: (item: ArticleInfo, index: number) => boolean, thisArg?: any, options?: {
             mkt?: string | boolean;
         }): boolean;
@@ -384,7 +387,7 @@ declare namespace DeepX.MdBlogs {
         /**
          * The relative paths of all rest articles in pages.
          */
-        futher?: string[];
+        further?: string[];
         /**
          * The root display path mode.
          */
@@ -439,6 +442,25 @@ declare namespace DeepX.MdBlogs {
          */
         contributors?: IContributorInfo[];
         [property: string]: any;
+    }
+    interface IArticlePagingModel {
+        /**
+         * All blog articles.
+         */
+        blog: IArticleInfo[];
+        /**
+         * Options of this paging model.
+         */
+        options?: {
+            /**
+             * A flag to indicate whether reverse the article list to diplay.
+             *
+             * The blog articles in `list` should order by publish `date` ascending (earliest to latest).
+             * Sets this field to `true` if the list is sort descending (latest to earlist).
+             * Default is `false`.
+             */
+            reverse?: boolean;
+        };
     }
     interface IArticleCollection {
         /**
@@ -533,6 +555,17 @@ declare namespace DeepX.MdBlogs {
         title?: string | boolean;
         banner?: Hje.DescriptionContract;
         supplement?: Hje.DescriptionContract;
+        onselect?(ev: {
+            children: Hje.DescriptionContract[];
+            article: ArticleInfo;
+            mkt: string | boolean | undefined;
+            store: any;
+        }): void;
+        onhome?(ev: {
+            model: Hje.DescriptionContract;
+            mkt: string | boolean | undefined;
+            store: any;
+        }): void;
     }): Hje.ViewGeneratingContextContract<any>;
 }
 declare namespace DeepX.MdBlogs {

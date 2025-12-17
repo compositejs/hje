@@ -230,7 +230,7 @@ namespace DeepX.MdBlogs {
         /**
          * The relative paths of all rest articles in pages.
          */
-        futher?: string[];
+        further?: string[];
         /**
          * The root display path mode.
          */
@@ -290,6 +290,26 @@ namespace DeepX.MdBlogs {
         contributors?: IContributorInfo[];
 
         [property: string]: any;
+    }
+
+    export interface IArticlePagingModel {
+        /**
+         * All blog articles.
+         */
+        blog: IArticleInfo[];
+        /**
+         * Options of this paging model.
+         */
+        options?: {
+            /**
+             * A flag to indicate whether reverse the article list to diplay.
+             * 
+             * The blog articles in `list` should order by publish `date` ascending (earliest to latest).
+             * Sets this field to `true` if the list is sort descending (latest to earlist).
+             * Default is `false`.
+             */
+            reverse?: boolean;
+        }
     }
 
     export interface IArticleCollection {

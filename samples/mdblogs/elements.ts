@@ -1,6 +1,7 @@
 namespace DeepX.MdBlogs {
     export const hooks = {
         renderMd: undefined as ((element: HTMLElement, md: string) => void),
+        fetchList: undefined as ((input: RequestInfo | URL, init?: RequestInit) => Promise<Response>),
     };
 
     export function showElements(show: string[], hide: string[]) {

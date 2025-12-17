@@ -289,6 +289,26 @@ export class BaseComponent {
     }
 
     /**
+     * Appends an element to the end.
+     * @param childKey The child key; or null for the current component.
+     * @param model The description of model to append.
+     * @returns true if append succeeded; otherwise, false.
+     */
+    appendChild(childKey: string, model: Hje.DescriptionContract) {
+        const context = this.childContext(childKey);
+        if (!context || !model) return false;
+        let m = context.model();
+        if (!m) return false;
+        if (!m.children) m.children = [model];
+        else if (m.children instanceof Array) m.children.push(model);
+        else return false;
+        const view = render(undefined, model);
+        const h = viewGenerator();
+        h.append(context.element(), view.element());
+        return true;
+    }
+
+    /**
      * Gets or sets a property.
      * @param key The property key.
      * @param value The optional value of the property if need set.

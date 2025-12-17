@@ -139,6 +139,7 @@ namespace DeepX.MdBlogs {
             });
             this.refreshMenu();
             if (!already) this.lifecycle()?.onhome?.(this);
+            this.__inner.info.loadMoreBlogs();
         }
 
         select(article?: ArticleInfo | string) {
@@ -258,16 +259,31 @@ namespace DeepX.MdBlogs {
             const data: IArticlesPartData = self.data || {};
             children.push({
                 tagName: "main",
-                children: [
-                    { tagName: "em", children: getLocaleString("loading", mkt) }
-                ],
+                children: [{
+                    tagName: "div",
+                    styleRefs: "x-part-blog-notification",
+                    children: [{ tagName: "em", children: getLocaleString("loading", mkt) }]
+                }],
                 onInit(c) {
+                    const cm = c.model();
+                    if (!cm || !cm.children || cm.data?.state) return;
+                    cm.data = { state: "pending" };
                     const config = self.__inner.info.options;
                     article.getContent(options).then(md => {
+                        cm.data.state = "render";
                         const mdEle = c.element();
                         renderMd(mdEle, md);
+                        cm.data.state = "done";
                         if (article.disableMenu || config.disableMenu) return;
                         self.childModel("contents", getContentsModel(mdEle, mkt));
+                    }, err => {
+                        cm.data.state = "error";
+                        cm.children = [{
+                            tagName: "div",
+                            styleRefs: "x-part-blog-notification",
+                            children: [{ tagName: "em", children: getLocaleString("loadFailed") }]
+                        }];
+                        c.refresh();
                     });
                 }
             });
@@ -281,21 +297,23 @@ namespace DeepX.MdBlogs {
                 styleRefs: "x-part-blog-related",
                 children: related
             });
-            children.push({
+            const previous = this.__inner.info?.previousArticle(article, options);
+            const next = this.__inner.info?.nextArticle(article, options);
+            const parent = this.__inner.info?.parentArticle(article, options);
+            if (previous || next) children.push({
                 tagName: "section",
                 styleRefs: "x-part-blog-next",
                 children: [{
                     tagName: "a",
                     props: {
                         href: "javascript:void(0)",
-                        title: getLocaleString("previous", mkt)
+                        title: tipArticleName("previous", previous, options)
                     },
                     on: {
                         click(ev) {
                             ev.preventDefault();
-                            if (self.previous() !== undefined) return;
-                            if (self.parent() !== undefined) return;
-                            self.home();
+                            if (previous) self.select(previous);
+                            else self.home();
                         }
                     },
                     children: [
@@ -306,19 +324,40 @@ namespace DeepX.MdBlogs {
                     tagName: "a",
                     props: {
                         href: "javascript:void(0)",
-                        title: getLocaleString("next", mkt)
+                        title: tipArticleName("next", next, options)
                     },
                     on: {
                         click(ev) {
                             ev.preventDefault();
-                            if (self.next() !== undefined) return;
-                            if (self.parent() !== undefined) return;
-                            self.home();
+                            if (next) self.select(next);
+                            else self.home();
                         }
                     },
                     children: [
                         { "tagName": "span", children: getLocaleString("next", mkt) },
                         { "tagName": "span", children: ">" },
+                    ]
+                }]
+            });
+            else children.push({
+                tagName: "section",
+                styleRefs: "x-part-blog-back",
+                children: [{
+                    tagName: "a",
+                    props: {
+                        href: "javascript:void(0)",
+                        title: tipArticleName("back", parent, options)
+                    },
+                    on: {
+                        click(ev) {
+                            ev.preventDefault();
+                            if (parent) self.select(parent);
+                            else self.home();
+                        }
+                    },
+                    children: [
+                        { "tagName": "span", children: "<" },
+                        { "tagName": "span", children: getLocaleString("back", mkt) },
                     ]
                 }]
             });
@@ -731,5 +770,13 @@ namespace DeepX.MdBlogs {
                 }]
             });
         }
+    }
+
+    function tipArticleName(key: string, article: ArticleInfo, options?: ILocalePropOptions) {
+        key = getLocaleString("previous", options?.mkt);
+        if (!article) return key;
+        const name = article.getName(options);
+        if (!name) return key;
+        return `${key}\n${name}`;
     }
 }

@@ -77,7 +77,7 @@
               "description": "The relative path of root directory of blog articles",
               "type": "string"
             },
-            "futher": {
+            "further": {
               "description": "The relative paths of all rest articles in pages",
               "type": "array",
               "items": {
