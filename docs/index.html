@@ -104,21 +104,23 @@
                     <pre><code class="language-typescript">import * as Hje from 'hje';
 
 Hje.render("container-main", {
-  children: [
-    {
-      tagName: "ul",
-      styleRefs: "list-alphabet",
-      props: {
-        type: "circle",
-      },
-      on: {
-        click(ev) { console.log("ul click", ev); }
-      },
-      children: ["ABCDEFG", "HIJKLMN", "OPQ RST", "UVW XYZ"]
-        .map(ele => ({ tag: "li", children: ele }))
-    }
-  ]
-});</code></pre>
+  children: [{
+    tagName: "h2",
+    on: {
+      click(ev) { console.log("title clicked", ev); }
+    },
+    children: "Alphabet"
+  }, {
+    tagName: "ul",
+    styleRefs: "list-alphabet",
+    props: {
+      type: "circle",
+    },
+    children: ["ABCDEFG", "HIJKLMN", "OPQ RST", "UVW XYZ"]
+      .map(ele => ({ tag: "li", children: ele }))
+  }]
+});
+</code></pre>
                 </div>
             </div>
         </section>

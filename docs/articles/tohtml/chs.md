@@ -15,20 +15,21 @@ import * as Hje from 'hje';
 
 // 用描述性语言，在指定元素中执行渲染。
 Hje.render("container-main", {
-  children: [
-    {
-      tagName: "ul",
-      styleRefs: "list-alphabet",
-      props: {
-        type: "circle",
-      },
-      on: {
-        click(ev) { console.log("ul click", ev); }
-      },
-      children: ["ABCDEFG", "HIJKLMN", "OPQ RST", "UVW XYZ"]
-        .map(ele => ({ tag: "li", children: ele }))
-    }
-  ]
+  children: [{
+    tagName: "h2",
+    on: {
+      click(ev) { console.log("title clicked", ev); }
+    },
+    children: "Alphabet"
+  }, {
+    tagName: "ul",
+    styleRefs: "list-alphabet",
+    props: {
+      type: "circle",
+    },
+    children: ["ABCDEFG", "HIJKLMN", "OPQ RST", "UVW XYZ"]
+      .map(ele => ({ tag: "li", children: ele }))
+  }]
 });
 ```
 
@@ -37,7 +38,21 @@ Hje.render("container-main", {
 - 第一个参数为 DOM 元素或其 ID，示例中指示以前面特定 DOM 为渲染元素。如果是希望在 `body` 内的结尾处直接新增一个 `div` 元素，也可以传入 `Hje.appendElement(null)`，这里面的 `null` 也可以替换成任意一个预期放入的父容器 DOM 元素或其 ID。
 - 第二个参数是一个描述结构，符合 `DescriptionContract` 接口，用于以类似 JSON 的形式说明其内部元素布局构造，并可绑定相关事件。
 
-本方法返回一个 `ViewGeneratingContextContract<T>` 结构体。
+本方法返回一个 `ViewGeneratingContextContract<T>` 结构体，并在页面中最终渲染出如下 HTML 结构。
+
+```html
+<main id="container-main">
+  <h2>Alphabet</h2>
+  <ul>
+    <li>ABCDEFG</li>
+    <li>HIJKLMN</li>
+    <li>OPQ RST</li>
+    <li>UVW XYZ</li>
+  </ul>
+</main>
+```
+
+另，上述 `h2` 还绑有 `click` 事件。
 
 ## `DescriptionContract`
 
