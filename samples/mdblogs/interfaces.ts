@@ -201,7 +201,12 @@ namespace DeepX.MdBlogs {
                 url: string;
                 maxHeight?: number;
                 cover?: boolean;
-            }
+            },
+
+            /**
+             * The additional kind of article for filter.
+             */
+            kind: string[] | string;
         };
 
         [property: string]: any;

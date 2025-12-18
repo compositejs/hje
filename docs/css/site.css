@@ -494,22 +494,57 @@ div.placeholder-after-loading:first-child > span::after {
     border: 1px solid rgba(128, 128, 128, 0.4);
     padding: 3px;
 }
-#blog_content > article > main > pre {
-    max-width: 640px;;
-    background-color: rgba(128, 128, 128, 0.1);
+#blog_content > article > main > pre,
+#blog_content > article > main p > pre,
+#blog_content > article > main li > pre,
+#blog_content > article > main table th > pre,
+#blog_content > article > main table td > pre {
+    max-width: 640px;
+    background-color: #111;
     padding: 9px;
-    border: 1px solid transparent;
+    border: 1px solid #333;
     border-radius: 4px;
     overflow-x: auto;
     transition: 0.4s;
     scrollbar-color: rgba(128, 128, 128, 0.2) transparent;
 }
-#blog_content > article > main > pre:hover {
-    border-color: rgba(128, 128, 128, 0.2);
+#blog_content > article > main > pre:hover,
+#blog_content > article > main p > pre:hover,
+#blog_content > article > main li > pre:hover,
+#blog_content > article > main table th > pre:hover,
+#blog_content > article > main table td > pre:hover {
+    background-color: #090909;
+    border-color: #444;
     transition: 0.2s;
 }
-#blog_content > article > main > pre:has(> code.hljs) {
+#blog_content > article > main > pre > code.hljs,
+#blog_content > article > main p > pre > code.hljs,
+#blog_content > article > main li > pre > code.hljs,
+#blog_content > article > main table th > pre > code.hljs,
+#blog_content > article > main table td > pre > code.hljs {
+    background-color: transparent;
+}
+#blog_content > article > main > pre:has(> code.hljs),
+#blog_content > article > main p > pre:has(> code.hljs),
+#blog_content > article > main li > pre:has(> code.hljs),
+#blog_content > article > main table th > pre:has(> code.hljs),
+#blog_content > article > main table td > pre:has(> code.hljs) {
     padding: 0;
+}
+#blog_content > article > main p > code,
+#blog_content > article > main li > code,
+#blog_content > article > main > table td > code,
+#blog_content > article > main > table th > code {
+    background-color: #111;
+    padding: 0 4px;
+    border-radius: 4px;
+    transition: 0.2s;
+}
+#blog_content > article > main p > code:hover,
+#blog_content > article > main li > code:hover,
+#blog_content > article > main > table td > code:hover,
+#blog_content > article > main > table th > code:hover {
+    background-color: #090909;
 }
 #blog_content > article > main > div.x-part-blog-notification:first-child {
     min-height: 320px;

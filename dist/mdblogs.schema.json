@@ -28,6 +28,10 @@
       "description": "The website name in Chinese tranditional",
       "type": "string"
     },
+    "name#ja": {
+      "description": "The website name in Japanese",
+      "type": "string"
+    },
     "home": {
       "description": "The relative URL of home markdown file",
       "type": "string"
@@ -50,6 +54,10 @@
     },
     "home#zh-Hant": {
       "description": "The relative URL of home markdown file in Chinese tranditional",
+      "type": "string"
+    },
+    "home#ja": {
+      "description": "The relative URL of home markdown file in Japanese",
       "type": "string"
     },
     "blogs": {
@@ -220,6 +228,10 @@
           "description": "The name of article in Chinese tranditional",
           "type": "string"
         },
+        "name#ja": {
+          "description": "The name of article in Japanese",
+          "type": "string"
+        },
         "disable": {
           "description": "A flag indicate whether disable this article",
           "anyOf": [
@@ -292,6 +304,10 @@
           "description": "The relative directory path with the article markdown file in Chinese tranditional",
           "type": "string"
         },
+        "dir#ja": {
+          "description": "The relative directory path with the article markdown file in Japanese",
+          "type": "string"
+        },
         "file": {
           "description": "The file name of the article markdown file",
           "anyOf": [
@@ -354,6 +370,18 @@
         },
         "file#zh-Hant": {
           "description": "The file name of the article markdown file in Chinese tranditional",
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "description": "true for README.md (default value) or false for no file name",
+              "type": "boolean"
+            }
+          ]
+        },
+        "file#ja": {
+          "description": "The file name of the article markdown file in Japanese",
           "anyOf": [
             {
               "type": "string"
@@ -536,7 +564,7 @@
         },
         "options": {
           "description": "The options of the article",
-          "type": "string",
+          "type": "object",
           "properties": {
               "disableMenu": {
                   "description": "A flag to indicate whether need hide the contents in article",
@@ -556,6 +584,13 @@
                       "type": "object"
                     }
                   ]
+              },
+              "kind": {
+                "description": "The additional kind of article for filter",
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
               }
           }
         }
@@ -585,7 +620,11 @@
           "type": "string"
         },
         "name#zh-Hant": {
-          "description": "The name in CHinese tranditional",
+          "description": "The name in Chinese tranditional",
+          "type": "string"
+        },
+        "name#ja": {
+          "description": "The name in Japanese",
           "type": "string"
         },
         "value": {

@@ -4,47 +4,78 @@ var curSite = {};
 
     curSite.listModel = function (list, element) {
         if (!list) return undefined;
-        let m = {
-            tagName: "section",
-            children: list.map(function (item) {
-                if (!item || !item.name || !item.url) return undefined;
-                let text = [{ tagName: "span", children: item.name }];
-                if (item.desc) {
-                    text.push({ tagName: "br" });
-                    text.push({
-                        tagName: "span",
-                        children: [{ tagName: "span", children: item.desc }]
-                    });
-                } else if (item.subtitle) {
-                    text.push({ tagName: "span", children: item.subtitle });
-                }
-                return {
-                    tagName: "a",
-                    props: { href: item.url },
-                    styleRefs: "link-long-button",
-                    children: text
-                };
-            }).filter(function (item) {
-                return item;
-            })
+        const m = {
+            tagName: "section"
         };
-        if (element) {
-            if (typeof element === "string") element = document.getElementById(element);
-            if (element.tagName) Hje.render(element, m);
+        if (list === true) {
+            m.children = [{
+                tagName: "em",
+                styleRefs: "x-part-blog-notification",
+                children: DeepX.MdBlogs.getLocaleString("loading")
+            }];
+            const context = element ? Hje.render(element, m) : undefined;
+            DeepX.MdBlogs.fetchArticles("./articles/config.json").then(function (articles) {
+                list = articles.wiki().filter(function (article) {
+                    return article instanceof DeepX.MdBlogs.ArticleInfo && article.isKind("featured");
+                }).map(function (article) {
+                    return {
+                        name: article.name,
+                        subtitle: article.subtitle,
+                        desc: article.intro,
+                        url: "./articles/?" + article.getRoutePath()
+                    }
+                });
+                m.children = generateHomeMenuModel(list);
+                if (context) context.refresh();
+                return m;
+            }, function (error) {
+                m.children = [{
+                    tagName: "em",
+                    styleRefs: "x-part-blog-notification",
+                    children: DeepX.MdBlogs.getLocaleString("loadFailed")
+                }];
+                if (context) context.refresh();
+            });
+            return m;
         }
-
+        m.children = generateHomeMenuModel(list);
+        if (element) Hje.render(element, m);
         return m;
     };
 
+    function generateHomeMenuModel(list) {
+        return list.map(function (item) {
+            if (!item || !item.name || !item.url) return undefined;
+            const text = [{ tagName: "span", children: DeepX.MdBlogs.getLocaleProp(item) }];
+            if (item.desc) {
+                text.push({ tagName: "br" });
+                text.push({
+                    tagName: "span",
+                    children: [{ tagName: "span", children: DeepX.MdBlogs.getLocaleProp(item, "desc") }]
+                });
+            } else if (item.subtitle) {
+                text.push({ tagName: "span", children: DeepX.MdBlogs.getLocaleProp(item, "subtitle") });
+            }
+            return {
+                tagName: "a",
+                props: { href: DeepX.MdBlogs.getLocaleProp(item, "url") },
+                styleRefs: "link-long-button",
+                children: text
+            };
+        }).filter(function (item) {
+            return item;
+        });
+    }
+
     curSite.initHome = function (config) {
-        let installStr = DeepX.MdBlogs.setElementText("title-install", "installation");
+        const installStr = DeepX.MdBlogs.setElementText("title-install", "installation");
         DeepX.MdBlogs.setElementText("title-features", "features");
         DeepX.MdBlogs.setElementText("title-source", "sourceCode");
         DeepX.MdBlogs.setElementText("link-install", "getDetails");
         if (!config || !config.name) return;
 
-        let zh = installStr === "安装";
-        let installModel = [{
+        const zh = installStr === "安装";
+        const installModel = [{
             tagName: "div",
             children: [{
                 tagName: "span",
@@ -59,13 +90,13 @@ var curSite = {};
         }];
         if (!config.cdn) config.cdn = ["https://cdn.jsdelivr.net/npm/", "https://unpkg.com/"];
         for (let i = 0; i < config.cdn.length; i++) {
-            let url = config.cdn[i];
+            const url = config.cdn[i];
             if (!url) continue;
-            let cdnM = DeepX.MdBlogs.generateCdnScript(config.name, config.version, url, config.path);
+            const cdnM = DeepX.MdBlogs.generateCdnScript(config.name, config.version, url, config.path);
             if (cdnM) installModel.push(cdnM);
         }
 
-        let m = {
+        const m = {
             tagName: "section",
             styleRefs: ["x-part-installation", "x-part-intro"],
             children: [{
@@ -118,7 +149,7 @@ var curSite = {};
             }]
         };
         Hje.render("part-install", m);
-        let tutorial = DeepX.MdBlogs.codeElements("part-tutorial");
+        const tutorial = DeepX.MdBlogs.codeElements("part-tutorial");
         if (tutorial && typeof hljs === "object") {
             for (let i = 0; i < tutorial.length; i++) {
                 hljs.highlightElement(tutorial[i]);

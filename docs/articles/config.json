@@ -21,18 +21,28 @@
         {
             "name": "To HTML",
             "name#zh": "动态生成页面",
+            "intro": "Convert the description model to DOMs with interactive.",
+            "intro#zh": "通过 JS 友好的描述模型，生成具有交互能力的 DOM。",
             "dir": "tohtml",
             "file": true,
             "file#zh": "chs.md",
-            "end": true
+            "end": true,
+            "options": {
+                "kind": ["featured"]
+            }
         },
         {
             "name": "Component",
             "name#zh": "组件",
+            "intro": "Build reusable rich component.",
+            "intro#zh": "创建可复用的富交互组件。",
             "dir": "component",
             "file": true,
             "file#zh": "chs.md",
-            "end": true
+            "end": true,
+            "options": {
+                "kind": ["featured"]
+            }
         },
         {
             "disable": "label",

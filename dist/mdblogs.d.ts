@@ -161,6 +161,8 @@ declare namespace DeepX.MdBlogs {
             mkt?: string | boolean;
         }): (IArticleRelatedLinkItemInfo | string)[];
         children(options?: IArticleLocaleOptions): ArticleInfo[];
+        hasKeyword(test: string): boolean;
+        isKind(test: string): boolean;
         toJSON(): IArticleInfo;
         protected getDirPath(options?: ILocalePropOptions<string>): string;
     }
@@ -361,6 +363,10 @@ declare namespace DeepX.MdBlogs {
                 maxHeight?: number;
                 cover?: boolean;
             };
+            /**
+             * The additional kind of article for filter.
+             */
+            kind: string[] | string;
         };
         [property: string]: any;
     }
@@ -735,6 +741,11 @@ declare namespace DeepX.MdBlogs {
 }
 declare namespace DeepX.MdBlogs {
     function setElementProp(element: HTMLElement | string, key: string | null, value: any): void;
+    function batchSetElementProp(list: {
+        element: HTMLElement | string;
+        key?: string | null;
+        value: any;
+    }[]): void;
     function firstQuery(): string;
     function getLocaleProp<T = any>(obj: T, key?: keyof (T) | null, options?: {
         mkt?: string | boolean;

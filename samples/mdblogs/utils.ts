@@ -6,7 +6,20 @@ namespace DeepX.MdBlogs {
         if (key == null) key = element.innerText = value;
         else if (key === "display" && typeof value === "boolean") key = element.style.display = value ? "" : "none";
         else (element as any)[key] = value;
-    };
+    }
+
+    export function batchSetElementProp(list: {
+        element: HTMLElement | string,
+        key?: string | null,
+        value: any
+    }[]) {
+        if (!list || !(list instanceof Array)) return;
+        for (let i = 0; i < list.length; i++) {
+            const item = list[i];
+            if (!item || !item.element) continue;
+            DeepX.MdBlogs.setElementProp(item.element, item.key, DeepX.MdBlogs.getLocaleProp(item, "value"))
+        }
+    }
 
     export function firstQuery() {
         var id = location.search;

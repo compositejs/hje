@@ -381,6 +381,14 @@ namespace DeepX.MdBlogs {
             return list;
         }
 
+        hasKeyword(test: string) {
+            return isStringInArray(this._inner.data.keywords, test);
+        }
+
+        isKind(test: string) {
+            return isStringInArray(this._inner.data.options?.kind, test);
+        }
+
         toJSON() {
             return this._inner.data;
         }
@@ -398,4 +406,21 @@ namespace DeepX.MdBlogs {
         }
     }
 
+    function isStringInArray(arr: string[] | INameValueModelValue | string, test: string) {
+        if (!test) return false;
+        if (!arr) return false;
+        if (typeof arr === "string") arr = [arr];
+        for (let i = 0; i < arr.length; i++) {
+            let item = arr[i];
+            if (!item) continue;
+            if (typeof item !== "string") {
+                item = item.value;
+                if (!item || typeof item !== "string") continue;
+            }
+
+            if (item === test) return true;
+        }
+
+        return false;
+    }
 }
