@@ -32,6 +32,10 @@
       "description": "The website name in Japanese",
       "type": "string"
     },
+    "description": {
+      "description": "The description of the website",
+      "type": "string"
+    },
     "home": {
       "description": "The relative URL of home markdown file",
       "type": "string"
