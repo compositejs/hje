@@ -37,6 +37,11 @@ const ele = Hje.appendElement(null);
 DeepX.MdBlogs.render(ele, "./config.json", { title: true });
 ```
 
+### 依赖
+
+- MdBlogs 依赖 Hyper-JSON Engine，需自行引用。
+- 在执行 Markdown 渲染时，需要引用并适配对应的渲染函数，通过暴露的 `hooks`，设置其 `renderMd` 回调，其两个入参以此为目标 DOM 和 Markdown 文本，回调无需返回值。
+
 ## 工作模式
 
 MdBlogs 内部内使用 Hyper-JSON Engine 作为渲染引擎。其汇总并路由至对应 Markdown 文件，以此作为页面渲染的内容主体。
@@ -57,7 +62,7 @@ MdBlogs 内部内使用 Hyper-JSON Engine 作为渲染引擎。其汇总并路�
 
 假设需要同时支持博客和知识库：其中，博客有3篇，包括2024年一篇和2025年两篇；知识库也是3篇。
 
-### 文件目录目录
+### 文件目录结构
 
 所有的文章需要放置在目录中，建议为每一篇文章创建文件夹，并将内附图片也放置于对应文件夹或子文件夹内。
 
@@ -87,7 +92,7 @@ MdBlogs 内部内使用 Hyper-JSON Engine 作为渲染引擎。其汇总并路�
 - 同样的，知识库文章《介绍》被放置于自身独立目录 `intro` 中，且命名为经典的 `README.md`；
 - 于此同时，另外两篇知识库文章则放置于同一个目录 `tools` 中，并分别有不同的文件名 `cli.md` 和 `gui.md`。
 
-### 配置文件
+### 配置文件填写
 
 在 `config.json` 中，配置以下内容，将这些文章引入进来，并添加更多附加信息。其中，
 
@@ -96,35 +101,39 @@ MdBlogs 内部内使用 Hyper-JSON Engine 作为渲染引擎。其汇总并路�
 
 ```json
 {
-  "blog": [{
-    "name": "博客 A",
-    "date": "20241020",
-    "dir": "blog-a",
-    "file": true
-  }, {
-    "name": "博客 B",
-    "date": "20250201",
-    "dir": "blog-b",
-    "file": true
-  }, {
-    "name": "博客 C",
-    "date": "20250201",
-    "dir": "blog-c",
-    "file": "article.md"
-  }],
-  "docs": [{
-    "name": "介绍",
-    "dir": "intro",
-    "file": true
-  }, {
-    "name": "CLI",
-    "dir": "tools",
-    "file": "cli.md"
-  }, {
-    "name": "GUI",
-    "dir": "tools",
-    "file": "gui.md"
-  }]
+  "blog": [
+    {
+      "name": "博客 A",
+      "date": "20241020",
+      "dir": "blog-a",
+      "file": true
+    }, {
+      "name": "博客 B",
+      "date": "20250201",
+      "dir": "blog-b",
+      "file": true
+    }, {
+      "name": "博客 C",
+      "date": "20250201",
+      "dir": "blog-c",
+      "file": "article.md"
+    }
+  ],
+  "docs": [
+    {
+      "name": "介绍",
+      "dir": "intro",
+      "file": true
+    }, {
+      "name": "CLI",
+      "dir": "tools",
+      "file": "cli.md"
+    }, {
+      "name": "GUI",
+      "dir": "tools",
+      "file": "gui.md"
+    }
+  ]
 }
 ```
 
@@ -141,7 +150,7 @@ MdBlogs 内部内使用 Hyper-JSON Engine 作为渲染引擎。其汇总并路�
 | CLI | `?tools/cli` | `/tools/cli.md` |
 | GUI | `?tools/gui` | `/tools/gui.md` |
 
-## 配置文件
+## 配置文件说明
 
 配置文件采用 JSON 格式，其描述了该博客或知识库的基本信息，以及罗列了所有文档。
 
