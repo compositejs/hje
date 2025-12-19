@@ -53,7 +53,7 @@
             "name": "MdBlogs",
             "dir": "mdblogs",
             "file": true,
-            "end": true
+            "end": "End of Article"
         }
     ],
     "hiddenArticles": [

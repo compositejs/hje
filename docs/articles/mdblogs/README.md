@@ -14,7 +14,6 @@ npm i hje
 
 首先，需要在本地安装 Hyper-JSON Engine 包，然后可以在其 `hje/dist/mdblogs` 引入所有相关业务能力。
 
-如果
 ```typescript
 import { * as Hje } from "hje";
 import { render as renderMdBlogs } from "hje/dist/mdblogs";
@@ -96,11 +95,12 @@ MdBlogs 内部内使用 Hyper-JSON Engine 作为渲染引擎。其汇总并路�
 
 在 `config.json` 中，配置以下内容，将这些文章引入进来，并添加更多附加信息。其中，
 
-- 博客均放置于 `blog` 字段中，该字段是个数组，里面元素均为对象，通过配置 `name` 为文章名、`dir` 为目录名（不含年份）、`file` 为文件名（如果为 `README.md` 可简写为布尔值 true）、`date` 为发布日期（采用 `YYYYMMDD` 格式），另外还可以有作者姓名 `author`、关键词 `keywords`、简介 `intro` 等可选字段。
-- 知识库文章放置于 `docs` 字段中，结构与博客的类似，不过其内元素 `date` 不再为必选而是可选，以及 `dir` 目录需要是完整的相对路径，以及知识库文章支持树形结构，通过 `children` 字段，来放置子文章对象结构数组。
+- 博客均放置于 `blog` 字段中，该字段是个数组，里面元素均为对象，通过配置 `name` 为文章名、`dir` 为目录名（不含年份）、`file` 为文件名（如果为 `README.md` 可简写为布尔值 true）、`date` 为发布日期（采用 `YYYYMMDD` 格式），另外还可以有作者姓名 `author`、关键词 `keywords`、简介 `intro` 等可选字段。博客文章按照从早到新顺序排列，展示时会自动以此进行倒序。
+- 知识库文章放置于 `docs` 字段中，结构与博客的类似，不过其内元素 `date` 不再为必选而是可选，以及 `dir` 目录需要是完整的相对路径。另外，知识库文章支持树形结构，通过在需要设置子文章的文章结构中，新增 `children` 字段，值为数组，放置各子文章对象结构。
 
 ```json
 {
+  "name": "示例站点",
   "blog": [
     {
       "name": "博客 A",
@@ -136,6 +136,21 @@ MdBlogs 内部内使用 Hyper-JSON Engine 作为渲染引擎。其汇总并路�
   ]
 }
 ```
+
+### 目录呈现
+
+- 介绍
+- CLI
+- GUI
+
+> 2025
+
+- 博客 C
+- 博客 B
+
+> 2024
+
+- 博客 A
 
 ### 页面路由映射
 
