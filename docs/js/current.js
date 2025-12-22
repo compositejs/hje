@@ -15,7 +15,7 @@ var curSite = {};
             }];
             const context = element ? Hje.render(element, m) : undefined;
             DeepX.MdBlogs.fetchArticles("./articles/config.json").then(function (articles) {
-                list = articles.wiki().filter(function (article) {
+                list = articles.docs().filter(function (article) {
                     return article instanceof DeepX.MdBlogs.ArticleInfo && article.isKind("featured");
                 }).map(function (article) {
                     return {
