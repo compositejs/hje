@@ -271,6 +271,11 @@ namespace DeepX.MdBlogs {
             mkt: string | boolean | undefined;
             store: any;
         }): void;
+        onfetch?(ev: {
+            articles: Articles
+            mkt: string | boolean | undefined;
+            store: any;
+        }): void;
     }
 
     export interface IArticleInfoOptions {

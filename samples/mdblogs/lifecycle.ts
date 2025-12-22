@@ -6,10 +6,15 @@ namespace DeepX.MdBlogs {
      * @param options The options.
      * @returns The view generating context.
      */
-    export function render(element: any, data: string | Articles, options: {
+    export function render(element: any, data: string | Articles, options?: {
         title?: string | boolean;
         banner?: Hje.DescriptionContract;
         supplement?: Hje.DescriptionContract;
+        onfetch?(ev: {
+            articles: Articles
+            mkt: string | boolean | undefined;
+            store: any;
+        }): void;
         onselect?(ev: {
             children: Hje.DescriptionContract[];
             article: ArticleInfo;
@@ -55,6 +60,7 @@ namespace DeepX.MdBlogs {
             supplement: options.supplement,
             onselect: options.onselect,
             onhome: options.onhome,
+            onfetch: options.onfetch,
         } as IArticlesPartData;
         if (q && q.length > 0) {
             if (typeof q[0] === "string") d.select = q[0];

@@ -696,6 +696,119 @@ div.placeholder-after-loading:first-child > span::after {
     color: #888; font-size: 12px; content: "Loading…"
 }
 
+/* Blog links*/
+ul.link-item-blog {
+    padding: 0; margin: 0; list-style: none;
+}
+ul.link-item-blog > li {
+    padding: 0; margin: 0 0 8px 0; list-style: none;
+}
+ul.link-item-blog > li.grouping-header {
+    color: #999; padding-left: 20px; cursor: default; user-select: none;
+}
+ul.link-item-blog > li > a {
+    padding: 0; margin: 0 0 10px 0; display: block; border-radius: 4px; overflow: hidden; position: relative;
+}
+ul.link-item-blog > li > a, ul.link-item-blog > li > a:visited, ul.link-item-blog > li > a:hover, ul.link-item-blog > li > a:active {
+    text-decoration: none;
+}
+ul.link-item-blog > li > a:link, ul.link-item-blog > li > a:visited {
+    color: #888; transition: 0.6s;
+}
+ul.link-item-blog > li > a:hover {
+    color: #AAA; transition: 0.1s; box-shadow: #111 1px 1px 4px;
+}
+ul.link-item-blog > li > a:active {
+    color: #999; transition: 0.1s; box-shadow: #111 0 0 4px;
+}
+ul.link-item-blog > li > a > div {
+    padding-top: 0; padding-bottom: 0; transition: 0.4s;
+}
+ul.link-item-blog > li > a > div, ul.link-item-blog > li > a:visited > div {
+    padding-left: 20px; padding-right: 20px; 
+}
+ul.link-item-blog > li > a:hover > div {
+    padding-left: 18px; padding-right: 22px;
+}
+ul.link-item-blog > li > a:active > div {
+    padding-left: 20px; padding-right: 20px;
+}
+ul.link-item-blog > li > a > div > strong, ul.link-item-blog > li > a > div > span {
+    vertical-align: baseline;
+}
+ul.link-item-blog > li > a > div:first-child, ul.link-item-blog > li > a > div:first-child + div {
+    background-color: rgba(128, 128, 128, 0.12);
+}
+ul.link-item-blog > li > a > div:first-child {
+    padding-top: 7px; padding-right: 110px; border-width: 1px 0 0 0; border-style: solid none none none; border-top-left-radius: 4px; border-top-right-radius: 4px; line-height: 26px;
+}
+ul.link-item-blog > li > a > div:first-child, ul.link-item-blog > li > a:visited > div:first-child {
+    border-color: rgba(128, 128, 128, 0.04);
+}
+ul.link-item-blog > li > a:hover > div:first-child {
+    border-color: rgba(128, 128, 128, 0.12);
+}
+ul.link-item-blog > li > a:active > div:first-child {
+    border-color: rgba(128, 128, 128, 0.08);
+}
+ul.link-item-blog > li > a > div:first-child > strong:first-child {
+    font-weight: normal; font-size: 18px;
+}
+ul.link-item-blog > li > a > div:first-child > strong:first-child, ul.link-item-blog > li > a:active > div:first-child > strong:first-child {
+    color: #CCC; transition: 0.6s;
+}
+ul.link-item-blog > li > a:hover > div:first-child > strong:first-child {
+    color: #9EF; transition: 0.1s;
+}
+ul.link-item-blog > li > a:active > div:first-child > strong:first-child {
+    color: #8CE; transition: 0.1s;
+}
+ul.link-item-blog > li > a > div:first-child > span {
+    font-weight: normal; font-size: 14px;
+}
+ul.link-item-blog > li > a > div:first-child > strong + span {
+    margin-left: 20px;
+}
+ul.link-item-blog > li > a > div:first-child + div > img {
+    border: 1px solid rgba(128, 128, 128, 0.1); border-radius: 4px; object-fit: cover; position: absolute; transition: 0.4s;
+}
+ul.link-item-blog > li > a > div:first-child + div > img, ul.link-item-blog > li > a:visited > div:first-child + div > img,
+#blog_content > article > main ul.link-item-blog > li > a > div:first-child + div > img,
+#blog_content > article > main ul.link-item-blog > li > a:visited > div:first-child + div > img {
+    width: 80px; height: 45px; top: 8px; right: 16px;
+}
+ul.link-item-blog > li > a:hover > div:first-child + div > img
+#blog_content > article > main ul.link-item-blog > li > a:hover > div:first-child + div > img {
+    width: 88px; height: 50px; top: 6px; right: 12px;
+}
+ul.link-item-blog > li > a:active > div:first-child + div > img
+#blog_content > article > main ul.link-item-blog > li > a:active > div:first-child + div > img {
+    width: 84px; height: 48px; top: 7px; right: 14px;
+}
+ul.link-item-blog > li > a > div:first-child + div {
+    font-size: 12px; padding-bottom: 8px; line-height: 20px;
+}
+ul.link-item-blog > li > a > div + div + div {
+    background-color: rgba(128, 128, 128, 0.09); max-height: 72px; line-height: 24px; overflow: hidden;
+}
+ul.link-item-blog > li > a > div:first-child + div + div > span:first-child {
+    display: inline-block; max-height: 72px; line-height: 24px; overflow: hidden; text-overflow: ellipsis;
+}
+ul.link-item-blog > li > a > div:first-child + div + div {
+    padding-top: 7px; border-top: 1px solid rgba(128, 128, 128, 0.1);
+}
+ul.link-item-blog > li > a > div:last-child {
+    padding-bottom: 8px; border-bottom-left-radius: 4px; border-bottom-right-radius: 4px;
+}
+@media screen and (max-width:800px) {
+    ul.link-item-blog > li > a > div:first-child > strong:first-child {
+        display: block;
+    }
+    ul.link-item-blog > li > a > div:first-child > strong:first-child + span {
+        margin-left: 0;
+    }
+}
+
 /* Blog */
 #blog_content {
     font-weight: normal;

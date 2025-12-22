@@ -63,7 +63,7 @@ namespace DeepX.MdBlogs {
 
             if (!article || !article.name || !(article instanceof ArticleInfo)) continue;
             const y = article.dateObj?.year;
-            if (deep === false && y && y != group) {
+            if ((deep === false || deep === -2) && y && y != group) {
                 group = y;
                 arr.push({
                     tagName: "li",
@@ -73,7 +73,7 @@ namespace DeepX.MdBlogs {
             }
 
             const path = genArticlePath(article, options.path, localeOptions);
-            const result = generateMenuItemInternal(article, deep === -1 ? -1 : level, path, options.click, localeOptions);
+            const result = generateMenuItemInternal(article, (deep === -1 || deep === -2) ? deep : level, path, options.click, localeOptions);
             const hasSelected = options.select === article;
             if (hasSelected) result.styleRefs = "state-sel";
             if (typeof options.render === "function") options.render(result, article, {
@@ -118,7 +118,7 @@ namespace DeepX.MdBlogs {
         let arr: (string | ArticleInfo)[];
         if (!filter) {
             arr = [
-                ...result.wiki({ mkt: options.mkt }),
+                ...result.docs({ mkt: options.mkt }),
                 ...result.blogs({ mkt: options.mkt })
             ];
         } else if (typeof filter === "function") {
@@ -126,7 +126,7 @@ namespace DeepX.MdBlogs {
         } else if (filter === "blogs" || filter === "blog") {
             arr = result.blogs({ mkt: options.mkt });
         } else if (filter === "docs" || filter === "wiki") {
-            arr = result.wiki({ mkt: options.mkt });
+            arr = result.docs({ mkt: options.mkt });
         } else {
             return undefined;
         }
@@ -277,7 +277,8 @@ namespace DeepX.MdBlogs {
             data: article,
         } as Hje.DescriptionContract;
         const dateStr = article.dateString;
-        if (level === -1 && (intro || dateStr)) {
+        if (!intro && !dateStr) return result;
+        if (level === -1) {
             if (typeof text.children === "string") text.children = [{
                 tagName: "span",
                 children: text.children
@@ -295,6 +296,45 @@ namespace DeepX.MdBlogs {
                 text.children.push({ tagName: "br" });
                 text.children.push({ tagName: "span", children: intro });
             }
+        } else if (level === -2) {
+            const firstLine = {
+                tagName: "div",
+                children: [{
+                    tagName: "strong",
+                    children: title
+                }, {
+                    tagName: "span",
+                    children: subtitle
+                }]
+            };
+            const publishDate = article.dateObj;
+            const secondLine = {
+                tagName: "div",
+                children: [{
+                    tagName: "time",
+                    props: {
+                        datetime: `${publishDate.year.toString(10)}-${publishDate.month.toString(10)}-${publishDate.date.toString(10)}`
+                    },
+                    children: article.dateString
+                }]
+            };
+            const thumb = article.getThumb("wide");
+            if (thumb) (secondLine.children as Hje.DescriptionContract[]).push({
+                tagName: "img",
+                props: {
+                    alt: title,
+                    src: thumb
+                }
+            });
+            text.children = [firstLine, secondLine];
+            if (intro) text.children.push({
+                tagName: "div",
+                children: [{
+                    tagName: "span",
+                    children: intro
+                }]
+            });
+            if (text.props) delete text.props.title;
         }
 
         return result;

@@ -120,7 +120,7 @@ namespace DeepX.MdBlogs {
             return list;
         }
 
-        wiki(options?: IArticleLocaleOptions) {
+        docs(options?: IArticleLocaleOptions) {
             const specificMkt = options?.mkt && options.mkt !== true;
             if (this._inner.docs && !options?.reload && !specificMkt) return this._inner.docs;
             const docs: typeof this._inner.data.docs = this._inner.data.docs || this._inner.data.wiki;
@@ -237,7 +237,7 @@ namespace DeepX.MdBlogs {
                 if (name2 && typeof name2 === "string") name = name2;
             }
 
-            let result = getArticle(this.wiki({ mkt }) as ArticleInfo[], name, options);
+            let result = getArticle(this.docs({ mkt }) as ArticleInfo[], name, options);
             if (result) return result;
             result = getArticle(this.blogs({ mkt }), name, options);
             if (result) return result;
@@ -268,7 +268,7 @@ namespace DeepX.MdBlogs {
                 deep: true,
                 options
             };
-            if (someInternal(this.wiki(options) as ArticleInfo[], callback, context) === true) return true;
+            if (someInternal(this.docs(options) as ArticleInfo[], callback, context) === true) return true;
             context.deep = false;
             if (someInternal(this.blogs(options), callback, context) === true) return true;
             return false;

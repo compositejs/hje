@@ -10,7 +10,8 @@ namespace DeepX.MdBlogs {
 
         constructor(element: any, options?: Hje.ComponentOptionsContract<IArticlesPartData>) {
             super(element, options);
-            if (options?.data?.mkt != null) this.__inner.mkt = options.data.mkt;
+            const data = options?.data;
+            if (data?.mkt != null) this.__inner.mkt = data.mkt;
             this.currentModel = {
                 children: [{
                     key: "content",
@@ -40,15 +41,25 @@ namespace DeepX.MdBlogs {
                 }]
             };
             this.refreshChild();
-            if (!options?.data) return;
-            const lifecycle: IArticlesLifecycle = options.data.lifecycle || { disable: true };
+            if (!data) return;
+            const lifecycle: IArticlesLifecycle = data.lifecycle || { disable: true };
             this.__inner.lifecycle = lifecycle;
-            if (typeof options.data.articles === "string") {
-                fetchArticles(options.data.articles).then(r => {
-                    this.initRender(r, options.data.select, lifecycle);
+            if (typeof data.articles === "string") {
+                fetchArticles(data.articles).then(r => {
+                    if (typeof data.onfetch === "function") data.onfetch({
+                        articles: r,
+                        mkt: this.__inner.mkt,
+                        store: data.store
+                    });
+                    this.initRender(r, data.select, lifecycle);
                 });
-            } else if (options.data.articles instanceof Articles) {
-                this.initRender(options.data.articles, options.data.select, lifecycle);
+            } else if (data.articles instanceof Articles) {
+                if (typeof data.onfetch === "function") data.onfetch({
+                    articles: data.articles,
+                    mkt: this.__inner.mkt,
+                    store: data.store
+                });
+                this.initRender(data.articles, data.select, lifecycle);
             }
         }
 
@@ -94,7 +105,8 @@ namespace DeepX.MdBlogs {
                     tagName: "h1",
                     children: this.__inner.info.getName(options)
                 });
-                children.push({
+                const desc = this.__inner.info.getDescription(options);
+                if (desc) children.push({
                     tagName: "p",
                     children: this.__inner.info.getDescription(options)
                 });
@@ -114,14 +126,22 @@ namespace DeepX.MdBlogs {
                 children: part.contentCache
             });
             const menu: Hje.DescriptionContract[] = [];
-            this.genMenu(menu, this.__inner.info.wiki(options), true);
-            this.genMenu(menu, this.__inner.info.blogs(options), false);
+            const docs = this.__inner.info.docs(options);
+            let listStyleRef = "link-tile-compact";
+            if (docs.length > 0) {
+                this.genMenu(menu, docs, true);
+                this.genMenu(menu, this.__inner.info.blogs(options), false);
+            } else {
+                this.genMenu(menu, this.__inner.info.blogs(options), -2);
+                listStyleRef = "link-item-blog";
+            }
+
             children.push({
                 tagName: "main",
                 styleRefs: "x-part-blog-menu",
                 children: [{
                     tagName: "ul",
-                    styleRefs: "link-tile-compact",
+                    styleRefs: listStyleRef,
                     children: menu
                 }]
             });
@@ -426,7 +446,7 @@ namespace DeepX.MdBlogs {
                 m.children = arr;
             }
 
-            this.genMenu(arr, articles.wiki(options), true);
+            this.genMenu(arr, articles.docs(options), true);
             this.genMenu(arr, articles.blogs(options), false);
             m.style = arr.length > 0 ? {} : { display: "none" };
             super.childModel("menu", m);

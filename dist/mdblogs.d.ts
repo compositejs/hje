@@ -87,7 +87,7 @@ declare namespace DeepX.MdBlogs {
         getDescription(optional?: ILocalePropOptions<string>): any;
         home(options?: IArticleLocaleOptions): ArticleInfo;
         blogs(options?: IArticleLocaleOptions): ArticleInfo[];
-        wiki(options?: IArticleLocaleOptions): (string | ArticleInfo)[];
+        docs(options?: IArticleLocaleOptions): (string | ArticleInfo)[];
         hiddenArticles(options?: IArticleLocaleOptions): ArticleInfo[];
         loadMoreBlogs(): Promise<boolean>;
         get(name: string, options?: {
@@ -427,6 +427,11 @@ declare namespace DeepX.MdBlogs {
             mkt: string | boolean | undefined;
             store: any;
         }): void;
+        onfetch?(ev: {
+            articles: Articles;
+            mkt: string | boolean | undefined;
+            store: any;
+        }): void;
     }
     interface IArticleInfoOptions {
         rela: Hje.RelativePathInfo;
@@ -557,10 +562,15 @@ declare namespace DeepX.MdBlogs {
      * @param options The options.
      * @returns The view generating context.
      */
-    function render(element: any, data: string | Articles, options: {
+    function render(element: any, data: string | Articles, options?: {
         title?: string | boolean;
         banner?: Hje.DescriptionContract;
         supplement?: Hje.DescriptionContract;
+        onfetch?(ev: {
+            articles: Articles;
+            mkt: string | boolean | undefined;
+            store: any;
+        }): void;
         onselect?(ev: {
             children: Hje.DescriptionContract[];
             article: ArticleInfo;

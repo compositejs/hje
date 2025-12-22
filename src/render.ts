@@ -204,7 +204,7 @@ function updateContext<T = any>(h: ViewGeneratorContract<T>, bag: CreatingBagCon
     if (!bag.element) return undefined;
 
     // Control controlling logic.
-    let componentType = model.control;
+    let componentType = model.control || (model as any).component;
     if (typeof componentType === "string") componentType = inner.controls[componentType];
     if (typeof componentType === "function") {
         if (appendMode) {

@@ -88,7 +88,7 @@ export class BaseComponent {
         const m = context.model();
         if (arguments.length < 2 || !m) return m;
         let change = false;
-        if (!clearOriginal) {
+        if (clearOriginal) {
             change = true;
             for (const key in m) {
                 delete (m as any)[key];
@@ -414,6 +414,36 @@ export class BaseComponent {
      */
     styleRefs(value: string[]) {
         return this.style(true, value);
+    }
+
+    /**
+     * Tests if the child has the specific class name.
+     * @param key The child key.
+     * @param test The class name to test.
+     * @returns true if has; otherwise, false.
+     */
+    childHasStyleRef(key: string, test: string) {
+        const context = this.childContext(key);
+        const v = context.model().styleRefs;
+        if (!v) return false;
+        if (typeof v === "string") return v === test;
+        if (Array.isArray(v)) return v.indexOf(test) >= 0;
+        if (typeof (v as any).get === "function") {
+            const v2 = (v as any).get();
+            if (typeof v2 === "string") return v2 === test;
+            if (Array.isArray(v2)) return v2.indexOf(test) >= 0;
+        }
+
+        return false;
+    }
+
+    /**
+     * Tests if has the specific class name.
+     * @param test The class name to test.
+     * @returns true if has; otherwise, false.
+     */
+    hasStyleRef(test: string) {
+        return this.childHasStyleRef(null, test);
     }
 
     /**

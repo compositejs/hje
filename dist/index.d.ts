@@ -147,6 +147,19 @@ declare namespace Hje {
             refs: string[] | undefined;
         };
         /**
+         * Tests if the child has the specific class name.
+         * @param key The child key.
+         * @param test The class name to test.
+         * @returns true if has; otherwise, false.
+         */
+        childHasStyleRef(key: string, test: string): boolean;
+        /**
+         * Tests if has the specific class name.
+         * @param test The class name to test.
+         * @returns true if has; otherwise, false.
+         */
+        hasStyleRef(test: string): boolean;
+        /**
          * Gets the raw element.
          */
         element(): any;
