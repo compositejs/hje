@@ -178,12 +178,12 @@ namespace DeepX.MdBlogs {
         }) {
             const data = this._inner.data;
             let dir = this.getDirPath(options);
-            if (!data || !dir || dir.length < 4) return undefined;
-            dir = dir.substring(2, dir.length - 1);
+            if (!data || !dir) return undefined;
+            dir = dir.length < 3 ? "" : dir.substring(2, dir.length - 1);
             const file = getLocaleProp(data, "file", { mkt: options?.mkt })
             if (typeof data.file === "boolean" || data.file == null || typeof file === "boolean" || file == null) {
             } else if (typeof file === "string") {
-                dir += "/" + (file.toLowerCase().endsWith(".md") ? file.substring(0, file.length - 3) : file);
+                dir += (dir ? "/" : "") + (file.toLowerCase().endsWith(".md") ? file.substring(0, file.length - 3) : file);
             }
 
             if (dir.endsWith("/")) dir = dir.substring(0, dir.length - 1);
