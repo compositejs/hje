@@ -182,6 +182,107 @@ namespace DeepX.MdBlogs {
             return list;
         }
 
+        addBlog(article: IArticleInfo) {
+            if (!article?.name) return undefined;
+            const item = new ArticleInfo(article, {
+                rela: this._inner.path,
+                year: this._inner.blogConfig.year || true,
+                fetch: this._inner.fetch,
+                definitions: this._inner.data["$defs"],
+            });
+            const arr = this.blogs();
+            let source = this._inner.data.blog;
+            if (!source) {
+                source = [];
+                this._inner.data.blog = source;
+            }
+            
+            if (source instanceof Array) {
+                source.push(article);
+            } else {
+                if (!(source.list instanceof Array)) source.list = []
+                if (source.reverse) source.list.splice(0, 0, article);
+                else source.list.push(article);
+            }
+
+            arr.splice(0, 0, item);
+            return item;
+        }
+
+        addDocs(article: IArticleInfo | string | IArticleLabelInfo) {
+            if (!article) return undefined;
+            if (typeof article === "string") {
+                this._inner.docs = undefined;
+                if (!this._inner.data.docs) this._inner.data.docs = [];
+                this._inner.data.docs.push(article);
+                return article;
+            }
+
+            if (!article.name) return undefined;
+            this._inner.docs = undefined;
+            if (!this._inner.data.docs) this._inner.data.docs = [];
+            if (typeof article.disable === "string") {
+                this._inner.data.docs.push(article);
+                return getLocaleProp(article);
+            }
+
+            const item = new ArticleInfo(article, {
+                rela: this._inner.path,
+                fetch: this._inner.fetch,
+                definitions: this._inner.data["$defs"],
+            });
+            this._inner.data.docs.push(article);
+            return item;
+        }
+
+        addHiddenArticle(article: IArticleInfo) {
+            if (!article?.name) return undefined;
+            const item = new ArticleInfo(article, {
+                rela: this._inner.path,
+                fetch: this._inner.fetch,
+                definitions: this._inner.data["$defs"],
+            });
+            const arr = this.hiddenArticles();
+            arr.push(item);
+            if (!this._inner.data.hiddenArticles) this._inner.data.hiddenArticles = [];
+            this._inner.data.hiddenArticles.push(article);
+            return item;
+        }
+
+        clearBlogs() {
+            this._inner.blogs = undefined;
+            let source = this._inner.data.blog;
+            if (!source) {
+                source = [];
+                this._inner.data.blog = source;
+            }
+            
+            if (source instanceof Array) {
+                while (source.length > 0) {
+                    source.pop();
+                }
+            } else if (source.list instanceof Array) {
+                while (source.list.length > 0) {
+                    source.list.pop();
+                }
+            }
+        }
+
+        clearDocs() {
+            this._inner.docs = undefined;
+            this._inner.data.docs = undefined;
+            if (this._inner.data.wiki) delete this._inner.data.wiki;
+        }
+
+        clearHiddenArticles() {
+            this._inner.hidden = undefined;
+            this._inner.data.hiddenArticles = undefined;
+        }
+
+        toJSON() {
+            return this._inner.data;
+        }
+
         async loadMoreBlogs() {
             const { further, list } = this._inner.blogConfig;
             if (!further || !(further instanceof Array)) return false;

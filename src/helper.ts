@@ -52,4 +52,26 @@ namespace Hje {
         (parent || document.body).appendChild(ele);
         return ele;
     }
+
+    /**
+     * Tests if the specific value is in the array.
+     * @param test The value to test.
+     * @param arr The array.
+     * @returns true if exists; otherwise, false.
+     */
+    export function inArray<T>(test: T, arr: T | T[] | {
+        subscribe(h: any): any;
+        [property: string]: any;
+    }) {
+        if (!arr || test == null) return false;
+        if (arr === test) return true;
+        if (Array.isArray(arr)) return arr.indexOf(test) >= 0;
+        if (typeof (arr as any).get === "function") {
+            const v2 = (arr as any).get();
+            if (v2 === test) return true;
+            if (Array.isArray(v2)) return v2.indexOf(test) >= 0;
+        }
+
+        return false;
+    }
 }

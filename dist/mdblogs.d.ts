@@ -89,6 +89,13 @@ declare namespace DeepX.MdBlogs {
         blogs(options?: IArticleLocaleOptions): ArticleInfo[];
         docs(options?: IArticleLocaleOptions): (string | ArticleInfo)[];
         hiddenArticles(options?: IArticleLocaleOptions): ArticleInfo[];
+        addBlog(article: IArticleInfo): ArticleInfo;
+        addDocs(article: IArticleInfo | string | IArticleLabelInfo): any;
+        addHiddenArticle(article: IArticleInfo): ArticleInfo;
+        clearBlogs(): void;
+        clearDocs(): void;
+        clearHiddenArticles(): void;
+        toJSON(): IArticleCollection;
         loadMoreBlogs(): Promise<boolean>;
         get(name: string, options?: {
             mkt?: string | boolean;

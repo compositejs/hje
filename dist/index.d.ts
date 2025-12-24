@@ -231,6 +231,16 @@ declare namespace Hje {
      * @returns The element created to append.
      */
     function appendChild(parent: HTMLElement | null, tag?: string): HTMLElement;
+    /**
+     * Tests if the specific value is in the array.
+     * @param test The value to test.
+     * @param arr The array.
+     * @returns true if exists; otherwise, false.
+     */
+    function inArray<T>(test: T, arr: T | T[] | {
+        subscribe(h: any): any;
+        [property: string]: any;
+    }): boolean;
 }
 declare namespace Hje {
     /**

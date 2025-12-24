@@ -424,17 +424,7 @@ export class BaseComponent {
      */
     childHasStyleRef(key: string, test: string) {
         const context = this.childContext(key);
-        const v = context.model().styleRefs;
-        if (!v) return false;
-        if (typeof v === "string") return v === test;
-        if (Array.isArray(v)) return v.indexOf(test) >= 0;
-        if (typeof (v as any).get === "function") {
-            const v2 = (v as any).get();
-            if (typeof v2 === "string") return v2 === test;
-            if (Array.isArray(v2)) return v2.indexOf(test) >= 0;
-        }
-
-        return false;
+        return inArray(test, context.model().styleRefs);
     }
 
     /**

@@ -16,7 +16,7 @@ npm i hje
 
 ```typescript
 import { * as Hje } from "hje";
-import { render as renderMdBlogs } from "hje/dist/mdblogs";
+import { render as renderMdBlogs } from "hje/modules/mdblogs";
 
 const ele = Hje.appendElement(null);
 renderMdBlogs(ele, "./config.json", { title: true });
