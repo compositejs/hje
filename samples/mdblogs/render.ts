@@ -703,7 +703,7 @@ namespace DeepX.MdBlogs {
 
         if (arr.length > 0) children.push({
             tagName: "h2",
-            children: getLocaleString("keywords")
+            children: getLocaleString("keywords", options?.mkt)
         }, {
             tagName: "div",
             styleRefs: "x-part-blog-keywords",

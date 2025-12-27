@@ -301,6 +301,7 @@ namespace DeepX.MdBlogs {
             if (!result || !result.ok) return false;
             const json: IArticlePagingModel = await result.json();
             if (!json || !json.blog || !(json.blog instanceof Array)) return false;
+            if (json.disable) return true;
             const arr = json.blog;
             const options = json.options || {};
             if (options.reverse) arr.reverse();
@@ -320,6 +321,8 @@ namespace DeepX.MdBlogs {
                 if (has) continue;
                 list.splice(0, 0, item);
             }
+
+            return true;
         }
 
         get(name: string, options?: {

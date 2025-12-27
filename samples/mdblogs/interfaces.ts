@@ -302,7 +302,14 @@ namespace DeepX.MdBlogs {
         [property: string]: any;
     }
 
+    /**
+     * The model of previous blog articles in page.
+     */
     export interface IArticlePagingModel {
+        /**
+         * A flag indicating whether this page is disabled.
+         */
+        disable?: boolean;
         /**
          * All blog articles.
          */
@@ -322,6 +329,9 @@ namespace DeepX.MdBlogs {
         }
     }
 
+    /**
+     * The model of blog and docs.
+     */
     export interface IArticleCollection {
         /**
          * The website name.

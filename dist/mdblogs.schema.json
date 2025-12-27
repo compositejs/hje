@@ -422,17 +422,111 @@
             },
             {
               "type": "array",
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "$ref": "#/$defs/contributorInfo"
-                }
-              ]
+              "items": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "$ref": "#/$defs/contributorInfo"
+                  }
+                ]
+              }
             },
             {
-              "type": "object"
+              "type": "object",
+              "properties": {
+                "producer": {
+                  "$ref": "#/$defs/contributorInfoType"
+                },
+                "executive producer": {
+                  "$ref": "#/$defs/contributorInfoType"
+                },
+                "contributor": {
+                  "$ref": "#/$defs/contributorInfoType"
+                },
+                "author": {
+                  "$ref": "#/$defs/contributorInfoType"
+                },
+                "translator": {
+                  "$ref": "#/$defs/contributorInfoType"
+                },
+                "editor": {
+                  "$ref": "#/$defs/contributorInfoType"
+                },
+                "chief editor": {
+                  "$ref": "#/$defs/contributorInfoType"
+                },
+                "director": {
+                  "$ref": "#/$defs/contributorInfoType"
+                },
+                "star": {
+                  "$ref": "#/$defs/contributorInfoType"
+                },
+                "actor": {
+                  "$ref": "#/$defs/contributorInfoType"
+                },
+                "dev": {
+                  "$ref": "#/$defs/contributorInfoType"
+                },
+                "qa": {
+                  "$ref": "#/$defs/contributorInfoType"
+                },
+                "pm": {
+                  "$ref": "#/$defs/contributorInfoType"
+                },
+                "pmo": {
+                  "$ref": "#/$defs/contributorInfoType"
+                },
+                "photographer": {
+                  "$ref": "#/$defs/contributorInfoType"
+                },
+                "cameraman": {
+                  "$ref": "#/$defs/contributorInfoType"
+                },
+                "designer": {
+                  "$ref": "#/$defs/contributorInfoType"
+                },
+                "film editor": {
+                  "$ref": "#/$defs/contributorInfoType"
+                },
+                "visual effects": {
+                  "$ref": "#/$defs/contributorInfoType"
+                },
+                "painter": {
+                  "$ref": "#/$defs/contributorInfoType"
+                },
+                "composer": {
+                  "$ref": "#/$defs/contributorInfoType"
+                },
+                "lyricist": {
+                  "$ref": "#/$defs/contributorInfoType"
+                },
+                "writer": {
+                  "$ref": "#/$defs/contributorInfoType"
+                },
+                "vocal": {
+                  "$ref": "#/$defs/contributorInfoType"
+                },
+                "singer": {
+                  "$ref": "#/$defs/contributorInfoType"
+                },
+                "dancer": {
+                  "$ref": "#/$defs/contributorInfoType"
+                },
+                "arranger": {
+                  "$ref": "#/$defs/contributorInfoType"
+                },
+                "host": {
+                  "$ref": "#/$defs/contributorInfoType"
+                },
+                "permanent guests": {
+                  "$ref": "#/$defs/contributorInfoType"
+                },
+                "special guests": {
+                  "$ref": "#/$defs/contributorInfoType"
+                }
+              }
             }
           ]
         },
@@ -657,7 +751,28 @@
           "description": "Avatar URL",
           "type": "string"
         }
-      }
+      },
+      "required": ["name"]
+    },
+    "contributorInfoType": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "array",
+          "items": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "$ref": "#/$defs/contributorInfo"
+              }
+            ]
+          }
+        }
+      ]
     }
   }
 }

@@ -461,7 +461,14 @@ declare namespace DeepX.MdBlogs {
         contributors?: IContributorInfo[];
         [property: string]: any;
     }
+    /**
+     * The model of previous blog articles in page.
+     */
     interface IArticlePagingModel {
+        /**
+         * A flag indicating whether this page is disabled.
+         */
+        disable?: boolean;
         /**
          * All blog articles.
          */
@@ -480,6 +487,9 @@ declare namespace DeepX.MdBlogs {
             reverse?: boolean;
         };
     }
+    /**
+     * The model of blog and docs.
+     */
     interface IArticleCollection {
         /**
          * The website name.
