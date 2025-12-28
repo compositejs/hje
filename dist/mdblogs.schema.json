@@ -493,6 +493,12 @@
                 "visual effects": {
                   "$ref": "#/$defs/contributorInfoType"
                 },
+                "illustrator": {
+                  "$ref": "#/$defs/contributorInfoType"
+                },
+                "dj": {
+                  "$ref": "#/$defs/contributorInfoType"
+                },
                 "painter": {
                   "$ref": "#/$defs/contributorInfoType"
                 },

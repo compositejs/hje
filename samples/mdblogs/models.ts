@@ -187,6 +187,8 @@ namespace DeepX.MdBlogs {
                 "film editor": new NameValueModel({ name: "Film editor", "name#zh": "剪辑师", value: "film editor" }),
                 "visual effects": new NameValueModel({ name: "Visual Effects", "name#zh": "特效师", value: "visual effects" }),
                 painter: new NameValueModel({ name: "Painter", "name#zh": "画师", value: "painter" }),
+                illustrator: new NameValueModel({ name: "Illustrator", "name#zh": "插画师", value: "illustrator" }),
+                dj: new NameValueModel({ name: "DJ", value: "dj" }),
                 composer: new NameValueModel({ name: "Composer", "name#zh": "作曲", value: "composer" }),
                 lyricist: new NameValueModel({ name: "Lyricist", "name#zh": "作词", value: "lyricist" }),
                 writer: new NameValueModel({ name: "Original writer", "name#zh": "原著作者", value: "writer" }),
