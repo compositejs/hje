@@ -464,22 +464,7 @@
                   },
                   "url": {
                     "description": "The link URL",
-                    "anyOf": [
-                      {
-                        "type": "string"
-                      },
-                      {
-                        "type": "object",
-                        "properties": {
-                          "type": {
-                            "type": "string"
-                          },
-                          "url": {
-                            "value": "string"
-                          }
-                        }
-                      }
-                    ]
+                    "type": "string"
                   },
                   "data": {
                     "description": "Addtional data for reference",
@@ -633,6 +618,10 @@
         "^name#": {
           "description": "The name of article in the specific language",
           "type": "string"
+        },
+        "^disable#": {
+          "description": "A flag indicate whether disable this article in the specific language",
+          "type": "boolean"
         },
         "^dir#": {
           "description": "The relative directory path with the article markdown file in the specific language",

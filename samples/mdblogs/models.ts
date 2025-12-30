@@ -123,6 +123,31 @@ namespace DeepX.MdBlogs {
         }
     }
 
+    export function formatContributors(contributors: string | (string | IContributorInfo)[], refs: DeepX.MdBlogs.IContributorInfo[], options?: {
+        mkt?: string | boolean;
+    }) {
+        if (!contributors) return [];
+        if (typeof contributors === "string") contributors = [contributors];
+        if (!refs) refs = [];
+        return contributors.map(item => {
+            if (!item) return undefined;
+            if (typeof item === "string") {
+                for (let i = 0; i < refs.length; i++) {
+                    const ele = refs[i];
+                    if (ele.name === item || getLocaleProp(ele, null, options) === item || ele.email === item) return ele;
+                }
+
+                const pos = item.indexOf("@");
+                if (pos < 0) return { name: item };
+                if (pos === 0) return item.length > 1 ? { name: item.substring(1) } : undefined;
+                const pos2 = item.indexOf(".", pos);
+                return pos2 > 0 ? { name: item.substring(0, pos), email: item } : { name: item };
+            }
+
+            return item.name ? item : undefined;
+        }).filter(item => item) as DeepX.MdBlogs.IContributorInfo[];
+    }
+
     export function toMembers(list: IRoleContributorInfo[]) {
         const arr: IContributorInfo[] = [];
         if (!list) return arr;

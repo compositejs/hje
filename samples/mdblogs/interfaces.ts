@@ -4,6 +4,28 @@ namespace DeepX.MdBlogs {
     export type INameValueModelDefinitions = INameValueModel[] | Record<string, INameValueModel | string | boolean>;
     export type IContributorsInfo = string | (string | IContributorInfo)[] | Record<string, string | (string | IContributorInfo)[]>;
 
+    export interface IArticlesPartDataSelectParams {
+        children: Hje.DescriptionContract[];
+        article: ArticleInfo;
+        mkt: string | boolean | undefined;
+        store: any;
+        defs(key: string): any;
+        insertChildren(position: "last" | "end" | "start" | number | undefined, ...models: Hje.DescriptionContract[]): void;
+    }
+
+    export interface IArticlesPartDataHomeParams {
+        model: Hje.DescriptionContract;
+        mkt: string | boolean | undefined;
+        store: any;
+        defs(key: string): any;
+    }
+
+    export interface IArticlesPartDataFetchParams {
+        articles: Articles
+        mkt: string | boolean | undefined;
+        store: any;
+    }
+
     export interface IContributorInfo {
         /**
          * Nickname.
@@ -47,10 +69,7 @@ namespace DeepX.MdBlogs {
         /**
          * The link URL.
          */
-        url: string | {
-            type: string;
-            value: string;
-        };
+        url: string;
         /**
          * A flag indicating opens in a new window or tab.
          */
@@ -287,25 +306,9 @@ namespace DeepX.MdBlogs {
         articles?: string | Articles;
         select?: string;
         store?: any;
-        onselect(ev: {
-            children: Hje.DescriptionContract[];
-            article: ArticleInfo;
-            mkt: string | boolean | undefined;
-            store: any;
-            defs(key: string): any;
-            insertChildren(position: "last" | "end" | "start" | number | undefined, ...models: Hje.DescriptionContract[]): void;
-        }): void;
-        onhome(ev: {
-            model: Hje.DescriptionContract;
-            mkt: string | boolean | undefined;
-            store: any;
-            defs(key: string): any;
-        }): void;
-        onfetch?(ev: {
-            articles: Articles
-            mkt: string | boolean | undefined;
-            store: any;
-        }): void;
+        onselect?(ev: IArticlesPartDataSelectParams): void;
+        onhome?(ev: IArticlesPartDataHomeParams): void;
+        onfetch?(ev: IArticlesPartDataFetchParams): void;
     }
 
     export interface IArticleInfoOptions {

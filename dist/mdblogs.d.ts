@@ -13,7 +13,9 @@ declare namespace DeepX.MdBlogs {
      * @param options Additional options.
      * @returns A promise object of description model. It is a `ul` element.
      */
-    export function generateMenuPromise(articles: Promise<Articles> | string, filter: "blogs" | "blog" | "docs" | "wiki" | ((articles: Articles) => (ArticleInfo | string)[]), options?: IArticleMenuOptions): Promise<Hje.DescriptionContract>;
+    export function generateMenuPromise(articles: Promise<Articles> | string, filter: "blogs" | "blog" | "docs" | "wiki" | ((articles: Articles) => (ArticleInfo | string)[]), options?: IArticleMenuOptions & {
+        onfetch?(ev: IArticlesPartDataFetchParams): void;
+    }): Promise<Hje.DescriptionContract>;
     export function generateMenuItem(article: ArticleInfo, level: number, path?: string | ((original: string, article: ArticleInfo) => string), click?: (ev: Event, article: ArticleInfo) => void, options?: ILocalePropOptions): Hje.DescriptionContract;
     export function generateCdnScript(name: string, ver: string, url: string, path: string): {
         tagName: string;
@@ -190,6 +192,25 @@ declare namespace DeepX.MdBlogs {
     type INameValueModelValue = (INameValueModel | string)[];
     type INameValueModelDefinitions = INameValueModel[] | Record<string, INameValueModel | string | boolean>;
     type IContributorsInfo = string | (string | IContributorInfo)[] | Record<string, string | (string | IContributorInfo)[]>;
+    interface IArticlesPartDataSelectParams {
+        children: Hje.DescriptionContract[];
+        article: ArticleInfo;
+        mkt: string | boolean | undefined;
+        store: any;
+        defs(key: string): any;
+        insertChildren(position: "last" | "end" | "start" | number | undefined, ...models: Hje.DescriptionContract[]): void;
+    }
+    interface IArticlesPartDataHomeParams {
+        model: Hje.DescriptionContract;
+        mkt: string | boolean | undefined;
+        store: any;
+        defs(key: string): any;
+    }
+    interface IArticlesPartDataFetchParams {
+        articles: Articles;
+        mkt: string | boolean | undefined;
+        store: any;
+    }
     interface IContributorInfo {
         /**
          * Nickname.
@@ -229,10 +250,7 @@ declare namespace DeepX.MdBlogs {
         /**
          * The link URL.
          */
-        url: string | {
-            type: string;
-            value: string;
-        };
+        url: string;
         /**
          * A flag indicating opens in a new window or tab.
          */
@@ -462,25 +480,9 @@ declare namespace DeepX.MdBlogs {
         articles?: string | Articles;
         select?: string;
         store?: any;
-        onselect(ev: {
-            children: Hje.DescriptionContract[];
-            article: ArticleInfo;
-            mkt: string | boolean | undefined;
-            store: any;
-            defs(key: string): any;
-            insertChildren(position: "last" | "end" | "start" | number | undefined, ...models: Hje.DescriptionContract[]): void;
-        }): void;
-        onhome(ev: {
-            model: Hje.DescriptionContract;
-            mkt: string | boolean | undefined;
-            store: any;
-            defs(key: string): any;
-        }): void;
-        onfetch?(ev: {
-            articles: Articles;
-            mkt: string | boolean | undefined;
-            store: any;
-        }): void;
+        onselect?(ev: IArticlesPartDataSelectParams): void;
+        onhome?(ev: IArticlesPartDataHomeParams): void;
+        onfetch?(ev: IArticlesPartDataFetchParams): void;
     }
     interface IArticleInfoOptions {
         rela: Hje.RelativePathInfo;
@@ -643,14 +645,14 @@ declare namespace DeepX.MdBlogs {
      * @param options The options.
      * @returns The view generating context.
      */
-    function render(element: any, data: string | Articles, options?: {
+    function render(element: HTMLElement | string, data: string | Articles, options?: {
         title?: string | boolean;
         banner?: Hje.DescriptionContract;
         supplement?: Hje.DescriptionContract;
-        onfetch?(ev: Parameters<IArticlesPartData["onfetch"]>[0]): void;
-        onselect?(ev: Parameters<IArticlesPartData["onselect"]>[0]): void;
-        onhome?(ev: Parameters<IArticlesPartData["onhome"]>[0]): void;
-    }): Hje.ViewGeneratingContextContract<any>;
+        onfetch?(ev: IArticlesPartDataFetchParams): void;
+        onselect?(ev: IArticlesPartDataSelectParams): void;
+        onhome?(ev: IArticlesPartDataHomeParams): void;
+    }): Hje.ViewGeneratingContextContract<string | HTMLElement>;
 }
 declare namespace DeepX.MdBlogs {
     const en: {
@@ -756,7 +758,7 @@ declare namespace DeepX.MdBlogs {
         getDetails: string;
     };
     export function getLocaleString(key: keyof typeof en, mkt?: string | boolean | undefined): any;
-    export function setElementText(element: HTMLElement, key: keyof typeof en): any;
+    export function setElementText(element: HTMLElement | string, key: keyof typeof en): any;
     export {};
 }
 declare namespace DeepX.MdBlogs {
@@ -779,6 +781,9 @@ declare namespace DeepX.MdBlogs {
         roles(): string[];
         all(): IRoleContributorInfo[];
     }
+    function formatContributors(contributors: string | (string | IContributorInfo)[], refs: DeepX.MdBlogs.IContributorInfo[], options?: {
+        mkt?: string | boolean;
+    }): IContributorInfo[];
     function toMembers(list: IRoleContributorInfo[]): IContributorInfo[];
     function nameValueModels(list: INameValueModelValue, defs?: INameValueModelDefinitions): NameValueModel[];
 }
@@ -826,7 +831,7 @@ declare namespace DeepX.MdBlogs {
         value: any;
     }[]): void;
     function firstQuery(): string;
-    function filterFirst<T>(arr: T[], predicate: (item: T, index: number) => boolean): T;
+    function filterFirst<T>(arr: T[], predicate: (item: T, index?: number) => boolean): T;
     function getLocaleProp<T = any>(obj: T, key?: keyof (T) | null, options?: {
         mkt?: string | boolean;
         fallback?: any;

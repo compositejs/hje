@@ -218,7 +218,7 @@ namespace DeepX.MdBlogs {
         return res[key] || obj.strings[key];
     }
 
-    export function setElementText(element: HTMLElement, key: keyof typeof en) {
+    export function setElementText(element: HTMLElement | string, key: keyof typeof en) {
         if (!key || typeof key !== "string") return undefined;
         const s = getLocaleString(key);
         if (!s) return s;

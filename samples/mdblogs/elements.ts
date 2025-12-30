@@ -109,12 +109,19 @@ namespace DeepX.MdBlogs {
      * @param options Additional options.
      * @returns A promise object of description model. It is a `ul` element.
      */
-    export async function generateMenuPromise(articles: Promise<Articles> | string, filter: "blogs" | "blog" | "docs" | "wiki" | ((articles: Articles) => (ArticleInfo | string)[]), options?: IArticleMenuOptions) {
+    export async function generateMenuPromise(articles: Promise<Articles> | string, filter: "blogs" | "blog" | "docs" | "wiki" | ((articles: Articles) => (ArticleInfo | string)[]), options?: IArticleMenuOptions & {
+        onfetch?(ev: IArticlesPartDataFetchParams): void
+    }) {
         if (!articles) return undefined;
         if (typeof articles === "string") articles = fetchArticles(articles);
         const result = await articles;
         if (!result) return undefined;
         if (!options) options = {};
+        if (typeof options.onfetch === "function") options.onfetch({
+            articles: result,
+            mkt: options.mkt,
+            store: undefined,
+        });
         let arr: (string | ArticleInfo)[];
         if (!filter) {
             arr = [
