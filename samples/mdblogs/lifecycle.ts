@@ -10,22 +10,9 @@ namespace DeepX.MdBlogs {
         title?: string | boolean;
         banner?: Hje.DescriptionContract;
         supplement?: Hje.DescriptionContract;
-        onfetch?(ev: {
-            articles: Articles
-            mkt: string | boolean | undefined;
-            store: any;
-        }): void;
-        onselect?(ev: {
-            children: Hje.DescriptionContract[];
-            article: ArticleInfo;
-            mkt: string | boolean | undefined;
-            store: any;
-        }): void;
-        onhome?(ev: {
-            model: Hje.DescriptionContract;
-            mkt: string | boolean | undefined;
-            store: any;
-        }): void;
+        onfetch?(ev: Parameters<IArticlesPartData["onfetch"]>[0]): void;
+        onselect?(ev: Parameters<IArticlesPartData["onselect"]>[0]): void;
+        onhome?(ev: Parameters<IArticlesPartData["onhome"]>[0]): void;
     }) {
         const q = Hje.queryArray();
         if (!options) options = {};

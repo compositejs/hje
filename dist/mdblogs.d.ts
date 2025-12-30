@@ -74,7 +74,9 @@ declare namespace DeepX.MdBlogs {
             disableName?: boolean;
             disableAuthors?: boolean;
             disableMenu?: boolean;
+            linksTitle?: string;
         };
+        defs(key: string): any;
         blogsInfo(options?: {
             mkt?: string | boolean;
         }): {
@@ -89,6 +91,13 @@ declare namespace DeepX.MdBlogs {
         blogs(options?: IArticleLocaleOptions): ArticleInfo[];
         docs(options?: IArticleLocaleOptions): (string | ArticleInfo)[];
         hiddenArticles(options?: IArticleLocaleOptions): ArticleInfo[];
+        links(options?: {
+            mkt?: string | boolean;
+        }): {
+            name: any;
+            url: any;
+            newWindow: boolean;
+        }[];
         addBlog(article: IArticleInfo): ArticleInfo;
         addDocs(article: IArticleInfo | string | IArticleLabelInfo): any;
         addHiddenArticle(article: IArticleInfo): ArticleInfo;
@@ -141,7 +150,7 @@ declare namespace DeepX.MdBlogs {
             date: number;
         };
         get dateString(): string;
-        get location(): string;
+        get location(): string | INameValueModel;
         get data(): any;
         get disableMenu(): boolean;
         get disableAuthors(): boolean;
@@ -151,6 +160,7 @@ declare namespace DeepX.MdBlogs {
             maxHeight?: number;
             cover?: boolean;
         };
+        defs(key: string): any;
         getRoutePath(options?: {
             mkt?: string | boolean;
         }): string;
@@ -162,8 +172,9 @@ declare namespace DeepX.MdBlogs {
         getSubtitle(options?: ILocalePropOptions<string>): string;
         getIntro(options?: ILocalePropOptions<string>): string;
         getNotes(options?: ILocalePropOptions<string>): string[];
-        getThumb(kind?: "square" | "common" | "wide" | "tall"): string;
+        getThumb(kind?: "square" | "common" | "wide" | "tall"): string | Hje.RelativePathInfo;
         getContent(options: IArticleLocaleOptions): Promise<string>;
+        relative(path: string): Hje.RelativePathInfo;
         related(options?: {
             mkt?: string | boolean;
         }): (IArticleRelatedLinkItemInfo | string)[];
@@ -207,12 +218,28 @@ declare namespace DeepX.MdBlogs {
         mkt?: string | boolean;
     }
     interface IArticleRelatedLinkItemInfo {
+        /**
+         * The display name.
+         */
         name: string;
+        /**
+         * The subtitle.
+         */
         subtitle?: string;
+        /**
+         * The link URL.
+         */
         url: string | {
             type: string;
             value: string;
         };
+        /**
+         * A flag indicating opens in a new window or tab.
+         */
+        newWindow?: boolean;
+        /**
+         * Addtional data for reference.
+         */
         data?: any;
     }
     interface IArticleLabelInfo {
@@ -303,7 +330,7 @@ declare namespace DeepX.MdBlogs {
         /**
          * The city where the article publishes.
          */
-        location?: string;
+        location?: string | INameValueModel;
         /**
          * The related links (display in section see also).
          */
@@ -365,9 +392,21 @@ declare namespace DeepX.MdBlogs {
              * The banner image URL or info.
              */
             banner: string | {
+                /**
+                 * The alt name of banner image.
+                 */
                 name?: string;
+                /**
+                 * The URL of banner.
+                 */
                 url: string;
+                /**
+                 * The max height of banner image.
+                 */
                 maxHeight?: number;
+                /**
+                 * A flag indicating whether fit cover.
+                 */
                 cover?: boolean;
             };
             /**
@@ -428,11 +467,14 @@ declare namespace DeepX.MdBlogs {
             article: ArticleInfo;
             mkt: string | boolean | undefined;
             store: any;
+            defs(key: string): any;
+            insertChildren(position: "last" | "end" | "start" | number | undefined, ...models: Hje.DescriptionContract[]): void;
         }): void;
         onhome(ev: {
             model: Hje.DescriptionContract;
             mkt: string | boolean | undefined;
             store: any;
+            defs(key: string): any;
         }): void;
         onfetch?(ev: {
             articles: Articles;
@@ -522,6 +564,24 @@ declare namespace DeepX.MdBlogs {
             [alias: string]: string;
         };
         /**
+         * The additional links. They will display under the list of docs and blog.
+         */
+        links?: {
+            /**
+             * The display name.
+             */
+            name: string;
+            /**
+             * The link URL.
+             */
+            url: string;
+            /**
+             * A flag indicating opens in a new window or tab.
+             */
+            newWindow?: boolean;
+            [property: string]: any;
+        }[];
+        /**
          * The additional options of website.
          */
         options?: {
@@ -537,6 +597,10 @@ declare namespace DeepX.MdBlogs {
              * A flag to indicate whether need hide the contents in article.
              */
             disableMenu?: boolean;
+            /**
+             * The title of links.
+             */
+            linksTitle?: string;
         };
         /**
          * The definitions.
@@ -583,22 +647,9 @@ declare namespace DeepX.MdBlogs {
         title?: string | boolean;
         banner?: Hje.DescriptionContract;
         supplement?: Hje.DescriptionContract;
-        onfetch?(ev: {
-            articles: Articles;
-            mkt: string | boolean | undefined;
-            store: any;
-        }): void;
-        onselect?(ev: {
-            children: Hje.DescriptionContract[];
-            article: ArticleInfo;
-            mkt: string | boolean | undefined;
-            store: any;
-        }): void;
-        onhome?(ev: {
-            model: Hje.DescriptionContract;
-            mkt: string | boolean | undefined;
-            store: any;
-        }): void;
+        onfetch?(ev: Parameters<IArticlesPartData["onfetch"]>[0]): void;
+        onselect?(ev: Parameters<IArticlesPartData["onselect"]>[0]): void;
+        onhome?(ev: Parameters<IArticlesPartData["onhome"]>[0]): void;
     }): Hje.ViewGeneratingContextContract<any>;
 }
 declare namespace DeepX.MdBlogs {
@@ -752,6 +803,7 @@ declare namespace DeepX.MdBlogs {
         set title(value: string);
         get mkt(): string | boolean;
         set mkt(value: string | boolean);
+        defs(key: string): any;
         home(): void;
         select(article?: ArticleInfo | string): ArticleInfo;
         next(): ArticleInfo;
@@ -774,6 +826,7 @@ declare namespace DeepX.MdBlogs {
         value: any;
     }[]): void;
     function firstQuery(): string;
+    function filterFirst<T>(arr: T[], predicate: (item: T, index: number) => boolean): T;
     function getLocaleProp<T = any>(obj: T, key?: keyof (T) | null, options?: {
         mkt?: string | boolean;
         fallback?: any;

@@ -4,32 +4,16 @@
   "description": "The Article collection and site config of MdBlogs",
   "type": "object",
   "properties": {
+    "$schema": {
+      "description": "The JSON schema URL",
+      "type": "string"
+    },
+    "$id": {
+      "description": "The identifier or URL of the website directory",
+      "type": "string"
+    },
     "name": {
       "description": "The website name",
-      "type": "string"
-    },
-    "name#en": {
-      "description": "The website name in English",
-      "type": "string"
-    },
-    "name#fr": {
-      "description": "The website name in French",
-      "type": "string"
-    },
-    "name#zh": {
-      "description": "The website name in Chinese",
-      "type": "string"
-    },
-    "name#zh-Hans": {
-      "description": "The website name in Chinese simplified",
-      "type": "string"
-    },
-    "name#zh-Hant": {
-      "description": "The website name in Chinese tranditional",
-      "type": "string"
-    },
-    "name#ja": {
-      "description": "The website name in Japanese",
       "type": "string"
     },
     "description": {
@@ -38,30 +22,6 @@
     },
     "home": {
       "description": "The relative URL of home markdown file",
-      "type": "string"
-    },
-    "home#en": {
-      "description": "The relative URL of home markdown file in English",
-      "type": "string"
-    },
-    "home#fr": {
-      "description": "The relative URL of home markdown file in French",
-      "type": "string"
-    },
-    "home#zh": {
-      "description": "The relative URL of home markdown file in Chinese",
-      "type": "string"
-    },
-    "home#zh-Hans": {
-      "description": "The relative URL of home markdown file in Chinese simplified",
-      "type": "string"
-    },
-    "home#zh-Hant": {
-      "description": "The relative URL of home markdown file in Chinese tranditional",
-      "type": "string"
-    },
-    "home#ja": {
-      "description": "The relative URL of home markdown file in Japanese",
       "type": "string"
     },
     "blogs": {
@@ -136,6 +96,34 @@
         "$ref": "#/$defs/articleInfo"
       }
     },
+    "links": {
+      "description": "The additional links",
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "description": "The display name",
+            "type": "string"
+          },
+          "url": {
+            "description": "The link URL",
+            "type": "string"
+          }
+        },
+        "required": ["name", "url"],
+        "patternProperties": {
+          "^name#": {
+            "description": "The display name in the specific language",
+            "type": "string"
+          },
+          "^url#": {
+            "description": "The link URL in the specific language",
+            "type": "string"
+          }
+        }
+      }
+    },
     "redir": {
       "description": "The mapping of route",
       "type": "object"
@@ -155,6 +143,10 @@
         "disableAuthors": {
           "description": "A flag to indicate whether need hide the authors and publish date in article",
           "type": "boolean"
+        },
+        "linksTitle": {
+          "description": "The title of links",
+          "type": "string"
         }
       }
     },
@@ -200,6 +192,20 @@
       }
     }
   },
+  "patternProperties": {
+    "^name#": {
+      "description": "The website name in the specific language",
+      "type": "string"
+    },
+    "^description#": {
+      "description": "The description of the website in the specific language",
+      "type": "string"
+    },
+    "^home#": {
+      "description": "The relative URL of home markdown file in the specific language",
+      "type": "string"
+    }
+  },
   "$defs": {
     "articleInfo": {
       "type": "object",
@@ -210,30 +216,6 @@
         },
         "name": {
           "description": "The name of article",
-          "type": "string"
-        },
-        "name#en": {
-          "description": "The name of article in English",
-          "type": "string"
-        },
-        "name#fr": {
-          "description": "The name of article in French",
-          "type": "string"
-        },
-        "name#zh": {
-          "description": "The name of article in Chinese",
-          "type": "string"
-        },
-        "name#zh-Hans": {
-          "description": "The name of article in Chinese simplified",
-          "type": "string"
-        },
-        "name#zh-Hant": {
-          "description": "The name of article in Chinese tranditional",
-          "type": "string"
-        },
-        "name#ja": {
-          "description": "The name of article in Japanese",
           "type": "string"
         },
         "disable": {
@@ -288,104 +270,8 @@
           "description": "The relative directory path with the article markdown file",
           "type": "string"
         },
-        "dir#en": {
-          "description": "The relative directory path with the article markdown file in English",
-          "type": "string"
-        },
-        "dir#fr": {
-          "description": "The relative directory path with the article markdown file in French",
-          "type": "string"
-        },
-        "dir#zh": {
-          "description": "The relative directory path with the article markdown file in Chinese",
-          "type": "string"
-        },
-        "dir#zh-Hans": {
-          "description": "The relative directory path with the article markdown file in Chinese simplified",
-          "type": "string"
-        },
-        "dir#zh-Hant": {
-          "description": "The relative directory path with the article markdown file in Chinese tranditional",
-          "type": "string"
-        },
-        "dir#ja": {
-          "description": "The relative directory path with the article markdown file in Japanese",
-          "type": "string"
-        },
         "file": {
           "description": "The file name of the article markdown file",
-          "anyOf": [
-            {
-              "type": "string"
-            },
-            {
-              "description": "true for README.md (default value) or false for no file name",
-              "type": "boolean"
-            }
-          ]
-        },
-        "file#en": {
-          "description": "The file name of the article markdown file in English",
-          "anyOf": [
-            {
-              "type": "string"
-            },
-            {
-              "description": "true for README.md (default value) or false for no file name",
-              "type": "boolean"
-            }
-          ]
-        },
-        "file#fr": {
-          "description": "The file name of the article markdown file in French",
-          "anyOf": [
-            {
-              "type": "string"
-            },
-            {
-              "description": "true for README.md (default value) or false for no file name",
-              "type": "boolean"
-            }
-          ]
-        },
-        "file#zh": {
-          "description": "The file name of the article markdown file in Chinese",
-          "anyOf": [
-            {
-              "type": "string"
-            },
-            {
-              "description": "true for README.md (default value) or false for no file name",
-              "type": "boolean"
-            }
-          ]
-        },
-        "file#zh-Hans": {
-          "description": "The file name of the article markdown file in Chinese simplified",
-          "anyOf": [
-            {
-              "type": "string"
-            },
-            {
-              "description": "true for README.md (default value) or false for no file name",
-              "type": "boolean"
-            }
-          ]
-        },
-        "file#zh-Hant": {
-          "description": "The file name of the article markdown file in Chinese tranditional",
-          "anyOf": [
-            {
-              "type": "string"
-            },
-            {
-              "description": "true for README.md (default value) or false for no file name",
-              "type": "boolean"
-            }
-          ]
-        },
-        "file#ja": {
-          "description": "The file name of the article markdown file in Japanese",
           "anyOf": [
             {
               "type": "string"
@@ -538,7 +424,14 @@
         },
         "location": {
           "description": "The city where the article publishes",
-          "type": "string"
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "$ref": "#/$defs/nameValueModel"
+            }
+          ]
         },
         "related": {
           "description": "The related links (display in section see also)",
@@ -552,6 +445,7 @@
                 "type": "object",
                 "properties": {
                   "name": {
+                    "description": "The display name",
                     "type": "string"
                   },
                   "disable": {
@@ -565,9 +459,11 @@
                     ]
                   },
                   "subtitle": {
+                    "description": "The subtitle",
                     "type": "string"
                   },
                   "url": {
+                    "description": "The link URL",
                     "anyOf": [
                       {
                         "type": "string"
@@ -586,7 +482,22 @@
                     ]
                   },
                   "data": {
+                    "description": "Addtional data for reference",
                     "type": "object"
+                  }
+                },
+                "patternProperties": {
+                  "^name#": {
+                    "description": "The display name in the specific language",
+                    "type": "string"
+                  },
+                  "^subtitle#": {
+                    "description": "The subtitle in the specific language",
+                    "type": "string"
+                  },
+                  "^url#": {
+                    "description": "The link URL in the specific language",
+                    "type": "string"
                   }
                 }
               }
@@ -685,7 +596,26 @@
                       "type": "string"
                     },
                     {
-                      "type": "object"
+                      "type": "object",
+                      "properties": {
+                        "name": {
+                          "description": "The alt name of banner image",
+                          "type": "string"
+                        },
+                        "url": {
+                          "description": "The URL of banner image",
+                          "type": "string"
+                        },
+                        "maxHeight": {
+                          "description": "The max height of banner image",
+                          "type": "integer"
+                        },
+                        "cover": {
+                          "description": "A flag indicating whether fit cover",
+                          "type": "boolean"
+                        }
+                      },
+                      "required": ["url"]
                     }
                   ]
               },
@@ -698,6 +628,28 @@
               }
           }
         }
+      },
+      "patternProperties": {
+        "^name#": {
+          "description": "The name of article in the specific language",
+          "type": "string"
+        },
+        "^dir#": {
+          "description": "The relative directory path with the article markdown file in the specific language",
+          "type": "string"
+        },
+        "^file#": {
+          "description": "The file name of the article markdown file in the specific language",
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "description": "true for README.md (default value) or false for no file name",
+              "type": "boolean"
+            }
+          ]
+        }
       }
     },
     "nameValueModel": {
@@ -707,36 +659,18 @@
           "description": "The name",
           "type": "string"
         },
-        "name#en": {
-          "description": "English name",
-          "type": "string"
-        },
-        "name#fr": {
-          "description": "French name",
-          "type": "string"
-        },
-        "name#zh": {
-          "description": "Chinese name",
-          "type": "string"
-        },
-        "name#zh-Hans": {
-          "description": "The name in Chinese simplified",
-          "type": "string"
-        },
-        "name#zh-Hant": {
-          "description": "The name in Chinese tranditional",
-          "type": "string"
-        },
-        "name#ja": {
-          "description": "The name in Japanese",
-          "type": "string"
-        },
         "value": {
           "description": "The value",
           "type": "string"
         }
       },
-      "required": ["value"]
+      "required": ["value"],
+      "patternProperties": {
+        "^name#": {
+          "description": "The name in the specific language",
+          "type": "string"
+        }
+      }
     },
     "contributorInfo": {
       "type": "object",
@@ -758,7 +692,13 @@
           "type": "string"
         }
       },
-      "required": ["name"]
+      "required": ["name"],
+      "patternProperties": {
+        "^name#": {
+          "description": "Nickname in the specific language",
+          "type": "string"
+        }
+      }
     },
     "contributorInfoType": {
       "anyOf": [

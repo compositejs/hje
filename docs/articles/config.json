@@ -67,6 +67,8 @@
         "xuanran": "tohtml",
         "zujian": "component"
     },
+    "options": {
+    },
     "$defs": {
         "contributors": [
             { "name": "Kingcean Tuan", "url": "https://kingcean.org" }

@@ -55,6 +55,11 @@ namespace DeepX.MdBlogs {
             return this._inner.data.options || {};
         }
 
+        defs(key: string) {
+            const defs = this._inner.data["$defs"];
+            return defs ? defs[key] : undefined;
+        }
+
         blogsInfo(options?: {
             mkt?: string | boolean;
         }) {
@@ -180,6 +185,25 @@ namespace DeepX.MdBlogs {
             });
             if (!specificMkt) this._inner.hidden = list;
             return list;
+        }
+
+        links(options?: {
+            mkt?: string | boolean;
+        }) {
+            const arr = this._inner.data.links;
+            if (!arr) return [];
+            return arr.map(item => {
+                let url = getLocaleProp(item, "url", options);
+                if (!url || !item) return undefined;
+                if (url && typeof url === "string" && url.startsWith(".")) url = this.relative(url);
+                return {
+                    name: getLocaleProp(item, null, options),
+                    url: getLocaleProp(item, "url", options),
+                    newWindow: item.newWindow
+                };
+            }).filter(item => {
+                return item.name && item.url && typeof item.name === "string" && typeof item.url === "string";
+            });
         }
 
         addBlog(article: IArticleInfo) {

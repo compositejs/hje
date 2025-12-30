@@ -162,7 +162,10 @@ var curSite = {};
         return DeepX.MdBlogs.render("blog_content", "../articles/config.json", {
             title: true,
             banner: config.banner,
-            supplement: config.supplement
+            supplement: config.supplement,
+            onselect(ev) {
+                if (!ev || !ev.article) return;
+            }
         });
     };
 

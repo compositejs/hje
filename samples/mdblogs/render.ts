@@ -36,6 +36,16 @@ namespace DeepX.MdBlogs {
                             tagName: "ul",
                             styleRefs: "link-tile-compact",
                             children: []
+                        }, {
+                            key: "linksTitle",
+                            tagName: "h1",
+                            style: { display: "none" }
+                        }, {
+                            key: "links",
+                            tagName: "ul",
+                            styleRefs: "link-tile-compact",
+                            children: [],
+                            style: { display: "none" }
                         }]
                     }]
                 }]
@@ -93,6 +103,10 @@ namespace DeepX.MdBlogs {
         set mkt(value: string | boolean) {
             this.__inner.mkt = value;
         }
+
+        defs(key: string) {
+            return this.__inner.info.defs(key);
+        }
         
         home() {
             const already = !this.__inner.select;
@@ -126,6 +140,7 @@ namespace DeepX.MdBlogs {
                 children: part.contentCache
             });
             const menu: Hje.DescriptionContract[] = [];
+            const self = this;
             const docs = this.__inner.info.docs(options);
             let listStyleRef = "link-tile-compact";
             if (docs.length > 0) {
@@ -136,15 +151,28 @@ namespace DeepX.MdBlogs {
                 listStyleRef = "link-item-blog";
             }
 
+            const main: Hje.DescriptionContract[] = [{
+                tagName: "ul",
+                styleRefs: listStyleRef,
+                children: menu
+            }];
             children.push({
                 tagName: "main",
                 styleRefs: "x-part-blog-menu",
-                children: [{
-                    tagName: "ul",
-                    styleRefs: listStyleRef,
-                    children: menu
-                }]
+                children: main
             });
+            const links = this.__inner.info.links(options);
+            if (links.length > 0) {
+                main.push({
+                    tagName: "h2",
+                    children: this.__inner.info.options?.linksTitle || getLocaleString("otherLinks", options?.mkt)
+                }, {
+                    tagName: "section",
+                    styleRefs: "link-tile-wide",
+                    children: links.map(link => generateLink(link))
+                });
+            }
+
             if (data.supplement) children.push(data.supplement);
             const model = super.childModel("content", { children });
             super.childModel("contents", {
@@ -155,7 +183,10 @@ namespace DeepX.MdBlogs {
             if (typeof data.onhome === "function") data.onhome({
                 model,
                 mkt: options?.mkt,
-                store: data.store
+                store: data.store,
+                defs(key) {
+                    return self.defs(key);
+                }
             });
             this.refreshMenu();
             if (!already) this.lifecycle()?.onhome?.(this);
@@ -213,7 +244,7 @@ namespace DeepX.MdBlogs {
                             tagName: "img",
                             props: {
                                 alt: banner.name || title,
-                                src: banner.url
+                                src: banner.url.startsWith(".") ? self.__inner.info.relative(banner.url) : banner.url
                             },
                             style: bannerStyle
                         }]
@@ -259,7 +290,7 @@ namespace DeepX.MdBlogs {
                     }];
                     if (article.location) dateArr.push({
                         tagName: "span",
-                        children: article.location
+                        children: typeof article.location === "string" ? article.location : getLocaleProp(article.location, null, options)
                     });
                     if (infoChildren.length === 1) {
                         infoChildren.push(dateArr[0]);
@@ -385,7 +416,37 @@ namespace DeepX.MdBlogs {
                 children,
                 article,
                 mkt,
-                store: data.store
+                store: data.store,
+                defs(key) {
+                    return self.defs(key);
+                },
+                insertChildren(position, ...models) {
+                    if (typeof position === "number") {
+                        children.splice(position, 0, ...models);
+                        return;
+                    }
+
+                    if (!position) position = "end";
+                    if (position === "last") {
+                        children.push(...models);
+                        return;
+                    }
+
+                    let insertion = 0;
+                    for (let i = 0; i < children.length; i++) {
+                        insertion++;
+                        if (children[i] && children[i].tagName === "main") break;
+                    }
+
+                    if (position === "start") {
+                        insertion--;
+                        if (insertion < 0) insertion = 0;
+                    } else if (position !== "end") {
+                        return;
+                    }
+
+                    children.splice(insertion, 0, ...models);
+                }
             });
             super.childModel("content", { children });
             this.__inner.select = article;
@@ -454,6 +515,20 @@ namespace DeepX.MdBlogs {
             if (select) article = this.select(select);
             if (!article) this.home();
             if (!lifecycle.disable && typeof lifecycle.oninit === "function") lifecycle.oninit(this);
+            const linkModels = this.__inner.info.links(options).map(item => {
+                return {
+                    tagName: "li",
+                    children: [generateLink(item)]
+                };
+            });
+            super.childModel("links", {
+                style: linkModels.length > 0 ? {} : { display: "none" },
+                children: linkModels
+            });
+            super.childModel("linksTitle", {
+                style: linkModels.length > 0 ? {} : { display: "none" },
+                children: articles.options?.linksTitle || getLocaleString("otherLinks", options?.mkt)
+            });
         }
 
         protected refreshMenu() {
@@ -495,6 +570,24 @@ namespace DeepX.MdBlogs {
 
     function scrollToTop() {
         window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+
+    function generateLink(item: {
+        name: string;
+        url: string;
+        newWindow?: boolean;
+    }, styleRefs?: string | string[]) {
+        const m: Hje.DescriptionContract = {
+            tagName: "a",
+            props: {
+                href: item.url,
+                title: item.name
+            },
+            children: item.name
+        };
+        if (item.newWindow) m.props.target = "_blank";
+        if (styleRefs) m.styleRefs = styleRefs;
+        return m;
     }
 
     function renderMd(element: HTMLElement, md: string) {
@@ -772,14 +865,16 @@ namespace DeepX.MdBlogs {
                 label = undefined;
             }
 
+            const props = {
+                href: link.url,
+                title: link.name + (link.subtitle ? ("\n" + link.subtitle) : "")
+            };
+            if (link.newWindow) (props as any).target = "_blank";
             relatedItems.push({
                 tagName: "li",
                 children: [{
                     tagName: "a",
-                    props: {
-                        href: link.url,
-                        title: link.name + (link.subtitle ? ("\n" + link.subtitle) : "")
-                    },
+                    props,
                     children: [{
                         tagName: "span",
                         children: link.name

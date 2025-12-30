@@ -36,12 +36,28 @@ namespace DeepX.MdBlogs {
     }
 
     export interface IArticleRelatedLinkItemInfo {
+        /**
+         * The display name.
+         */
         name: string;
+        /**
+         * The subtitle.
+         */
         subtitle?: string;
+        /**
+         * The link URL.
+         */
         url: string | {
             type: string;
             value: string;
         };
+        /**
+         * A flag indicating opens in a new window or tab.
+         */
+        newWindow?: boolean;
+        /**
+         * Addtional data for reference.
+         */
         data?: any;
     }
 
@@ -135,7 +151,7 @@ namespace DeepX.MdBlogs {
         /**
          * The city where the article publishes.
          */
-        location?: string;
+        location?: string | INameValueModel;
         /**
          * The related links (display in section see also).
          */
@@ -197,12 +213,23 @@ namespace DeepX.MdBlogs {
              * The banner image URL or info.
              */
             banner: string | {
+                /**
+                 * The alt name of banner image.
+                 */
                 name?: string;
+                /**
+                 * The URL of banner.
+                 */
                 url: string;
+                /**
+                 * The max height of banner image.
+                 */
                 maxHeight?: number;
+                /**
+                 * A flag indicating whether fit cover.
+                 */
                 cover?: boolean;
             },
-
             /**
              * The additional kind of article for filter.
              */
@@ -265,11 +292,14 @@ namespace DeepX.MdBlogs {
             article: ArticleInfo;
             mkt: string | boolean | undefined;
             store: any;
+            defs(key: string): any;
+            insertChildren(position: "last" | "end" | "start" | number | undefined, ...models: Hje.DescriptionContract[]): void;
         }): void;
         onhome(ev: {
             model: Hje.DescriptionContract;
             mkt: string | boolean | undefined;
             store: any;
+            defs(key: string): any;
         }): void;
         onfetch?(ev: {
             articles: Articles
@@ -364,6 +394,25 @@ namespace DeepX.MdBlogs {
             [alias: string]: string;
         };
         /**
+         * The additional links. They will display under the list of docs and blog.
+         */
+        links?: {
+            /**
+             * The display name.
+             */
+            name: string;
+            /**
+             * The link URL.
+             */
+            url: string;
+            /**
+             * A flag indicating opens in a new window or tab.
+             */
+            newWindow?: boolean;
+
+            [property: string]: any;
+        }[];
+        /**
          * The additional options of website.
          */
         options?: {
@@ -379,6 +428,10 @@ namespace DeepX.MdBlogs {
              * A flag to indicate whether need hide the contents in article.
              */
             disableMenu?: boolean;
+            /**
+             * The title of links.
+             */
+            linksTitle?: string;
         };
         /**
          * The definitions.

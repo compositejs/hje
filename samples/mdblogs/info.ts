@@ -173,6 +173,10 @@ namespace DeepX.MdBlogs {
             return this._inner.data?.options ? this._inner.data.options.banner : undefined;
         }
 
+        defs(key: string) {
+            return this._inner.definitions[key];
+        }
+
         getRoutePath(options?: {
             mkt?: string | boolean;
         }) {
@@ -242,23 +246,8 @@ namespace DeepX.MdBlogs {
         }
 
         getThumb(kind?: "square" | "common" | "wide" | "tall") {
-            let pic = this._inner.data.thumb;
-            if (!pic) return undefined;
-            if (typeof pic === "string") return pic;
-            let p = pic[kind];
-            if (p) return p;
-            switch (kind) {
-                case "square":
-                    return pic.common || pic.tall || pic.wide;
-                case "common":
-                    return pic.wide || pic.square || pic.tall;
-                case "wide":
-                    return pic.common || pic.square || pic.tall;
-                case "tall":
-                    return pic.square || pic.common || pic.wide;
-                default:
-                    return pic.square || pic.common || pic.tall || pic.wide;
-            }
+            const pic = getThumbInternal(this._inner.data.thumb, kind);
+            return pic && typeof pic === "string" && pic.startsWith(".") ? this.relative(pic) : pic;
         }
 
         getContent(options: IArticleLocaleOptions) {
@@ -328,12 +317,16 @@ namespace DeepX.MdBlogs {
             });
         }
 
+        relative(path: string) {
+            return this._inner.rela.relative(path);
+        }
+
         related(options?: {
             mkt?: string | boolean;
         }): (IArticleRelatedLinkItemInfo | string)[] {
             const arr = this._inner.data?.related;
             if (!arr || arr.length < 1) return [];
-            return arr.map(function (link) {
+            return arr.map(link => {
                 if (!link) return undefined;
                 if (typeof link === "string") return link;
                 const name = getLocaleProp(link, null, options);
@@ -344,11 +337,14 @@ namespace DeepX.MdBlogs {
                     return undefined;
                 }
 
+                let url = getLocaleProp(link, "url", options);
+                if (url && typeof url === "string" && url.startsWith(".")) url = this.relative(url);
                 return {
                     name: getLocaleProp(link, null, options),
                     subtitle: getLocaleProp(link, "subtitle", options),
-                    url: getLocaleProp(link, "url", options),
-                    data: link.data
+                    url,
+                    data: link.data,
+                    newWindow: link.newWindow
                 };
             }).filter(function (link) {
                 return link != null; 
@@ -403,6 +399,25 @@ namespace DeepX.MdBlogs {
             }
 
             return path;
+        }
+    }
+
+    function getThumbInternal(pic: IArticleInfo["thumb"], kind?: "square" | "common" | "wide" | "tall") {
+        if (!pic) return undefined;
+        if (typeof pic === "string") return pic;
+        let p = pic[kind];
+        if (p) return p;
+        switch (kind) {
+            case "square":
+                return pic.common || pic.tall || pic.wide;
+            case "common":
+                return pic.wide || pic.square || pic.tall;
+            case "wide":
+                return pic.common || pic.square || pic.tall;
+            case "tall":
+                return pic.square || pic.common || pic.wide;
+            default:
+                return pic.square || pic.common || pic.tall || pic.wide;
         }
     }
 

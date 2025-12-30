@@ -34,6 +34,12 @@ namespace DeepX.MdBlogs {
         return id;
     }
 
+    export function filterFirst<T>(arr: T[], predicate: (item: T, index: number) => boolean) {
+        if (!arr) return undefined;
+        arr = arr.filter(predicate);
+        return arr.length > 0 ? arr[0] : undefined;
+    }
+
     /* Copied from LangPack */
 
     function getKeyedPropValue(obj: any, key1: string, key2: string, options: {
