@@ -76,6 +76,7 @@ declare namespace DeepX.MdBlogs {
             disableName?: boolean;
             disableAuthors?: boolean;
             disableMenu?: boolean;
+            disableSearch?: boolean;
             linksTitle?: string;
         };
         defs(key: string): any;
@@ -603,6 +604,10 @@ declare namespace DeepX.MdBlogs {
              * A flag to indicate whether need hide the contents in article.
              */
             disableMenu?: boolean;
+            /**
+             * A flag to indicate whether need disable search functionality.
+             */
+            disableSearch?: boolean;
             /**
              * The title of links.
              */

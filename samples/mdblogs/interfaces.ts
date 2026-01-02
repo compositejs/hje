@@ -433,6 +433,10 @@ namespace DeepX.MdBlogs {
              */
             disableMenu?: boolean;
             /**
+             * A flag to indicate whether need disable search functionality.
+             */
+            disableSearch?: boolean;
+            /**
              * The title of links.
              */
             linksTitle?: string;

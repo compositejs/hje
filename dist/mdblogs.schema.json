@@ -144,6 +144,10 @@
           "description": "A flag to indicate whether need hide the authors and publish date in article",
           "type": "boolean"
         },
+        "disableSearch": {
+          "description": "A flag to indicate whether need disable search functionality",
+          "type": "boolean"
+        },
         "linksTitle": {
           "description": "The title of links",
           "type": "string"

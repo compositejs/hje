@@ -148,7 +148,7 @@ namespace DeepX.MdBlogs {
             (ul as Hje.DescriptionContract).onInit = c => {
                 listRef.list = c;
             };
-            const main: Hje.DescriptionContract[] = q || ul.children.length > 10 ? [{
+            const main: Hje.DescriptionContract[] = !config.disableSearch && (q || ul.children.length > 10) ? [{
                 tagName: "div",
                 styleRefs: "x-part-blog-search",
                 children: [{

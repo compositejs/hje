@@ -45,6 +45,7 @@ namespace DeepX.MdBlogs {
         const level = deep === true ? 1 : (typeof deep === "number" && deep >= 0 ? (deep + 1) : 0);
         let group: number | string = undefined;
         let label: string;
+        const now = new Date();
         for (let i = 0; i < params.length; i++) {
             const article = params[i];
             if (typeof article === "string") {
@@ -63,12 +64,14 @@ namespace DeepX.MdBlogs {
 
             if (!article || !article.name || !(article instanceof ArticleInfo)) continue;
             const y = article.dateObj?.year;
+            const isThisYear = now.getFullYear() === y;
             if ((deep === false || deep === -2) && y && y != group) {
                 group = y;
+                const groupName = isThisYear ? getLocaleString("thisYear") : (typeof group === "number" ? group.toString(10) : group);
                 arr.push({
                     tagName: "li",
                     styleRefs: "grouping-header",
-                    children: typeof group === "number" ? group.toString(10) : group
+                    children: groupName
                 });
             }
 
