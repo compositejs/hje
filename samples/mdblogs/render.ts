@@ -61,7 +61,7 @@ namespace DeepX.MdBlogs {
                         mkt: this.__inner.mkt,
                         store: data.store
                     });
-                    this.initRender(r, data.select, lifecycle);
+                    this.initRender(r, data.select, data.q, lifecycle);
                 });
             } else if (data.articles instanceof Articles) {
                 if (typeof data.onfetch === "function") data.onfetch({
@@ -69,7 +69,7 @@ namespace DeepX.MdBlogs {
                     mkt: this.__inner.mkt,
                     store: data.store
                 });
-                this.initRender(data.articles, data.select, lifecycle);
+                this.initRender(data.articles, data.select, data.q, lifecycle);
             }
         }
 
@@ -108,7 +108,7 @@ namespace DeepX.MdBlogs {
             return this.__inner.info.defs(key);
         }
         
-        home() {
+        home(q?: string) {
             const already = !this.__inner.select;
             this.__inner.select = null;
             const children: Hje.DescriptionContract[] = [];
@@ -139,23 +139,47 @@ namespace DeepX.MdBlogs {
                 },
                 children: part.contentCache
             });
-            const menu: Hje.DescriptionContract[] = [];
             const self = this;
-            const docs = this.__inner.info.docs(options);
-            let listStyleRef = "link-tile-compact";
-            if (docs.length > 0) {
-                this.genMenu(menu, docs, true);
-                this.genMenu(menu, this.__inner.info.blogs(options), false);
-            } else {
-                this.genMenu(menu, this.__inner.info.blogs(options), -2);
-                listStyleRef = "link-item-blog";
-            }
+            const listRef: {
+                list?: Hje.ViewGeneratingContextContract<any>;
+                search?: number;
+            } = {};
+            const ul = this.genArticleList(q, options);
+            (ul as Hje.DescriptionContract).onInit = c => {
+                listRef.list = c;
+            };
+            const main: Hje.DescriptionContract[] = q || ul.children.length > 10 ? [{
+                tagName: "div",
+                styleRefs: "x-part-blog-search",
+                children: [{
+                    tagName: "input",
+                    props: {
+                        type: "search",
+                        name: "blog-search",
+                        value: q || "",
+                        maxLength: 60,
+                        placeholder: getLocaleString("search", options?.mkt)
+                    },
+                    on: {
+                        input(ev) {
+                            if (listRef.search) {
+                                clearTimeout(listRef.search);
+                                listRef.search = null;
+                            }
 
-            const main: Hje.DescriptionContract[] = [{
-                tagName: "ul",
-                styleRefs: listStyleRef,
-                children: menu
-            }];
+                            if (!listRef.list) return;
+                            listRef.search = setTimeout(() => {
+                                if (!listRef.list) return;
+                                const ul = self.genArticleList(ev.target.value, options);
+                                const searchModel = listRef.list.model();
+                                searchModel.children = ul.children;
+                                searchModel.styleRefs = ul.styleRefs;
+                                listRef.list.refresh();
+                            }, 600);
+                        }
+                    }
+                }]
+            }, ul] : [ul];
             children.push({
                 tagName: "main",
                 styleRefs: "x-part-blog-menu",
@@ -495,7 +519,7 @@ namespace DeepX.MdBlogs {
             return blog;
         }
 
-        protected initRender(articles: Articles, select: string, lifecycle: IArticlesLifecycle) {
+        protected initRender(articles: Articles, select: string, q: string, lifecycle: IArticlesLifecycle) {
             if (this.__inner.info === articles || !articles) return;
             this.__inner.info = articles;
             const options = this.createLocaleOptions();
@@ -513,7 +537,7 @@ namespace DeepX.MdBlogs {
             super.childModel("menu", m);
             let article: ArticleInfo;
             if (select) article = this.select(select);
-            if (!article) this.home();
+            if (!article) this.home(q);
             if (!lifecycle.disable && typeof lifecycle.oninit === "function") lifecycle.oninit(this);
             const linkModels = this.__inner.info.links(options).map(item => {
                 return {
@@ -551,6 +575,36 @@ namespace DeepX.MdBlogs {
         protected lifecycle() {
             const l = this.__inner.lifecycle;
             return !l || l.disable ? undefined : l;
+        }
+
+        genArticleList(q: string, options?: {
+            mkt?: string | boolean
+        }) {
+            const ul = {
+                tagName: "ul",
+                styleRefs: "link-tile-compact",
+                children: [] as Hje.DescriptionContract[]
+            };
+            if (q && typeof q === "string") {
+                const searchResult = this.__inner.info.search(q);
+                if (searchResult.length < 1) ul.children.push({
+                    tagName: "li",
+                    styleRefs: "grouping-header",
+                    children: getLocaleString("empty", options?.mkt)
+                });
+                else this.genMenu(ul.children, searchResult, 0);
+            } else {
+                const docs = this.__inner.info.docs(options);
+                if (docs.length > 0) {
+                    this.genMenu(ul.children, docs, true);
+                    this.genMenu(ul.children, this.__inner.info.blogs(options), false);
+                } else {
+                    this.genMenu(ul.children, this.__inner.info.blogs(options), -2);
+                    ul.styleRefs = "link-item-blog";
+                }
+            }
+
+            return ul;
         }
 
         protected genMenu(arr: Hje.DescriptionContract[], params: (ArticleInfo | string)[], deep?: boolean | number) {

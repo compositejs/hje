@@ -52,6 +52,7 @@ namespace DeepX.MdBlogs {
         if (q && q.length > 0) {
             if (typeof q[0] === "string") d.select = q[0];
             d.mkt = Hje.getValueFromKeyedArray(q, "mkt");
+            d.q = Hje.getValueFromKeyedArray(q, "q");
         }
 
         const component = Hje.render(element, {

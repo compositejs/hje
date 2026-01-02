@@ -67,6 +67,32 @@ input[type=checkbox]:checked {
 input[type=checkbox]:checked:hover {
     border-color: rgba(255, 255, 255, 0.9);
 }
+input[type=text], input[type=email], input[type=tel], input[type=number], input[type=search], input[type=url] {
+    color: #DDD;
+    background-color: rgba(51, 51, 51, 0.5);
+    padding: 7px;
+    margin: 0;
+    border-style: solid;
+    border-width: 1px;
+    border-color: rgba(128, 128, 128, 0.1) rgba(128, 128, 128, 0.1) rgba(128, 128, 128, 0.4) rgba(128, 128, 128, 0.1);
+    border-radius: 4px;
+    outline: none;
+    transition: 0.2s border-color;
+}
+input[type=text]:hover, input[type=email]:hover, input[type=tel]:hover,
+input[type=number]:hover, input[type=search]:hover, input[type=url]:hover {
+    border-color: rgba(128, 128, 128, 0.2) rgba(128, 128, 128, 0.2) rgba(128, 128, 128, 0.6) rgba(128, 128, 128, 0.2);
+    outline: none;
+}
+input[type=text]:focus-visible, input[type=email]:focus-visible, input[type=tel]:focus-visible,
+input[type=number]:focus-visible, input[type=search]:focus-visible, input[type=url]:focus-visible {
+    background-color: #222;
+    padding: 7px 7px 6px 7px;
+    color: #DDD;
+    border-width: 1px 1px 2px 1px;
+    border-color: rgba(128, 128, 128, 0.2) rgba(128, 128, 128, 0.2) #F5B rgba(128, 128, 128, 0.2);
+    outline: none;
+}
 
 /* Header */
 body > header:first-child {
@@ -1082,6 +1108,22 @@ ul.link-item-blog > li > a > div:last-child {
 }
 #blog_content > article > main > div.x-part-blog-notification:first-child {
     min-height: 320px;
+}
+#blog_content > article > main > div.x-part-blog-search {
+    margin-bottom: 20px;
+}
+#blog_content > article > main > div.x-part-blog-search > input[type="search"] {
+    font-size: 14px;
+    width: 100%;
+    max-width: 480px;
+    padding-right: 19px;
+    padding-left: 19px;
+    border-radius: 18px;
+    line-height: 20px;
+    transition: 0.2s border-color, 0.2s border-radius;
+}
+#blog_content > article > main > div.x-part-blog-search > input[type="search"]:focus-visible {
+    border-radius: 18px 18px 4px 4px;
 }
 #blog_content > article > h1 + main.x-part-blog-menu,
 #blog_content > article > main + main.x-part-blog-menu {

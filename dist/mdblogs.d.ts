@@ -111,6 +111,9 @@ declare namespace DeepX.MdBlogs {
         get(name: string, options?: {
             mkt?: string | boolean;
         }): ArticleInfo;
+        search(q: string, options?: {
+            mkt?: string | boolean;
+        }): ArticleInfo[];
         genInfo(article: IArticleInfo, list?: ArticleInfo[] | any[]): ArticleInfo;
         relative(path: string | Hje.RelativePathInfo): Hje.RelativePathInfo;
         some(callback: (item: ArticleInfo, index: number) => boolean, thisArg?: any, options?: {
@@ -479,6 +482,7 @@ declare namespace DeepX.MdBlogs {
         lifecycle?: IArticlesLifecycle;
         articles?: string | Articles;
         select?: string;
+        q?: string;
         store?: any;
         onselect?(ev: IArticlesPartDataSelectParams): void;
         onhome?(ev: IArticlesPartDataHomeParams): void;
@@ -809,17 +813,24 @@ declare namespace DeepX.MdBlogs {
         get mkt(): string | boolean;
         set mkt(value: string | boolean);
         defs(key: string): any;
-        home(): void;
+        home(q?: string): void;
         select(article?: ArticleInfo | string): ArticleInfo;
         next(): ArticleInfo;
         previous(): ArticleInfo;
         parent(): ArticleInfo;
-        protected initRender(articles: Articles, select: string, lifecycle: IArticlesLifecycle): void;
+        protected initRender(articles: Articles, select: string, q: string, lifecycle: IArticlesLifecycle): void;
         protected refreshMenu(): void;
         protected createLocaleOptions(): {
             mkt: string | false;
         };
         protected lifecycle(): IArticlesLifecycle;
+        genArticleList(q: string, options?: {
+            mkt?: string | boolean;
+        }): {
+            tagName: string;
+            styleRefs: string;
+            children: Hje.DescriptionContract[];
+        };
         protected genMenu(arr: Hje.DescriptionContract[], params: (ArticleInfo | string)[], deep?: boolean | number): Hje.DescriptionContract;
     }
 }

@@ -422,9 +422,10 @@ namespace DeepX.MdBlogs {
     }
 
     function isStringInArray(arr: string[] | INameValueModelValue | string, test: string) {
-        if (!test) return false;
+        if (!test || typeof test !== "string") return false;
         if (!arr) return false;
         if (typeof arr === "string") arr = [arr];
+        test = test.toLowerCase();
         for (let i = 0; i < arr.length; i++) {
             let item = arr[i];
             if (!item) continue;
@@ -433,7 +434,7 @@ namespace DeepX.MdBlogs {
                 if (!item || typeof item !== "string") continue;
             }
 
-            if (item === test) return true;
+            if (item.toLowerCase() === test) return true;
         }
 
         return false;

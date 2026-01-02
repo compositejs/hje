@@ -672,6 +672,22 @@ ul.link-item-blog > li > a > div:last-child {
 #blog_content > article > main > div.x-part-blog-notification:first-child {
     min-height: 320px;
 }
+#blog_content > article > main > div.x-part-blog-search {
+    margin-bottom: 20px;
+}
+#blog_content > article > main > div.x-part-blog-search > input[type="search"] {
+    font-size: 14px;
+    width: 100%;
+    max-width: 480px;
+    padding-right: 19px;
+    padding-left: 19px;
+    border-radius: 18px;
+    line-height: 20px;
+    transition: 0.2s border-color, 0.2s border-radius;
+}
+#blog_content > article > main > div.x-part-blog-search > input[type="search"]:focus-visible {
+    border-radius: 18px 18px 4px 4px;
+}
 #blog_content > article > h1 + main.x-part-blog-menu,
 #blog_content > article > main + main.x-part-blog-menu {
     margin-top: 40px;

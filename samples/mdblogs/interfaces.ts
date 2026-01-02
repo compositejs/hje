@@ -305,6 +305,7 @@ namespace DeepX.MdBlogs {
         lifecycle?: IArticlesLifecycle;
         articles?: string | Articles;
         select?: string;
+        q?: string;
         store?: any;
         onselect?(ev: IArticlesPartDataSelectParams): void;
         onhome?(ev: IArticlesPartDataHomeParams): void;

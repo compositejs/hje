@@ -372,6 +372,21 @@ namespace DeepX.MdBlogs {
             return getArticle(this.hiddenArticles({ mkt }), name, options);
         }
 
+        search(q: string, options?: {
+            mkt?: string | boolean;
+        }) {
+            if (!q || typeof q !== "string") return undefined;
+            const arr: ArticleInfo[] = [];
+            q = q.toLowerCase();
+            this.blogs(options).forEach(ele => {
+                if (searchItem(ele, q, options)) arr.push(ele);
+            });
+            this.docs(options).forEach(ele => {
+                searchItemDeep(arr, ele, q, options);
+            });
+            return arr;
+        }
+
         genInfo(article: IArticleInfo, list?: ArticleInfo[] | any[]) {
             if (!article) return undefined;
             var info = new ArticleInfo(article, {
@@ -484,6 +499,39 @@ namespace DeepX.MdBlogs {
         }
 
         return undefined;
+    }
+
+    function searchItem(article: ArticleInfo, q: string, options?: {
+        mkt?: string | boolean;
+    }) {
+        if (!article) return false;
+        let s = article.getName(options);
+        if (s && s.toLowerCase().indexOf(q) >= 0) return true;
+        s = article.getName({ mkt: false });
+        if (s && s.toLowerCase().indexOf(q) >= 0) return true;
+        s = article.getSubtitle(options);
+        if (s && s.toLowerCase().indexOf(q) >= 0) return true;
+        s = article.getSubtitle({ mkt: false });
+        if (s && s.toLowerCase().indexOf(q) >= 0) return true;
+        s = article.getIntro(options);
+        if (s && s.toLowerCase().indexOf(q) >= 0) return true;
+        s = article.getIntro({ mkt: false });
+        if (s && s.toLowerCase().indexOf(q) >= 0) return true;
+        return article.hasKeyword(q);
+    }
+
+    function searchItemDeep(arr: ArticleInfo[], article: ArticleInfo | string, q: string, options?: {
+        mkt?: string | boolean;
+    }) {
+        if (!(article instanceof ArticleInfo)) return;
+        if (searchItem(article, q, options)) arr.push(article);
+        const children = article.children(options);
+        if (!children) return;
+        for (let i = 0; i < children.length; i++) {
+            const child = children[i];
+            if (!child) continue;
+            searchItemDeep(arr, child, q, options);
+        }
     }
 
     function someInternal(list: ArticleInfo[], callback: (item: ArticleInfo, index: number) => boolean, context?: {
