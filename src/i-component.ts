@@ -45,7 +45,7 @@ export interface DescriptionContract {
     key?: string;
 
     /**
-     * The control type to initialize.
+     * The component type to initialize this instance.
      */
     control?: typeof BaseComponent;
 
@@ -81,7 +81,7 @@ export interface DescriptionContract {
     };
 
     /**
-     * Childrens.
+     * Child models.
      */
     children?: DescriptionContract[] | string | number;
 

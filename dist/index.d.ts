@@ -584,7 +584,7 @@ declare namespace Hje {
          */
         key?: string;
         /**
-         * The control type to initialize.
+         * The component type to initialize this instance.
          */
         control?: typeof BaseComponent;
         /**
@@ -615,7 +615,7 @@ declare namespace Hje {
             };
         };
         /**
-         * Childrens.
+         * Child models.
          */
         children?: DescriptionContract[] | string | number;
         /**

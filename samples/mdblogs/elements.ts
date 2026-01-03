@@ -129,12 +129,12 @@ namespace DeepX.MdBlogs {
         if (!filter) {
             arr = [
                 ...result.docs({ mkt: options.mkt }),
-                ...result.blogs({ mkt: options.mkt })
+                ...result.blog({ mkt: options.mkt })
             ];
         } else if (typeof filter === "function") {
             arr = filter(result);
         } else if (filter === "blogs" || filter === "blog") {
-            arr = result.blogs({ mkt: options.mkt });
+            arr = result.blog({ mkt: options.mkt });
         } else if (filter === "docs" || filter === "wiki") {
             arr = result.docs({ mkt: options.mkt });
         } else {

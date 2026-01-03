@@ -214,7 +214,7 @@ namespace DeepX.MdBlogs {
             });
             this.refreshMenu();
             if (!already) this.lifecycle()?.onhome?.(this);
-            this.__inner.info.loadMoreBlogs();
+            this.__inner.info.loadMoreBlog();
         }
 
         select(article?: ArticleInfo | string) {
@@ -226,8 +226,8 @@ namespace DeepX.MdBlogs {
                 }
 
                 if (isNaN(article) || article < 0) return this.__inner.select;
-                const blogs = this.__inner.info?.blogs(options);
-                article = blogs[article];
+                const blog = this.__inner.info?.blog(options);
+                article = blog[article];
                 if (!article) return undefined;
             } else if (typeof article === "string") {
                 if (!article) {
@@ -531,14 +531,10 @@ namespace DeepX.MdBlogs {
                 m.children = arr;
             }
 
-            this.genMenu(arr, articles.docs(options), true);
-            this.genMenu(arr, articles.blogs(options), false);
+            const menu = this.genMenu(arr, articles.docs(options), true);
+            this.genMenu(arr, articles.blog(options), false);
             m.style = arr.length > 0 ? {} : { display: "none" };
             super.childModel("menu", m);
-            let article: ArticleInfo;
-            if (select) article = this.select(select);
-            if (!article) this.home(q);
-            if (!lifecycle.disable && typeof lifecycle.oninit === "function") lifecycle.oninit(this);
             const linkModels = this.__inner.info.links(options).map(item => {
                 return {
                     tagName: "li",
@@ -553,6 +549,10 @@ namespace DeepX.MdBlogs {
                 style: linkModels.length > 0 ? {} : { display: "none" },
                 children: articles.options?.linksTitle || getLocaleString("otherLinks", options?.mkt)
             });
+            let article: ArticleInfo;
+            if (select) article = this.select(select);
+            if (!article) this.home(q);
+            if (!lifecycle.disable && typeof lifecycle.oninit === "function") lifecycle.oninit(this);
         }
 
         protected refreshMenu() {
@@ -597,9 +597,9 @@ namespace DeepX.MdBlogs {
                 const docs = this.__inner.info.docs(options);
                 if (docs.length > 0) {
                     this.genMenu(ul.children, docs, true);
-                    this.genMenu(ul.children, this.__inner.info.blogs(options), false);
+                    this.genMenu(ul.children, this.__inner.info.blog(options), false);
                 } else {
-                    this.genMenu(ul.children, this.__inner.info.blogs(options), -2);
+                    this.genMenu(ul.children, this.__inner.info.blog(options), -2);
                     ul.styleRefs = "link-item-blog";
                 }
             }

@@ -91,7 +91,7 @@ declare namespace DeepX.MdBlogs {
         getName(options?: ILocalePropOptions<string>): any;
         getDescription(optional?: ILocalePropOptions<string>): any;
         home(options?: IArticleLocaleOptions): ArticleInfo;
-        blogs(options?: IArticleLocaleOptions): ArticleInfo[];
+        blog(options?: IArticleLocaleOptions): ArticleInfo[];
         docs(options?: IArticleLocaleOptions): (string | ArticleInfo)[];
         hiddenArticles(options?: IArticleLocaleOptions): ArticleInfo[];
         links(options?: {
@@ -104,11 +104,11 @@ declare namespace DeepX.MdBlogs {
         addBlog(article: IArticleInfo): ArticleInfo;
         addDocs(article: IArticleInfo | string | IArticleLabelInfo): any;
         addHiddenArticle(article: IArticleInfo): ArticleInfo;
-        clearBlogs(): void;
+        clearBlog(): void;
         clearDocs(): void;
         clearHiddenArticles(): void;
         toJSON(): IArticleCollection;
-        loadMoreBlogs(): Promise<boolean>;
+        loadMoreBlog(): Promise<boolean>;
         get(name: string, options?: {
             mkt?: string | boolean;
         }): ArticleInfo;
@@ -439,11 +439,11 @@ declare namespace DeepX.MdBlogs {
         [property: string]: any;
     }
     /**
-     * The config of blogs.
+     * The config of blog.
      */
-    interface IArticleBlogsConfig {
+    interface IArticleBlogConfig {
         /**
-         * The optional name of blogs.
+         * The optional name of blog.
          */
         name?: string;
         /**
@@ -553,9 +553,9 @@ declare namespace DeepX.MdBlogs {
          */
         home?: string;
         /**
-         * All blogs info.
+         * All blog info.
          */
-        blog?: IArticleInfo[] | IArticleBlogsConfig;
+        blog?: IArticleInfo[] | IArticleBlogConfig;
         /**
          * The docs or wiki with tree articles.
          */
@@ -648,7 +648,7 @@ declare namespace DeepX.MdBlogs {
 }
 declare namespace DeepX.MdBlogs {
     /**
-     * Renders a markdown blogs UX.
+     * Renders a markdown blog UX.
      * @param element The element to render.
      * @param data The URL of articles config or the collection of articles.
      * @param options The options.

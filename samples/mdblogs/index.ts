@@ -3,10 +3,10 @@ namespace DeepX.MdBlogs {
     export class Articles {
         private _inner: {
             data: IArticleCollection;
-            blogConfig: IArticleBlogsConfig;
+            blogConfig: IArticleBlogConfig;
             path: Hje.RelativePathInfo;
             fetch?: (url: Hje.RelativePathInfo) => Promise<string>;
-            blogs?: ArticleInfo[];
+            blog?: ArticleInfo[];
             docs?: (ArticleInfo | string)[];
             hidden?: ArticleInfo[];
             home?: ArticleInfo;
@@ -20,7 +20,7 @@ namespace DeepX.MdBlogs {
             let path = options?.path;
             if (!path || typeof path === "boolean") path = "./";
             if (typeof path === "string") path = new Hje.RelativePathInfo(path);
-            let blogConfig: IArticleBlogsConfig;
+            let blogConfig: IArticleBlogConfig;
             if (!data.blog) {
                 blogConfig = {
                     list: []
@@ -95,9 +95,9 @@ namespace DeepX.MdBlogs {
             return this._inner.home;
         }
 
-        blogs(options?: IArticleLocaleOptions) {
+        blog(options?: IArticleLocaleOptions) {
             const specificMkt = options?.mkt && options.mkt !== true;
-            if (this._inner.blogs && !options?.reload && !specificMkt) return this._inner.blogs;
+            if (this._inner.blog && !options?.reload && !specificMkt) return this._inner.blog;
             let blogInfo = this._inner.blogConfig;
             const path = this._inner.path;
             const fetchHandler = this._inner.fetch;
@@ -121,7 +121,7 @@ namespace DeepX.MdBlogs {
                 return true;
             });
             if (!blogInfo.reverse) list.reverse();
-            if (!specificMkt) this._inner.blogs = list;
+            if (!specificMkt) this._inner.blog = list;
             return list;
         }
 
@@ -214,7 +214,7 @@ namespace DeepX.MdBlogs {
                 fetch: this._inner.fetch,
                 definitions: this._inner.data["$defs"],
             });
-            const arr = this.blogs();
+            const arr = this.blog();
             let source = this._inner.data.blog;
             if (!source) {
                 source = [];
@@ -273,8 +273,8 @@ namespace DeepX.MdBlogs {
             return item;
         }
 
-        clearBlogs() {
-            this._inner.blogs = undefined;
+        clearBlog() {
+            this._inner.blog = undefined;
             let source = this._inner.data.blog;
             if (!source) {
                 source = [];
@@ -307,7 +307,7 @@ namespace DeepX.MdBlogs {
             return this._inner.data;
         }
 
-        async loadMoreBlogs() {
+        async loadMoreBlog() {
             const { further, list } = this._inner.blogConfig;
             if (!further || !(further instanceof Array)) return false;
             let pg = this._inner.pageIndex;
@@ -329,7 +329,7 @@ namespace DeepX.MdBlogs {
             const arr = json.blog;
             const options = json.options || {};
             if (options.reverse) arr.reverse();
-            this._inner.blogs = undefined;
+            this._inner.blog = undefined;
             for (let i = 0; i < arr.length; i++) {
                 const item = arr[i];
                 if (!item) continue;
@@ -355,8 +355,8 @@ namespace DeepX.MdBlogs {
             const mkt = options?.mkt;
             if (typeof name === "number") {
                 if (isNaN(name) || name < 0) return undefined;
-                const blogs = this.blogs(options);
-                return blogs[name];
+                const blog = this.blog(options);
+                return blog[name];
             }
 
             const redir = this._inner.data.redir;
@@ -367,7 +367,7 @@ namespace DeepX.MdBlogs {
 
             let result = getArticle(this.docs({ mkt }) as ArticleInfo[], name, options);
             if (result) return result;
-            result = getArticle(this.blogs({ mkt }), name, options);
+            result = getArticle(this.blog({ mkt }), name, options);
             if (result) return result;
             return getArticle(this.hiddenArticles({ mkt }), name, options);
         }
@@ -378,11 +378,11 @@ namespace DeepX.MdBlogs {
             if (!q || typeof q !== "string") return undefined;
             const arr: ArticleInfo[] = [];
             q = q.toLowerCase();
-            this.blogs(options).forEach(ele => {
-                if (searchItem(ele, q, options)) arr.push(ele);
-            });
             this.docs(options).forEach(ele => {
                 searchItemDeep(arr, ele, q, options);
+            });
+            this.blog(options).forEach(ele => {
+                if (searchItem(ele, q, options)) arr.push(ele);
             });
             return arr;
         }
@@ -413,7 +413,7 @@ namespace DeepX.MdBlogs {
             };
             if (someInternal(this.docs(options) as ArticleInfo[], callback, context) === true) return true;
             context.deep = false;
-            if (someInternal(this.blogs(options), callback, context) === true) return true;
+            if (someInternal(this.blog(options), callback, context) === true) return true;
             return false;
         }
 
@@ -457,9 +457,9 @@ namespace DeepX.MdBlogs {
         parentArticle(current: ArticleInfo, options?: {
             mkt?: string | boolean
         }) {
-            const blogs = this.blogs(options);
-            for (let i = 0; i < blogs.length; i++) {
-                const item = blogs[i];
+            const blog = this.blog(options);
+            for (let i = 0; i < blog.length; i++) {
+                const item = blog[i];
                 if (item === current) return null;
                 const test = isParent(item, current);
                 if (test) return test;

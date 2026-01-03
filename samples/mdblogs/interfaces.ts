@@ -259,11 +259,11 @@ namespace DeepX.MdBlogs {
     }
 
     /**
-     * The config of blogs.
+     * The config of blog.
      */
-    export interface IArticleBlogsConfig {
+    export interface IArticleBlogConfig {
         /**
-         * The optional name of blogs.
+         * The optional name of blog.
          */
         name?: string;
         /**
@@ -380,9 +380,9 @@ namespace DeepX.MdBlogs {
          */
         home?: string;
         /**
-         * All blogs info.
+         * All blog info.
          */
-        blog?: IArticleInfo[] | IArticleBlogsConfig;
+        blog?: IArticleInfo[] | IArticleBlogConfig;
         /**
          * The docs or wiki with tree articles.
          */

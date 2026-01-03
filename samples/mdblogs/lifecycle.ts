@@ -1,6 +1,6 @@
 namespace DeepX.MdBlogs {
     /**
-     * Renders a markdown blogs UX.
+     * Renders a markdown blog UX.
      * @param element The element to render.
      * @param data The URL of articles config or the collection of articles.
      * @param options The options.
@@ -30,7 +30,7 @@ namespace DeepX.MdBlogs {
             onselect(instance, article: ArticleInfo) {
                 if (monitor.skip) return;
                 const path = article.getRoutePath();
-                const title = defaultTitle || instance.title || getLocaleString("blogs");
+                const title = defaultTitle || instance.title || getLocaleString("blog");
                 history.pushState({ select: path }, "", `?${path}`);
                 document.title = title ? `${article.name} - ${title}` : article.name;
             },
@@ -71,7 +71,7 @@ namespace DeepX.MdBlogs {
                     document.title = title ? `${article.name} - ${title}` : article.name;
                 } else {
                     control.home();
-                    document.title = title || getLocaleString("blogs");
+                    document.title = title || getLocaleString("blog");
                 }
             }
 
