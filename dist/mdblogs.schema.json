@@ -24,7 +24,7 @@
       "description": "The relative URL of home markdown file",
       "type": "string"
     },
-    "blogs": {
+    "blog": {
       "description": "All blogs info",
       "anyOf": [
         {
