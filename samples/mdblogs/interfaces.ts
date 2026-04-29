@@ -14,7 +14,7 @@ namespace DeepX.MdBlogs {
     }
 
     export interface IArticlesPartDataHomeParams {
-        model: Hje.DescriptionContract;
+        model: Hje.BaseComponent;
         mkt: string | boolean | undefined;
         store: any;
         defs(key: string): any;
@@ -83,6 +83,7 @@ namespace DeepX.MdBlogs {
     export interface IArticleLabelInfo {
         name: string;
         disable: "label" | "header";
+        ref?: boolean | string;
         [property: string]: unknown;
     }
 
@@ -92,14 +93,66 @@ namespace DeepX.MdBlogs {
         mkt?: string | boolean;
         arr?: Hje.DescriptionContract[];
         path?: string | ((original: string, article: ArticleInfo) => string);
-        styleRefs?: string | string[];
+        className?: string | string[];
         click?(ev: Event, article: ArticleInfo): void;
         render?(model: Hje.DescriptionContract, article: ArticleInfo, options: {
             level: number;
-            mkt: string | boolean;
+            mkt?: string | boolean;
             path: string;
             select: boolean;
         }): void;
+    }
+
+    /**
+     * The series information.
+     */
+    export interface IImageSeriesInfo {
+        /**
+         * The identifier of the series.
+         */
+        id: string;
+        /**
+         * The additional alias.
+         */
+        alias?: string[] | null;
+        /**
+         * A value indicating whether the series item is disabled.
+         */
+        disable?: boolean;
+        /**
+         * The name.
+         */
+        name: string;
+        /**
+         * The subtitle.
+         */
+        subtitle?: string;
+        /**
+         * The options.
+         */
+        options: Record<string, any>;
+        /**
+         * The icon.
+         */
+        icon?: string;
+        /**
+         * The introduction.
+         */
+        intro?: string;
+        /**
+         * The start year published.
+         */
+        year: number;
+        /**
+         * The related links.
+         */
+        links?: DeepX.MdBlogs.IArticleRelatedLinkItemInfo[];
+        /**
+         * The data.
+         */
+        data?: Record<string, any>;
+
+        [property: string]: any;
     }
 
     /**
@@ -231,7 +284,7 @@ namespace DeepX.MdBlogs {
             /**
              * The banner image URL or info.
              */
-            banner: string | {
+            banner?: string | {
                 /**
                  * The alt name of banner image.
                  */
@@ -252,7 +305,11 @@ namespace DeepX.MdBlogs {
             /**
              * The additional kind of article for filter.
              */
-            kind: string[] | string;
+            kind?: string[] | string;
+            /**
+             * The identifier of series to bind
+             */
+            series?: string | string[] | null;
         };
 
         [property: string]: any;
@@ -313,10 +370,11 @@ namespace DeepX.MdBlogs {
     }
 
     export interface IArticleInfoOptions {
-        rela: Hje.RelativePathInfo;
+        rela?: Hje.RelativePathInfo;
         year?: IArticleYearConfig;
         fetch?: ((url: Hje.RelativePathInfo) => Promise<string>);
         definitions?: IArticlesDefinitions;
+        series?: IImageSeriesInfo[];
     }
 
     export interface IArticlesDefinitions {
@@ -332,6 +390,10 @@ namespace DeepX.MdBlogs {
          * All contributors.
          */
         contributors?: IContributorInfo[];
+        /**
+         * The string resources.
+         */
+        strings?: Record<string, string>;
 
         [property: string]: any;
     }
@@ -391,6 +453,10 @@ namespace DeepX.MdBlogs {
          * The additional articles which hide in menu of all articles.
          */
         hiddenArticles?: IArticleInfo[];
+        /**
+         * The series collection.
+         */
+        series?: IImageSeriesInfo[];
         /**
          * The mapping of route.
          */
@@ -470,7 +536,7 @@ namespace DeepX.MdBlogs {
         /**
          * The value.
          */
-        value: string;
+        value: string | undefined;
 
         [property: string]: any;
     }

@@ -5,10 +5,10 @@ namespace Hje {
     export class RelativePathInfo {
         private _info = {
             abs: false as boolean | string,
-            arr: undefined as string[],
-            back: undefined as number,
-            value: undefined as string,
-            part: undefined as string,
+            arr: undefined as unknown as string[],
+            back: undefined as unknown as number,
+            value: undefined as unknown as string,
+            part: undefined as unknown as string,
         };
 
         /**
@@ -19,11 +19,12 @@ namespace Hje {
             if (!path) return;
             path = removeQuestionAndHash(path);
             let protocal = path.indexOf("://");
-            let host: string;
+            let host: string | undefined = undefined;
             if (protocal >= 0 && protocal < path.indexOf("/")) {
                 protocal += 3;
-                host = path.substring(0, protocal);
-                path = path.substring(path.indexOf("/", protocal))
+                const pathIndex = path.indexOf("/", protocal);
+                host = path.substring(protocal, pathIndex);
+                path = path.substring(pathIndex);
             }
 
             const arr = path.split("/");

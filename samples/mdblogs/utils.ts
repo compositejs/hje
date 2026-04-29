@@ -1,7 +1,7 @@
 namespace DeepX.MdBlogs {
-    export function setElementProp(element: HTMLElement | string, key: string | null, value: any) {
+    export function setElementProp(element: HTMLElement | string, key: string | null | undefined, value: any) {
         if (!element) return;
-        if (typeof element === "string") element = document.getElementById(element);
+        if (typeof element === "string") element = document.getElementById(element)!;
         if (!element || !element.tagName) return;
         if (key == null) key = element.innerText = value;
         else if (key === "display" && typeof value === "boolean") key = element.style.display = value ? "" : "none";
@@ -42,7 +42,7 @@ namespace DeepX.MdBlogs {
 
     /* Copied from LangPack */
 
-    function getKeyedPropValue(obj: any, key1: string, key2: string, options: {
+    function getKeyedPropValue(obj: any, key1: string, key2: string | undefined, options?: {
         bind?: any;
         fallback?: any;
     }) {
@@ -59,13 +59,13 @@ namespace DeepX.MdBlogs {
         return v;
     }
 
-    export function getLocaleProp<T = any>(obj: T, key?: keyof(T) | null, options?: {
+    export function getLocaleProp<T = any>(obj: T | undefined, key?: keyof(T) | null, options?: {
         mkt?: string | boolean;
         fallback?: any;
         bind?: any;
     }) {
         if (!obj) return options?.fallback || undefined;
-        let mkt: string;
+        let mkt: string | undefined;
         const b = options?.bind || {};
         if (typeof options?.mkt === "string") mkt = options?.mkt;
         if (!mkt && options?.mkt !== false && typeof navigator === "object") mkt = navigator.language;

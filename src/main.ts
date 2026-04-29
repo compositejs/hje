@@ -1,4 +1,4 @@
-/// <reference path="./render.ts" />
+/// <reference path="./helper.ts" />
 
 // For asynchronous modules loaders.
 (function () {

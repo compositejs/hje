@@ -1,6 +1,6 @@
 {
   "name": "hje",
-  "version": "2.4.0",
+  "version": "3.0.0",
   "description": "A javascript library to generate HTML view by JSON.",
   "main": "index.js",
   "types": "./index.d.ts",
@@ -29,6 +29,6 @@
   "homepage": "https://hje.js.org/",
   "devDependencies": {
     "typescript": "^5.9.2",
-    "terser": "^5.44.0"
+    "terser": "^5.46.1"
   }
 }

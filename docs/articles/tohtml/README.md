@@ -23,7 +23,7 @@ Hje.render("container-main", {
     children: "Alphabet"
   }, {
     tagName: "ul",
-    styleRefs: "list-alphabet",
+    className: "list-alphabet",
     props: {
       type: "circle",
     },
@@ -60,15 +60,17 @@ The interface is used to describe the inner struct and other information. It own
 
 - `tagName` _string_: The tag name of DOM, e.g. `div`.
 - `key` _string_: The key for indexing. It can be used as the argument of `childContext()` method in the result model returned by `Hje.render`, to get its context.
-- `control` _type or string_: Hyper-JSON Engine supports control. Pass the type if you want to enable the control rendering.
-- `styleRefs` _string or string array_: The `className` list of DOM.
+- `component` _type or string_: Hyper-JSON Engine supports component. Pass the type if you want to enable the component rendering.
+- `className` _string or string array_: The `className` list of DOM.
 - `style` _object_: Inline style. See `ElementCSSInlineStyle`.
 - `props` _object_: The properties (attributes) of DOM, e.g. `title`. Most of value type of its property are string.
 - `on` _object_: The events of DOM, e.g. `click`. Most of value type of its property are function.
 - `children` _string or object array_: Child elements. If it is string, it renders the string by `TextNode`. If it is an array, its element should be an object which extends `DescriptionContract` interface.
 - `data` _object_: The data bound for accessing by programming.
-- `oninit` _function_: Occurs on initializing.
-- `onload` _function_: Occurs on loading.
+- `lifecycle` _object_: The hooks.
+  - `init` _function_: Occurs on initializing.
+  - `load` _function_: Occurs on loading.
+  - `unload` _function_: Occurs on unloading.
 
 <!-- End -->
 ---

@@ -1,502 +1,769 @@
 namespace Hje {
 
 /**
- * The base component that you can extend customized business logic
- * by a) updating constructor to set new model and refreshing;
- * b) adding methods to update specific child model and refreshing.
+ * The data handler result.
+ */
+interface DataHanlderResult {
+    /**
+     * The key of data.
+     */
+    key: string;
+    /**
+     * A value indicating whether the property of data exists and is the type of function.
+     */
+    handler: boolean;
+    /**
+     * The result of the function.
+     */
+    result?: any;
+}
+
+/**
+ * The base component.
  */
 export class BaseComponent {
-    private readonly _inner = {
-        props: {} as any,
+    private __innerStore = {
+        tagName: undefined as string | undefined,
         disposable: new DisposableArray(),
-        isDisposed: false,
-        data: undefined as any,
-        refreshKeys: [] as string[],
-        refreshToken: undefined as number,
+        engine: undefined as unknown as IComponentRenderEngine,
+        info: genDataInfo(),
+        children: undefined as unknown as ComponentChildren,
+        lifecycle: undefined as DescriptionContract["lifecycle"],
+        current: {
+            keyed: {} as Record<string, BaseComponent>,
+            className: [] as string[],
+            props: {} as Record<string, any>,
+            style: {} as Partial<CSSStyleDeclaration>,
+            on: {} as Record<string, IComponentEventHandler[]>,
+            onHandlers: {} as Record<string, (ev: any) => void>,
+            data: {} as Record<string, any>,
+            text: undefined as string | undefined,
+            propsSubscribers: {} as Record<string, SubscriberCompatibleResultContract>,
+            dataSubscribers: {} as Record<string, SubscriberCompatibleResultContract>,
+            dataBounds: {} as Record<string, {
+                callback(nv: any): void;
+                thisArg: any;
+                key: string | undefined;
+            }[]>,
+            classNameSubscriber: undefined as SubscriberCompatibleResultContract | undefined,
+        }
     };
-    private _context: ViewGeneratingContextContract<any>;
 
     /**
      * Initializes a new instance of the BaseComponent class.
-     * @param element The element.
-     * @param options The options.
+     * @param args The intialization arguments.
      */
-    constructor(element: any, options?: ComponentOptionsContract<any>) {
-        if (!options) options = {};
-        const self = this;
-        if (typeof (options as any).disposeFlagHandler === "function") (options as any).disposeFlagHandler(() => {
-            this._inner.isDisposed = true;
-            this._inner.disposable.dispose();
-        });
-        this._inner.data = options.data;
-        render(element, {}, {
-            onInit(c) {
-                self._context = c;
-                if (typeof options.contextRef === "function") options.contextRef(c);
-            }
-        });
-    }
-
-    /**
-     * Gets the generating context of the current instance.
-     */
-    protected get currentContext() {
-        return this._context;
-    }
-
-    /**
-     * Gets the view model of the current instance.
-     */
-    protected get currentModel() {
-        return this._context ? this._context.model() : undefined;
-    }
-
-    /**
-     * Sets the view model of the current instance.
-     * @param value The view model.
-     */
-    protected set currentModel(value: DescriptionContract) {
-        this.childModel(null, value);
-    }
-
-    /**
-     * Gets the generating context of a specific child.
-     * @param key The child key.
-     */
-    protected childContext(key: string) {
-        return this._context.childContext(key);
-    }
-
-    /**
-     * Gets the control of a specific child.
-     * @param key The child key.
-     */
-    protected childControl<T extends BaseComponent = BaseComponent>(key: string) {
-        const c = this._context.childContext(key);
-        return c ? c.control() as T : undefined;
-    }
-
-    /**
-     * Gets or sets the view model of the current instance.
-     * @param key The child key.
-     * @param value The optional view model to override by setting its properties. The original reference will not replace but keep.
-     * @param clearOriginal true if clear all properties of the original view model before set; otherwise, false.
-     */
-    protected childModel(key: string, value?: DescriptionContract, clearOriginal?: boolean) {
-        const context = this._context.childContext(key);
-        if (!context) return undefined;
-        const m = context.model();
-        if (arguments.length < 2 || !m) return m;
-        let change = false;
-        if (clearOriginal) {
-            change = true;
-            for (const key in m) {
-                delete (m as any)[key];
-            }
-
-            this.refreshChild(key, true);
-        }
-
-        if (!value) return undefined;
-        for (const key in value) {
-            (m as any)[key] = (value as any)[key];
-        }
-
-        if (!change) this.refreshChild(key, true);
-        return value;
-    }
-
-    /**
-     * Gets a disposable array attached in this component
-     * which will dispose automatically when the component is disposed.
-     */
-    protected get disposableStore() {
-        return this._inner.disposable;
-    }
-
-    /**
-     * Gets the data bound in this component.
-     */
-    protected get data() {
-        return this._inner.data;
-    }
-
-    /**
-     * Refreshes a specific child by key.
-     * @param key The child key; or null for updating the current component.
-     * @param handler An optional handler to process before refreshing.
-     */
-    protected refreshChild(key?: string | boolean, handler?: ((context: ViewGeneratingContextContract<any>) => void) | boolean) {
-        if (typeof key === "boolean") {
-            if (!key) return;
-            this._inner.refreshToken = undefined;
-            const keys2 = this._inner.refreshKeys;
-            if (keys2.length < 1) return;
-            this._inner.refreshKeys = [];
-            for (let i = 0; i < keys2.length; i++) {
-                const key2 = keys2[i];
-                const context2 = this._context.childContext(key2);
-                if (context2) context2.refresh();
-            }
-
+    constructor(args: Object) {
+        const store = this.__innerStore;
+        if (!(args instanceof ComponentInitArgs)) {
+            store.engine = defaultRenderEngine();
+            store.children = new ComponentChildren(undefined, store.engine, undefined, undefined);
+            store.lifecycle = {};
             return;
         }
 
-        const context = this._context.childContext(key);
-        if (!context) return;
-        const keys = this._inner.refreshKeys;
-        if (keys.indexOf(key) < 0) keys.push(key);
-        if (typeof handler === "function") {
-            handler(context);
-            this.refreshChild(true);
-        } else if (handler === false) {
-        } else if (handler === true) {
-            if (this._inner.refreshToken) return;
-            this._inner.refreshToken = setTimeout(() => {
-                this.refreshChild(true);
-            });
-        } else {
-            this.refreshChild(true);
-        }
-    }
-
-    /**
-     * Gets or sets the child property.
-     * @param childKey The child key; or null for the current component.
-     * @param propKey The property key.
-     * @param v An opitonal value to set.
-     */
-    protected childProps(childKey: string, propKey: string | number | string[] | any, v?: any) {
-        if (!propKey || typeof propKey === "boolean") return undefined;
-        const h = viewGenerator();
-        const context = this._context.childContext(childKey);
-        if (!context) return undefined;
-        if (arguments.length > 2) {
-            const m = context.model();
-            if (!m.props) m.props = {};
-            m.props[propKey] = v;
-            h.setProp(context, propKey, v);
-        }
-
-        if (typeof propKey === "string" || typeof propKey === "symbol" || typeof propKey === "number")
-            return h.getProp(context, propKey.toString());
-        
-        const result: any = {};
-        if (propKey instanceof Array) {
-            propKey.forEach(k => {
-                if (typeof k !== "string" && typeof k !== "symbol" && typeof k !== "number") return;
-                result[k] = h.getProp(context, k.toString());
-            });
-            return result;
-        }
-
-        if (typeof propKey !== "object") return undefined;
-        Object.keys(propKey).forEach(k => {
-            result[k] = this.childProps(childKey, k, propKey[k]);
-        });
-        return result;
-    }
-
-    /**
-     * Gets the data of model.
-     * @param childKey The child key; or null for the current component.
-     * @returns The data in the specific model.
-     */
-    protected childModelData(childKey: string) {
-        const context = this.childContext(childKey);
-        if (!context) return undefined;
-        const m = context.model();
-        if (!m) return undefined;
-        return m.data;
-    }
-
-    /**
-     * Gets or sets the style information of the specific child.
-     * @param childKey The child key; or null for the current component.
-     * @param style The inner style object.
-     * @param styleRefs The style class reference name list.
-     */
-    protected childStyle(childKey: string, style?: any, styleRefs?: string[] | string | boolean | {
-        subscribe(h: any): any;
-        [property: string]: any;
-    }) {
-        const h = viewGenerator();
-        const context = this._context.childContext(childKey);
-        if (!context || this._inner.isDisposed) return undefined;
-        if (arguments.length > 2 && typeof styleRefs !== "boolean") {
-            if (styleRefs) {
-                if (typeof (styleRefs as any).subscribe === "function") {
-                    (styleRefs as any).subscribe((nv: string[]) => {
-                        if (!nv) nv = [];
-                        else if (typeof nv === "string") nv = [nv as any];
-                        else if (!(nv instanceof Array)) return;
-                        h.setStyle(context, undefined, nv);
-                    });
-                    if (typeof (styleRefs as any).get === "function") styleRefs = (styleRefs as any).get();
-                }
-    
-                if (typeof styleRefs === "string") styleRefs = [styleRefs];
-                else if (!(styleRefs instanceof Array)) styleRefs = [];    
+        store.engine = args.engine;
+        const model = args.model;
+        const children = args.children;
+        store.children = children;
+        const done = args.init(this, () => {
+            try {
+                if (this instanceof DataComponent) this.patchData({}, true);
+                else this.setDataByDelta(new ComponentDeltaUpdateInfo({}, undefined, true));
+            } catch {
             }
-
-            h.setStyle(context, style, styleRefs as any);
-            return h.getStyle(context);
+            this.offAll();
+            for (const key in store.current.dataBounds) {
+                delete store.current.dataBounds[key];
+            }
+            try {
+                store.disposable.dispose();
+            } catch {
+            }
+            store.children.clear();
+            if (typeof store.lifecycle?.unload !== "function") nextWave(() => {
+                try {
+                    if (typeof store.lifecycle?.unload === "function")
+                        store.lifecycle.unload();
+                } catch {
+                }
+            });
+            this.onUnload();
+            if (typeof lifecycle.onunload === "function") lifecycle.onunload();
+        });
+        if (!model) {
+            store.lifecycle = {};
+            if (typeof done === "function") done();
+            return;
         }
 
-        let styleInfo = h.getStyle(context);
-        if (!styleInfo) styleInfo = {} as any;
-        if (arguments.length > 1) {
-            if (style === true) style = styleInfo.inline;
-            else if (style === false) style = undefined;
-            else if (styleRefs === true && styleInfo.inline) style = { ...styleInfo.inline, ...(style || {}) };
-            h.setStyle(context, style, styleInfo.refs);
-            return h.getStyle(context);
+        store.lifecycle = model.lifecycle;
+        store.tagName = model.tagName;
+        if (typeof model.lifecycle?.init === "function") model.lifecycle.init(this);
+        const lifecycle = args.lifecycle;
+        if (typeof lifecycle.oninit === "function") lifecycle.oninit(this);
+        if (model.props) this.patchProps(model.props);
+        this.className(model.className);
+        this.style(model.style);
+        if (model.on) {
+            for (const event in model.on) {
+                this.on(event, model.on[event] as any);
+            }
         }
 
-        return styleInfo;
+        if (model.children) children.set(model.children);
+        if (model.data) {
+            if (this instanceof DataComponent) this.patchData(model.data, true);
+            else this.setDataByDelta(new ComponentDeltaUpdateInfo(model.data, undefined, true));
+        }
+        if (typeof done === "function") done();
     }
 
     /**
-     * Sets the style references of the specific child.
-     * @param childKey The child key; or null for the current component.
-     * @param value The style class reference name list.
+     * Gets the accessor of children.
      */
-    protected childStyleRefs(childKey: string, value: string[]) {
-        return this.childStyle(childKey, null, value);
+    protected get childrenAccess() {
+        return this.__innerStore.children;
     }
 
     /**
-     * Gets a value indicating whether the component is disposed.
+     * Gets the original tag name set.
      */
-    get isDisposed() {
-        return this._inner.isDisposed;
+    get originalTagName() {
+        return this.__innerStore.tagName;
     }
 
     /**
-     * Adds disposable objects so that they will be disposed when this instance is disposed.
-     * @param items  The objects to add.
+     * Gets the reference of element.
+     */
+    get element() {
+        return this.__innerStore.children.parent;
+    }
+
+    /**
+     * Accesses the additional information.
+     */
+    get info() {
+        return this.__innerStore.info;
+    }
+
+    /**
+     * Gets the count of child items.
+     */
+    get childrenCount() {
+        return this.__innerStore.children.length;
+    }
+
+    /**
+     * Gets the count of child items.
+     */
+    get childrenKeys() {
+        return this.__innerStore.children.keys;
+    }
+
+    /**
+     * Adds a disposable instance to maintain.
+     * @param items  The disposable instance to add.
      */
     pushDisposable(...items: DisposableContract[]) {
-        return this._inner.disposable.push(...items);
+        return this.__innerStore.disposable.push(...items);
     }
 
     /**
-     * Removes the disposable objects added in this instance.
-     * @param items  The objects to remove.
+     * Removes a specific disposable instance.
+     * @param items  The disposable instance to remove.
      */
     removeDisposable(...items: DisposableContract[]) {
-        return this._inner.disposable.remove(...items);
+        return this.__innerStore.disposable.remove(...items);
     }
 
     /**
-     * Appends an element to the end.
-     * @param childKey The child key; or null for the current component.
-     * @param model The description of model to append.
-     * @returns true if append succeeded; otherwise, false.
+     * Checks whether the element is still in the document.
      */
-    appendChild(childKey: string, model: Hje.DescriptionContract) {
-        const context = this.childContext(childKey);
-        if (!context || !model) return false;
-        let m = context.model();
-        if (!m) return false;
-        if (!m.children) m.children = [model];
-        else if (m.children instanceof Array) m.children.push(model);
-        else return false;
-        const view = render(undefined, model);
-        const h = viewGenerator();
-        h.append(context.element(), view.element());
-        return true;
+    alive() {
+        return this.__innerStore.children.parent && this.__innerStore.engine.alive(this.__innerStore.children.parent);
     }
 
     /**
-     * Gets or sets a property.
+     * Gets a specific child item.
+     * @param index The index or key of the child item.
+     */
+    getChild(index: number | string) {
+        return this.childrenAccess.get(index);
+    }
+
+    /**
+     * Checks if has the index or contains the child context key.
+     * @param key The index of child, or the key of child declared in description.
+     */
+    containChild(key: number | string | BaseComponent | ComponentChildren) {
+        if (key instanceof ComponentChildren) return this.childrenAccess === key;
+        return this.childrenAccess.contain(key);
+    }
+
+    /**
+     * Checks if the specific component is the parent of the current component.
+     * @param component The component to test.
+     * @returns true if the specific component is the parent of the current component; otherwise, false.
+     */
+    isParent(component: BaseComponent | ComponentChildren) {
+        if (!component) return false;
+        if (component instanceof BaseComponent) return component.containChild(this);
+        if (component instanceof ComponentChildren) return component.contain(this);
+        return false;
+    }
+
+    /**
+     * Gets or sets the property of the element.
      * @param key The property key.
-     * @param value The optional value of the property if need set.
+     * @param value The value of property; or undefined, if remove the property.
+     * @returns The value of the property; or undefined, if does not exist.
      */
-    prop<T = any>(key: string | any, value?: T | any) {
-        if (arguments.length === 0) return Object.keys(this._inner.props);
-        if (!key || this._inner.isDisposed) return undefined;
-        if (typeof key === "object") {
-            const obj: any = {};
-            if (value === true) {
-                const oldKeys = Object.keys(this._inner.props);
-                const disposable = new DisposableArray();
-                for (const i in oldKeys) {
-                    const k = oldKeys[i];
-                    setProp(this._inner.props, k, undefined, disposable);
-                    obj[k] = undefined;
-                }
+    prop(key: string, value?: any) {
+        if (!key) return undefined;
+        if (arguments.length === 2) this.patchProps({ [key]: value });
+        return this.__innerStore.current.props[key];
+    }
 
-                if (disposable.count() > 0) setInterval(() => {
-                    disposable.dispose();
-                }, 0);
-            }
+    /**
+     * Sets properties batch with delta object.
+     * @param obj The new properties object, or the function to set properties.
+     * @param remove true if remove all rest properties out of the given; false if keep rest; a string array if remove the specific property keys.
+     */
+    patchProps(obj: IDeltaObject, remove?: boolean | string[]) {
+        if (!this.alive()) return;
+        const store = this.__innerStore;
+        updateObservableProps(obj, store.current.props, store.disposable, store.current.propsSubscribers, info => {
+            store.engine.props(store.children.parent, info.delta);
+        }, () => {
+            return store.engine.alive(store.children.parent);
+        }, remove);
+    }
 
-            Object.keys(key).forEach(k => {
-                setProp(this._inner.props, k, key[k]);
-                obj[k] = (this._inner.props[k] || {}).value;
+    /**
+     * Calls the method which is the specific property in data, substituting another object for the current object.
+     * @param key The property key of data.
+     * @param thisArg The object to be used as the current object.
+     * @param argArray A list of arguments to be passed to the method.
+     * @returns The result of the method; or undefined, if no such method, or the result is undefined.
+     */
+    callDataHandler(key: string, thisArg: any, ...argArray: any[]): DataHanlderResult {
+        const h = this.__innerStore.current.data[key];
+        if (typeof h !== "function") return {
+            key,
+            handler: false,
+        };
+        return {
+            key,
+            handler: true,
+            result: (h as Function).call(thisArg, ...argArray)
+        };
+    }
+
+    /**
+     * Calls the function which is the specific property in data, substituting the specified object for the this value of the function, and the specified array for the arguments of the function.
+     * @param key The property key of data.
+     * @param thisArg The object to be used as the this object.
+     * @param argArray A set of arguments to be passed to the function.
+     * @returns The result of the function; or undefined, if no such function, or the result is undefined.
+     */
+    applyDataHandler(key: string, thisArg: any, argArray?: any): DataHanlderResult {
+        const h = this.__innerStore.current.data[key];
+        if (typeof h !== "function") return {
+            key,
+            handler: false,
+        };
+        return {
+            key,
+            handler: true,
+            result: (h as Function).apply(thisArg, argArray)
+        };
+    }
+
+    /**
+     * Gets or sets the class name list of the style.
+     * @param value Optional. To get only if no such parameter. The new class name list of the style, if set.
+     * @returns The class name list of the style.
+     */
+    className(value?: IClassNameSetValue) {
+        const oldClassName = [ ...this.__innerStore.current.className ];
+        if (arguments.length < 1) return oldClassName;
+        tryUnsubscribe(this.__innerStore.current.classNameSubscriber);
+        this.__innerStore.current.classNameSubscriber = undefined;
+        if (!this.alive()) return oldClassName;
+        const newClassName = setClassName(oldClassName, value, obs => {
+            this.__innerStore.current.classNameSubscriber = subscribeNewValue(obs, nv => {
+                if (nv === undefined || !this.alive()) return;
+                nv = stringArray(nv);
+                if (!nv) return;
+                this.__innerStore.current.className = [ ...nv ];
+                this.__innerStore.engine.style(this.__innerStore.children.parent, {
+                    oldClassName: [ ...this.__innerStore.current.className ],
+                    newClassName: nv
+                });
             });
+        });
+        if (newClassName === oldClassName) return oldClassName;
+        this.__innerStore.current.className = [ ...newClassName ];
+        this.__innerStore.engine.style(this.__innerStore.children.parent, { oldClassName, newClassName });
+        return [ ...newClassName ];
+    }
 
-            const onPropsChanged = (this as any).onPropsChanged;
-            if (onPropsChanged === false) {
-            } else if (!onPropsChanged || onPropsChanged === true) {
-                const h = viewGenerator();
-                Object.keys(obj).forEach(k => {
-                    h.setProp(this._context, k, obj[k]);
-                });
-            } else if (typeof onPropsChanged === "function") {
-                (this as any).onPropsChanged(obj);
-            } else if (typeof onPropsChanged === "object") {
-                Object.keys(obj).forEach(k => {
-                    if (!(this as any).onPropsChanged[k])
-                        return;
-                    if (typeof (this as any).onPropsChanged[k].set === "function")
-                        (this as any).onPropsChanged[k].set(obj[k]);
-                    else if (typeof (this as any).onPropsChanged[k].next === "function")
-                        (this as any).onPropsChanged[k].next(obj[k]);
-                    else if (typeof (this as any).onPropsChanged[k] === "function")
-                        (this as any).onPropsChanged[k](obj[k]);
-                });
-            }
-
-            return Object.keys(key);
+    /**
+     * Gets or sets the inline style.
+     * @param value The style object.
+     * @returns The inline style.
+     */
+    style(value?: Partial<CSSStyleDeclaration>): Partial<CSSStyleDeclaration> {
+        if (arguments.length > 0 && this.alive()) {
+            const oldStyle = this.__innerStore.current.style;
+            this.__innerStore.current.style = value ? { ...value } : {};
+            this.__innerStore.engine.style(this.__innerStore.children.parent, {
+                oldStyle: { ...oldStyle },
+                newStyle: { ...this.__innerStore.current.style },
+            })
         }
 
-        if (arguments.length > 1 && setProp(this._inner.props, key, value)) {
-            const obj = {} as any;
-            obj[key] = value;
-            this.prop(obj);
-        }
+        return { ...this.__innerStore.current.style };
+    }
 
-        return this._inner.props[key];
+    /**
+     * Gets the inline style.
+     * @returns The inline style.
+     */
+    patchStyle(value: Partial<CSSStyleDeclaration>) {
+        if (!value || !this.alive()) return;
+        const oldStyle = this.__innerStore.current.style;
+        this.__innerStore.current.style = { ...oldStyle, ...value };
+        this.__innerStore.engine.style(this.__innerStore.children.parent, {
+            oldStyle: { ...oldStyle },
+            newStyle: { ...this.__innerStore.current.style },
+        })
     }
 
     /**
      * Adds an event listener.
-     * @param key The event key.
-     * @param handler The handler of the event to add.
+     * @param event The event key.
+     * @param handler The event handler.
      */
-    on(key: string, handler: any) {
-        const g = viewGenerator();
-        if (this._inner.isDisposed) return undefined;
-        const selfContext = this._context;
-        if (typeof (this as any).onListened === "function") typeof (this as any).onListened(key, handler, {
-            onChild(childKey: string, eventKey: string, h: any) {
-                const context = selfContext.childContext(childKey);
-                if (!context) return undefined;
-                const c = context.control();
-                if (c) {
-                    c.on(eventKey, h);
-                    return;
-                }
-
-                return g.on(context, eventKey, h);
+    on(event: string, handler: IComponentEventHandler) {
+        if (!event || !handler || !this.alive()) return errorDisposable();
+        const self = this;
+        let handlers = this.__innerStore.current.on[event];
+        if (!handlers) {
+            handlers = [];
+            this.__innerStore.current.on[event] = handlers;
+            this.__innerStore.current.onHandlers[event] = (ev) => {
+                occurEventHandlers(event, handlers, ev);
             }
-        });
-        else return g.on(selfContext, key, handler);
+            this.__innerStore.engine.on(this.__innerStore.children.parent, event, this.__innerStore.current.onHandlers[event]);
+        }
+
+        if (handlers.indexOf(handler) < 0) handlers.push(handler);
+        return {
+            dispose() {
+                const index = handlers.indexOf(handler);
+                if (index < 0) return;
+                handlers.splice(index, 1);
+            },
+        } as DisposableContract;
     }
 
     /**
-     * Gets or sets the style information.
-     * @param value The inner style object.
-     * @param refs The style class reference name list.
+     * Removes an event listener.
+     * @param event The event key.
+     * @param handler The event handler.
      */
-    style(value?: any, refs?: string[] | string | boolean | {
-        subscribe(h: any): any;
-        [property: string]: any;
-    }) {
-        return this.childStyle(null, value, refs);
-    }
-
-    /**
-     * Sets the style references.
-     * @param value The style class reference name list.
-     */
-    styleRefs(value: string[]) {
-        return this.style(true, value);
-    }
-
-    /**
-     * Tests if the child has the specific class name.
-     * @param key The child key.
-     * @param test The class name to test.
-     * @returns true if has; otherwise, false.
-     */
-    childHasStyleRef(key: string, test: string) {
-        const context = this.childContext(key);
-        return inArray(test, context.model().styleRefs);
-    }
-
-    /**
-     * Tests if has the specific class name.
-     * @param test The class name to test.
-     * @returns true if has; otherwise, false.
-     */
-    hasStyleRef(test: string) {
-        return this.childHasStyleRef(null, test);
-    }
-
-    /**
-     * Gets the raw element.
-     */
-    element() {
-        return this._context.element();
-    }
-
-    /**
-     * Disposeses this instance and remove the element from the tree.
-     */
-    dispose() {
-        if (this._inner.isDisposed) return;
-        this._inner.isDisposed = true;
-        this._inner.disposable.dispose();
-        if (typeof (this as any).onUnmount === "function") (this as any).onUnmount();
-        const ele = this._context.element();
-        if (!ele) return;
-        const h = viewGenerator();
-        h.unmount(ele);
-    }
-}
-
-function setProp(props: any, key: string, value?: any, disposable?: DisposableArray | boolean) {
-    if (!key || typeof key !== "string") return false;
-    const ele = props[key];
-    if (ele && ele.value === value) return false;
-    if (value === undefined) {
-        delete props[key];
-    } else {
-        if (!value) {
-            props[key] = { value };
-        } else if (typeof value.subscribe === "function") {
-            const v = props[key] = {} as any;
-            if (typeof value.get === "function") v.value = value.get();
-            const subscriber = (value as ObservableCompatibleContract).subscribe(nv => {
-                setProp(props, key, nv, false);
-            });
-            if (disposable instanceof DisposableArray) disposable.push(subscriber);
-        } else if (typeof value.then === "function") {
-            let noNeed = false;
-            (value as Promise<any>).then(nv => {
-                if (!noNeed) setProp(props, key, nv, false);
-            });
-            if (disposable instanceof DisposableArray) disposable.push({
-                dispose() {
-                    noNeed = true;
-                }
-            });
-        } else {
-            props[key] = { value };
+    off(event: string, handler: IComponentEventHandler) {
+        if (!event || !handler || !this.alive()) return;
+        let handlers = this.__innerStore.current.on[event];
+        if (!handlers) return;
+        const index = handlers.indexOf(handler);
+        if (index < 0) return;
+        handlers.splice(index, 1);
+        if (handlers.length < 1) {
+            delete this.__innerStore.current.on[event];
+            const h = this.__innerStore.current.onHandlers[event];
+            if (!h) return;
+            delete this.__innerStore.current.onHandlers[event];
+            this.__innerStore.engine.off(this.__innerStore.children.parent, event, h);
         }
     }
 
-    if (!ele || disposable === false) return true;
-    if (typeof ele.dispose !== "function") return true;
-    if (!disposable) ele.dispose();
-    else if (disposable === true) setTimeout(() => {
-        ele.dispose();
-    }, 0);
-    else disposable.push(ele);
-    return true;
+    /**
+     * Removes all event listeners.
+     */
+    protected offAll() {
+        let onKeys = Object.keys(this.__innerStore.current.on);
+        for (const key of onKeys) {
+            if (key) delete this.__innerStore.current.on[key];
+        }
+        for (const key in this.__innerStore.current.onHandlers) {
+            if (!key) continue;
+            const h = this.__innerStore.current.onHandlers[key];
+            if (!h) continue;
+            try {
+                this.__innerStore.engine.off(this.__innerStore.children.parent, key, h);
+            } catch {
+            }
+        }
+        onKeys = Object.keys(this.__innerStore.current.onHandlers);
+        for (const key of onKeys) {
+            if (key) delete this.__innerStore.current.onHandlers[key];
+        }
+    }
+
+    /**
+     * Gets data.
+     * @param key The property key of data.
+     * @returns The data.
+     */
+    protected getData(key?: string) {
+        return arguments.length === 0
+            ? { ...this.__innerStore.current.data }
+            : (key ? this.__innerStore.current.data[key] : undefined);
+    }
+
+    /**
+     * Sets data batch with delta object.
+     * @param obj The new properties object, or the function to set properties.
+     * @param remove true if remove all rest properties out of the given; false if keep rest; a string array if remove the specific property keys.
+     */
+    protected setDataByDelta(obj: any) {
+        if (!this.alive()) return;
+        const store = this.__innerStore;
+        let remove: boolean | string[] | undefined;
+        let callback: undefined | ((info: ComponentDataUpdateInfo) => void);
+        if (obj instanceof ComponentDeltaUpdateInfo) {
+            remove = obj.remove as any;
+            callback = obj.callback;
+            obj = obj.obj;
+        }
+        updateObservableProps(obj, store.current.data, store.disposable, store.current.dataSubscribers, info => {
+            if (typeof callback === "function") callback.call(this, info);
+            const delta = info.delta;
+            for (const key in delta) {
+                const bound = store.current.dataBounds[key];
+                if (!bound) continue;
+                const v = delta[key];
+                for (const item of bound) {
+                    if (typeof item?.callback !== "function") continue;
+                    item.callback.call(item.thisArg, unwrapObservableObject(v, item.key));
+                }
+            }
+        }, () => {
+            return store.engine.alive(store.children.parent);
+        }, remove);
+    }
+
+    protected dataObservable(key: string, subKey?: string): ObservableCompatibleContract {
+        if (!key) return {
+            get() {
+                return undefined;
+            },
+            subscribe(callback, thisArg) {
+                return createSubscriberCompatibleResult(() => { }, "No key");
+            }
+        };
+        const current = this.__innerStore.current;
+        return {
+            get() {
+                return unwrapObservableProp(current.data, key, subKey);
+            },
+            subscribe(callback, thisArg) {
+                if (typeof callback !== "function")
+                    return createSubscriberCompatibleResult(() => { }, "No callback");
+                let bounds = current.dataBounds[key];
+                if (!bounds) {
+                    bounds = [];
+                    current.dataBounds[key] = bounds;
+                }
+
+                const item = {
+                    callback,
+                    thisArg,
+                    key: subKey,
+                };
+                bounds.push(item);
+                return createSubscriberCompatibleResult(() => {
+                    removeFromArray(bounds, item);
+                    removeFromArray(current.dataBounds[key], item);
+                });
+            },
+        }
+    }
+
+    /**
+     * Occurs when the component is unloaded.
+     */
+    protected onUnload() {
+    }
+}
+
+/**
+ * The list component.
+ */
+export class DataComponent<T extends Record<string, any>> extends BaseComponent {
+    /**
+     * Gets the data copied.
+     * @param key The property key of data.
+     * @returns The value of the data property; or undefined, if does not exist.
+     */
+    data(): T;
+    /**
+     * Gets the data property bound.
+     * @param key The property key of data.
+     * @returns The value of the data property; or undefined, if does not exist.
+     */
+    data<P extends keyof T>(key: P): any;
+    /**
+     * Gets the data copied with the specific properties.
+     * @param key The property keys of data.
+     * @returns All the value of the data property in the object.
+     */
+    data<P extends keyof T>(key: P[]): Record<typeof key[number], any>;
+    /**
+     * Sets the data property bound.
+     * @param key The property key of data.
+     * @param value The value of data property; or undefined, if remove the property.
+     * @returns The value of the data property; or undefined, if does not exist.
+     */
+    data<P extends keyof T>(key: P, value: any): any;
+    /**
+     * Gets or sets the data property bound.
+     * @param key The property key of data.
+     * @param value The value of data property; or undefined, if remove the property.
+     * @returns The value of the data property; or undefined, if does not exist.
+     */
+    data<P extends keyof T>(key?: P | P[], value?: any) {
+        if (!key) return arguments.length === 0 ? this.getData() : undefined;
+        if (key instanceof Array) {
+            const obj: Record<typeof key[number], any> = {} as any;
+            for (const k of key) {
+                if (k && typeof k === "string") obj[k] = this.data(k);
+            }
+            return obj;
+        }
+        if (arguments.length === 2) this.patchData({ [key]: value } as any);
+        return this.getData(key as any);
+    }
+
+    patchData(obj: IDeltaObject<T>): void;
+    patchData(obj: IDeltaObject<T>, remove: boolean): void;
+    patchData<P extends keyof T>(obj: IDeltaObject<T>, remove: P[]): void;
+    patchData<P extends keyof T>(obj: IDeltaObject<T>, remove?: boolean | P[]) {
+        super.setDataByDelta(new ComponentDeltaUpdateInfo<T>(obj, info => this.onDataChange(info), remove));
+    }
+
+    /**
+     * Occurs when the data changes.
+     * @param delta The changed and current data.
+     */
+    protected onDataChange(info: ComponentDataUpdateInfo<T>) {
+    }
+}
+
+class ComponentDeltaUpdateInfo<T extends Record<string, any>> {
+    constructor(
+        public obj: IDeltaObject<T>,
+        public callback: undefined | ((info: ComponentDataUpdateInfo<T>) => void),
+        public remove: boolean | (keyof T)[] | undefined) {
+        }
+}
+
+/**
+ * The initialization arguments for component.
+ */
+class ComponentInitArgs {
+    private __innerStore: {
+        children: ComponentChildren;
+        model: DescriptionContract;
+        engine: IComponentRenderEngine;
+        callback?: (component: BaseComponent, dispose: () => void) => (null | (() => void));
+        lifecycle: {
+            oninit?(component: BaseComponent): void;
+            onload?(component: BaseComponent): void;
+            onunload?(): void;
+        }
+    }
+    constructor(element: any, model: DescriptionContract, engine?: IComponentRenderEngine, options?: IComponentRenderingOptions) {
+        if (!engine) engine = defaultRenderEngine();
+        let callback: (component: BaseComponent, dispose: () => void) => (null | (() => void));
+        this.__innerStore = {
+            children: new ComponentChildren(element, engine, model?.key, options, h => {
+                callback = h;
+            }),
+            model,
+            engine,
+            lifecycle: {
+                oninit: options?.oninit,
+                onload: options?.onload,
+                onunload: options?.onunload,
+            }
+        };
+        this.__innerStore.callback = callback!;
+    }
+    get children() {
+        return this.__innerStore.children;
+    }
+    get model() {
+        return this.__innerStore.model;
+    }
+    get engine() {
+        return this.__innerStore.engine;
+    }
+    get lifecycle() {
+        return this.__innerStore.lifecycle;
+    }
+    init(component: BaseComponent, dispose: () => void) {
+        if (typeof this.__innerStore.callback !== "function" || !component.containChild(this.__innerStore.children)) return null;
+        const done = this.__innerStore.callback(component, dispose);
+        delete this.__innerStore.callback;
+        return done;
+    }
+}
+
+/**
+ * Creates a component instance with the given element and description model.
+ * @param element The element reference.
+ * @param model The description model.
+ * @param engine The render engine.
+ * @param keyed The keyed component record to store the created component with key.
+ * @returns The component instance created; or undefined if fails.
+ */
+export function render(element: any, model: DescriptionContract, engine?: IComponentRenderEngine, options?: IComponentRenderingOptions) {
+    if (!element) return undefined;
+    const type = getComponentType(model);
+    const args = new ComponentInitArgs(element, model, engine, options);
+    const component = new type(args);
+    if (typeof model?.lifecycle?.load === "function") model.lifecycle.load(component);
+    if (typeof options?.onload === "function") options.onload(component);
+    return component;
+}
+
+function updateObservableProps(
+    obj: IDeltaObject | undefined,
+    current: Record<string, any>,
+    disposable: DisposableArray,
+    subscribers: Record<string, SubscriberCompatibleResultContract>,
+    callback: (delta: ComponentDataUpdateInfo) => void,
+    check: () => boolean,
+    remove: boolean | string[] | undefined) {
+    if (!obj) return;
+    if (typeof obj === "function") {
+        const result = obj({ ...current });
+        if (!result || typeof result === "function" || typeof result === "string") return;
+        if (result instanceof Promise) {
+            result.then(r => {
+                if (!r || typeof r === "function" || typeof r === "string" || (typeof check === "function" && !check())) return;
+                updateObservableProps(r, current, disposable, subscribers, callback, check, remove);
+            });
+        } else {
+            updateObservableProps(result, current, disposable, subscribers, callback, check, remove);
+        }
+
+        return;
+    }
+
+    if (obj instanceof Array) {
+        const obj2: Record<string, any> = {};
+        for (const record of obj) {
+            if (!record?.key) continue;
+            if (record.skip && obj2[record.key]) continue;
+            obj2[record.key] = record.value;
+        }
+        obj = obj2;
+    }
+
+    const delta = mapObservable(obj, disposable, subscribers, (key, nv) => {
+        if (current[key] === nv || (typeof check === "function" && !check())) return;
+        const delta2 = { [key]: nv };
+        nv = delta2[key];
+        const info2 = new ComponentDataUpdateInfo(delta2, current);
+        if (nv === undefined) delete current[key];
+        else current[key] = delta2[key];
+        callback(info2);
+    });
+    if (remove) {
+        if (remove instanceof Array) {
+            for (const item in remove) {
+                if (!item || typeof item !== "string") continue;
+                delta[item] = undefined;
+            }
+        } else if (remove === true) {
+            const keys = Object.keys(delta);
+            for (const item in current) {
+                if (!item || keys.indexOf(item) >= 0) continue;
+                delta[item] = undefined;
+            }
+        }
+    }
+
+    const info = new ComponentDataUpdateInfo(delta, current);
+    for (const key in delta) {
+        if (!key) continue;
+        const v = delta[key];
+        if (v === current[key]) delete delta[key];
+        else if (v === undefined) delete current[key];
+        else current[key] = v;
+    }
+
+    callback(info);
+}
+
+function occurEventHandlers(event: string, handlers: IComponentEventHandler[], ev: any) {
+    const start = new Date();
+    for (const h of handlers) {
+        if ((h as IComponentEventHandlerInstance).disable) continue;
+        if (!isEventHandlerInstance(h)) {
+            if (typeof h === "function") h(ev);
+            continue;
+        }
+        const options: Parameters<IComponentEventHandlerInstance["process"]>[0] = {
+            key: event,
+            occur: start,
+            context: self,
+            info: h.info,
+            off() {
+                const index = handlers.indexOf(h);
+                if (index < 0) return;
+                handlers.splice(index, 1);
+            },
+        };
+        if (typeof h.delay === "number") {
+            if (h.delay >= 0) {
+                setTimeout(() => {
+                    if (!h.disable && typeof h.process === "function")
+                        h.process.call(h.thisArg, ev, options);
+                }, h.delay);
+            } else {
+                setTimeout(() => {
+                    if (!h.disable && typeof h.process === "function")
+                        h.process.call(h.thisArg, ev, options);
+                });
+            }
+        } else if (h.delay) {
+            setTimeout(() => {
+                if (!h.disable && typeof h.process === "function")
+                    h.process.call(h.thisArg, ev, options);
+            });
+        } else {
+            h.process.call(h.thisArg, ev, options);
+        }
+    }
+}
+
+function isEventHandlerInstance(handler: IComponentEventHandler): handler is IComponentEventHandlerInstance {
+    return typeof (handler as IComponentEventHandlerInstance).process === "function";
+}
+
+function createSubscriberCompatibleResult(callback: () => void, message?: string) {
+    const f = function () {
+        callback();
+    } as SubscriberCompatibleResultContract;
+    f.dispose = callback;
+    if (message) (f as any).message = message;
+    return f;
 }
 
 }

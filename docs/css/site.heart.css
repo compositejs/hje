@@ -1007,8 +1007,8 @@ ul.link-item-blog > li > a > div:last-child {
     overflow-x: hidden;
 }
 #blog_content > article > main img {
-    width: 100%;
-    max-width: 660px;
+    width: fit-content;
+    max-width: min(660px, 100%);
 }
 #blog_content > article > main > h1 {
     font-size: 32px;

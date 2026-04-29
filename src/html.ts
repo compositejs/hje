@@ -1,160 +1,183 @@
 namespace Hje {
 
-/**
- * View generator for HTML element.
- */
-export class HtmlGenerator implements ViewGeneratorContract<HTMLElement> {
+export class HtmlRenderEngine implements IComponentRenderEngine<Element> {
     defaultTagName = "div";
-    initView(context: ViewGeneratingContextContract<HTMLElement>, tagName: string) {
-        let ele = context.element();
-        const eleType = typeof ele;
-        if (!ele || eleType === "symbol" || ele as any === true) {
-            let tagNs = (context.model() as any || {} as any).tagNamespace;
-            if (!tagNs && tagName && tagName.indexOf(":") >= 0) {
-                if (tagName.startsWith("svg:")) {
-                    tagNs = "http://www.w3.org/2000/svg";
-                    tagName = tagName.substring(4);
-                    if (!tagName) tagName = "svg";
-                } else if (tagName.startsWith("mathml:")) {
-                    tagNs = "http://www.w3.org/1998/Math/MathML";
-                    tagName = tagName.substring(7);
-                    if (!tagName) tagName = "math";
-                } else if (tagName.startsWith("math:")) {
-                    tagNs = "http://www.w3.org/1998/Math/MathML";
-                    tagName = tagName.substring(5);
-                    if (!tagName) tagName = "math";
-                } else if (tagName.startsWith("html:")) {
-                    tagNs = "http://www.w3.org/1999/xhtml";
-                    tagName = tagName.substring(5);
-                } else if (tagName.startsWith("xbl:")) {
-                    tagNs = "http://www.mozilla.org/xbl";
-                    tagName = tagName.substring(4);
-                } else if (tagName.startsWith("xul:")) {
-                    tagNs = "http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul";
-                    tagName = tagName.substring(4);
-                } else if (tagName.startsWith(":")) {
-                    tagName = tagName.substring(1);
-                }
-            }
 
-            return tagNs
-                ? document.createElementNS(tagNs, tagName || this.defaultTagName || "div")
-                : document.createElement(tagName || this.defaultTagName || "div");
-        }
-
-        if (eleType === "string") ele = document.getElementById(ele as any)!;
-        else if (eleType === "number") ele = document.body.children[ele as any] as HTMLElement;
-        if (ele) ele.innerHTML = "";
-        return ele;
+    get(element: any) {
+        if (!element) return undefined;
+        if (typeof element === "string") return document.getElementById(element);
+        return element;
     }
-    alive(element: HTMLElement) {
-        if (!element || !element.parentElement) return false;
+
+    alive(target: HTMLElement) {
+        if (!target || !target.parentElement) return false;
         try {
-            if (!element.parentElement.parentElement && element != document.body) return false;
+            if (!target.parentElement.parentElement && target != document.body) return false;
         }
         catch (ex) {}
         return true;
     }
-    unmount(element: HTMLElement) {
-        if (!element) return;
-        element.innerHTML = "";
-        element.remove();
-    }
-    append(parent: HTMLElement, child: HTMLElement) {
-        if (!parent || !child) return;
-        parent.appendChild(child);
-    }
-    setProp(context: ViewGeneratingContextContract<HTMLElement>, key: string, value: any) {
-        const element = context.element();
-        if (!element) return;
-        if (!value || typeof value === "string") element.setAttribute(key, value);
-        else (element as any)[key] = value;
-    }
-    getProp(context: ViewGeneratingContextContract<HTMLElement>, key: string) {
-        const element = context.element();
-        if (!element) return undefined;
-        return (element as any)[key] || element.getAttribute(key);
-    }
-    setStyle(context: ViewGeneratingContextContract<HTMLElement>, style: any, styleRefs: string[]) {
-        const element = context.element();
-        if (!element) return;
-        if (style) {
-            const len = element.style.length;
-            const old = [];
-            for (let i = 0; i < len; i++) {
-                const key = element.style.item(i);
-                old.push(key);
-            }
-            for (let i = 0; i < old.length; i++) {
-                const key = old[i];
-                if (!style[key]) element.style.removeProperty(key);
-            }
-            Object.keys(style).forEach(key => {
-                (element.style as any)[key] = style[key];
-            });
+
+    text(target: HTMLElement, text: string) {
+        if (target.tagName?.toLowerCase() === "input") {
+            (target as HTMLInputElement).value = text;
+        } else {
+            target.innerText = text;
         }
-        if (!styleRefs) return;
-        if (typeof styleRefs === "string") {
-            element.className = styleRefs;
-            return;
+    }
+
+    setChildren(parent: HTMLElement, child: DescriptionContract[], old: BaseComponent[]) {
+        while (parent.childNodes.length > 0) {
+            const item = parent.childNodes[0];
+            if (item) parent.removeChild(item);
+        }
+        return this.append(parent, child, old);
+    }
+
+    append(parent: HTMLElement, child: DescriptionContract[], old: BaseComponent[]) {
+        const arr: Element[] = [];
+        for (const item of child) {
+            if (!item) continue;
+            const element = this.createEmptyElementFromDescription(item, parent);
+            if (element) arr.push(element);
+        }
+        return arr;
+    }
+
+    insert(parent: HTMLElement, index: number, child: DescriptionContract[], old: BaseComponent[]) {
+        const arr: Element[] = [];
+        const rest = this.removeStart(parent, index);
+        for (const item of child) {
+            if (!item) continue;
+            const element = this.createEmptyElementFromDescription(item, parent);
+            if (element) arr.push(element);
+        }
+        for (const item of rest) {
+            parent.appendChild(item);
+        }
+        return arr;
+    }
+
+    remove(parent: HTMLElement, index: number, item: BaseComponent) {
+        let child = parent.childNodes[index];
+        if (!child) return false;
+        child = parent.removeChild(child);
+        return !!child;
+    }
+
+    move(parent: HTMLElement, newIndex: number, oldIndex: number) {
+        const child = parent.children[oldIndex];
+        if (!child) return;
+        parent.removeChild(child);
+        const rest = this.removeStart(parent, newIndex);
+        parent.appendChild(child);
+        for (const item of rest) {
+            parent.appendChild(item);
+        }
+    }
+
+    props(target: Element, set: Record<string, any>) {
+        const keys = Object.keys(set);
+        for (const key of keys) {
+            if (!key) continue;
+            const v = set[key];
+            let suc = false;
+            if (key.indexOf("-") < 0) {
+                if (target instanceof HTMLElement) {
+                    if (v === undefined) delete (target as any)[key];
+                    else (target as any)[key] = v;
+                    suc = true;
+                // } else if (target instanceof SVGElement && target[key as keyof SVGElement]?.baseVal) {
+                //     if (v === undefined) delete target[key as keyof SVGElement].baseVal.value;
+                //     else target[key as keyof SVGElement].baseVal.value = v;
+                //     suc = true;
+                }
+            }
+
+            if (!suc) {
+                if (v === undefined || v === null) target.removeAttribute(key);
+                else if (typeof v === "number") target.setAttribute(key, v.toString(10));
+                else target.setAttribute(key, v.toString());
+            }
+        }
+    }
+
+    style(target: HTMLElement, changes: {
+        oldStyle?: Record<string, any>;
+        newStyle?: Record<string, any>;
+        oldClassName?: string[];
+        newClassName?: string[];
+    }) {
+        if (!changes) return;
+        if (changes.newClassName !== undefined) target.className = changes.newClassName.join(" ");
+        if (!changes.newStyle) return;
+        const oldKeys = Object.keys(changes.oldStyle || {});
+        const newKeys = Object.keys(changes.newStyle);
+        for (const key of oldKeys) {
+            if (key && newKeys.indexOf(key) < 0) target.style[key as any] = "";
+        }
+        for (const key of newKeys) {
+            target.style[key as any] = changes.newStyle[key];
+        }
+    }
+
+    on(target: HTMLElement, event: string, handler: (ev: any) => void) {
+        target.addEventListener(event, handler);
+    }
+
+    off(target: HTMLElement, event: string, handler: (ev: any) => void) {
+        target.removeEventListener(event, handler);
+    }
+
+    removeStart(parent: HTMLElement, index: number) {
+        const arr = [];
+        while (parent.childNodes.length > index) {
+            let element = parent.childNodes[index];
+            element = parent.removeChild(element);
+            if (element) arr.push(element);
+        }
+        return arr;
+    }
+
+    createElement(tagName: string, tagNamespace?: string) {
+        if (!tagNamespace && tagName && tagName.indexOf(":") >= 0) {
+            if (tagName.startsWith("svg:")) {
+                tagNamespace = "http://www.w3.org/2000/svg";
+                tagName = tagName.substring(4);
+                if (!tagName) tagName = "svg";
+            } else if (tagName.startsWith("mathml:")) {
+                tagNamespace = "http://www.w3.org/1998/Math/MathML";
+                tagName = tagName.substring(7);
+                if (!tagName) tagName = "math";
+            } else if (tagName.startsWith("math:")) {
+                tagNamespace = "http://www.w3.org/1998/Math/MathML";
+                tagName = tagName.substring(5);
+                if (!tagName) tagName = "math";
+            } else if (tagName.startsWith("html:")) {
+                tagNamespace = "http://www.w3.org/1999/xhtml";
+                tagName = tagName.substring(5);
+            } else if (tagName.startsWith("xbl:")) {
+                tagNamespace = "http://www.mozilla.org/xbl";
+                tagName = tagName.substring(4);
+            } else if (tagName.startsWith("xul:")) {
+                tagNamespace = "http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul";
+                tagName = tagName.substring(4);
+            } else if (tagName.startsWith(":")) {
+                tagName = tagName.substring(1);
+            }
         }
 
-        element.className = Array.prototype.join.call(styleRefs, " ");
+        return tagNamespace
+            ? document.createElementNS(tagNamespace, tagName || this.defaultTagName || "div")
+            : document.createElement(tagName || this.defaultTagName || "div");
     }
-    getStyle(context: ViewGeneratingContextContract<HTMLElement>) {
-        const element = context.element();
-        const result = {
-            inline: undefined as any,
-            refs: [] as string[],
-            computed(pseudoElt?: string): any {
-                return element ? getComputedStyle(element, pseudoElt) : undefined;
-            }
-        };
-        if (!element) return result;
-        result.inline = element.style;
-        result.refs = (element.classList as any) || (element.className || "").split(" ");
-        return result;
-    }
-    setTextValue(context: ViewGeneratingContextContract<HTMLElement>, value: string) {
-        const element = context.element();
-        if (!element) return;
-        if (element.tagName === "input") {
-            (element as HTMLInputElement).value = value;
-            return;
-        }
-        
-        element.innerHTML = "";
-        element.appendChild(new Text(value));
-    }
-    bindProp(context: ViewGeneratingContextContract<HTMLElement>, keys: BindPropKeyInfoContract) {
-        keys.reg("value", setter => {
-            const element = context.element() as HTMLInputElement;
-            if (!element) return;
-            keys.on("change", ev => {
-                setter(element.value);
-            });
-        });
-    }
-    onInit(context: ViewGeneratingContextContract<HTMLElement>) {
-    }
-    on(context: ViewGeneratingContextContract<HTMLElement>, key: string, handler: (ev: any) => void) {
-        const element = context.element();
-        if (!element) return;
-        if (element.addEventListener) {
-            element.addEventListener(key, handler, false);
-            return {
-                dispose() {
-                    element.removeEventListener(key, handler, false);
-                }
-            };
-        } else if ((element as any).attachEvent) {
-            (element as any).attachEvent("on" + key, handler);
-            return {
-                dispose() {
-                    if ((element as any).detachEvent) (element as any).detachEvent(key, handler, false);
-                }
-            };
-        }
+
+    createEmptyElementFromDescription(item: DescriptionContract, parent?: HTMLElement) {
+        if (!item) return undefined;
+        const element = this.createElement(item.tagName || this.defaultTagName || "div", (item as any).tagNamespace);
+        if (!element) return undefined;
+        if (parent) parent.appendChild(element);
+        return element;
     }
 }
 
@@ -164,14 +187,20 @@ export class HtmlGenerator implements ViewGeneratorContract<HTMLElement> {
  * @returns The description model.
  */
 export function from(element: Element | string) {
-    if (typeof element === "string") element = document.getElementById(element);
+    if (typeof element === "string") element = document.getElementById(element) as HTMLElement;
     if (!element?.tagName) return undefined;
     const classNameStr = element.className;
     const classNames = classNameStr && typeof classNameStr === "string" ? classNameStr.split(" ").filter(v => !!v) : undefined;
-    const obj: Hje.DescriptionContract = {
+    const obj: {
+        tagName: Hje.DescriptionContract["tagName"];
+        props: Record<string, any>;
+        className: Hje.DescriptionContract["className"];
+        data?: Hje.DescriptionContract["data"];
+        children?: Hje.DescriptionContract["children"];
+    } = {
         tagName: element.tagName.toLowerCase(),
         props: {},
-        styleRefs: classNames
+        className: classNames
     };
     readPropertyOfElement(obj.props, element, "hidden");
     readPropertyOfElement(obj.props, element, "value");
@@ -193,7 +222,8 @@ export function from(element: Element | string) {
     if (children && children.length > 0) {
         obj.children = [];
         for (let i = 0; i < children.length; i++) {
-            obj.children.push(from(children[i]));
+            const child = from(children[i]);
+            if (child) obj.children.push(child);
         }
     } else if (element.childNodes.length === 1 && element.childNodes[0].nodeType === Node.TEXT_NODE) {
         obj.children = element.childNodes[0].textContent;

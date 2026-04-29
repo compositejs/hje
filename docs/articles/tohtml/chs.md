@@ -23,7 +23,7 @@ Hje.render("container-main", {
     children: "Alphabet"
   }, {
     tagName: "ul",
-    styleRefs: "list-alphabet",
+    className: "list-alphabet",
     props: {
       type: "circle",
     },
@@ -60,15 +60,17 @@ Hje.render("container-main", {
 
 - `tagName` _字符串_：DOM 的标签名，如 `div`。
 - `key` _字符串_：索引键名。当使用 `Hje.render` 时，其返回的结构体中，可以调用 `childContext()` 方法并传入此值，获取该值对应的该类型结构体。
-- `control` _类型 或 字符串_：Hyper-JSON Engine 支持封装控件，当有现有控件想在本元素中使用时，可在此传入。
-- `styleRefs` _字符串 或 字符串数组_：即 DOM 的 `className` 列表。
+- `component` _类型 或 字符串_：Hyper-JSON Engine 支持封装组件，当有现有组件想在本元素中使用时，可在此传入其类型。
+- `className` _字符串 或 字符串数组_：即 DOM 的 `className` 列表。
 - `style` _对象_：内联样式，结构与 `ElementCSSInlineStyle` 类似。
 - `props` _对象_：适用于 DOM 的属性（attribute），其内各字段大多为字符串。
 - `on` _对象_：适用于 DOM 的事件，如 `click`（表示点击事件），其内各字段大多为函数。
 - `children` _字符串 或 对象数组_：子元素。如果是字符串，那么里面即会直接渲染文本（`TextNode`）；如果是数组，那么各元素需要时 `DescriptionContract` 接口类型。
 - `data` _对象_：绑定的数据，用于编程开发时作为附加信息读取使用。
-- `oninit` _函数_：当初始化执行时会被触发。
-- `onload` _函数_：当被加载时会被触发。
+- `lifecycle` _生命周期钩子_：对象，会在创建和卸载时触发。。
+  - `init` _函数_：当初始化执行时会被触发。
+  - `load` _函数_：当被加载时会被触发。
+  - `unload` _函数_：当被卸载时会被触发。
 
 <!-- End -->
 ---

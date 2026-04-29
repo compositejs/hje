@@ -6,6 +6,8 @@ namespace DeepX.MdBlogs {
         dev: "Developer",
         contentCreator: "Content creator",
         refresh: "Refresh",
+        share: "Share",
+        general: "General",
         keywords: "Keywords",
         status: "Status",
         available: "Available",
@@ -51,6 +53,14 @@ namespace DeepX.MdBlogs {
         work: "Work",
         works: "Works",
         events: "Events",
+        series: "Series",
+        paintings: "Paintings",
+        related: "Related",
+        relatedBlog: "Related blog articles",
+        relatedSeries: "Related series",
+        relatedPaintings: "Related paintings",
+        picLibs: "All picture libraries",
+        all: "All",
         seeMore: "More",
         learnMore: "Learn more",
         back: "Back",
@@ -108,7 +118,9 @@ namespace DeepX.MdBlogs {
         author: "作者",
         dev: "研发",
         contentCreator: "内容创作者",
+        general: "常规",
         refresh: "刷新",
+        share: "分享",
         keywords: "关键词",
         status: "状态",
         available: "可用",
@@ -154,6 +166,14 @@ namespace DeepX.MdBlogs {
         work: "作品",
         works: "作品",
         events: "活动",
+        series: "系列",
+        paintings: "画作",
+        related: "相关",
+        relatedBlog: "相关博客",
+        relatedSeries: "相关系列",
+        relatedPaintings: "相关画作",
+        picLibs: "全部图集",
+        all: "全部",
         seeMore: "查看更多",
         learnMore: "了解详情",
         back: "返回",
@@ -223,7 +243,7 @@ namespace DeepX.MdBlogs {
         const s = getLocaleString(key);
         if (!s) return s;
         if (element) {
-            if (typeof element === "string") element = document.getElementById(element);
+            if (typeof element === "string") element = document.getElementById(element)!;
             if (element && element.tagName) element.innerText = s;
         }
 

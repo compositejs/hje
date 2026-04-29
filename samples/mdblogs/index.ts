@@ -9,7 +9,7 @@ namespace DeepX.MdBlogs {
             blog?: ArticleInfo[];
             docs?: (ArticleInfo | string)[];
             hidden?: ArticleInfo[];
-            home?: ArticleInfo;
+            home?: ArticleInfo | null;
             pageIndex: number;
         };
 
@@ -89,7 +89,7 @@ namespace DeepX.MdBlogs {
             }
 
             this._inner.home = this.genInfo({
-                name: this._inner.data.name,
+                name: this._inner.data.name!,
                 file: url,
             });
             return this._inner.home;
@@ -104,22 +104,23 @@ namespace DeepX.MdBlogs {
             const localeOptions = {
                 mkt: options?.mkt
             };
+            const data = this._inner.data;
             const dir = getLocaleProp(blogInfo, "dir");
             const rela = dir ? path.relative(dir) : path;
-            const defs = this._inner.data["$defs"];
             const list = blogInfo.list.map(function (blog) {
                 if (!blog || !blog.name || getLocaleProp(blog, "disable", localeOptions)) return null;
                 return new ArticleInfo(blog, {
                     rela,
                     year: blogInfo.year || true,
                     fetch: fetchHandler,
-                    definitions: defs,
+                    definitions: data["$defs"],
+                    series: data.series,
                 });
             }).filter(function (blog) {
                 if (!blog || !blog.dateObj || !blog.getPath()) return false;
                 blog.children();
                 return true;
-            });
+            }) as ArticleInfo[];
             if (!blogInfo.reverse) list.reverse();
             if (!specificMkt) this._inner.blog = list;
             return list;
@@ -149,8 +150,12 @@ namespace DeepX.MdBlogs {
                 if (!item.name) continue;
                 const disable = getLocaleProp(item, "disable", localeOptions);
                 if (disable) {
-                    if (disable === "label" || disable === "header")
-                        store.push(getLocaleProp(item, null, localeOptions));
+                    if (disable === "label" || disable === "header") {
+                        let name = getLocaleProp(item, null, localeOptions);
+                        const lableRefKey = getLocaleProp(item as IArticleLabelInfo, "ref", options);
+                        if (lableRefKey) name = this.string(lableRefKey === true ? name : lableRefKey, options) || name;
+                        store.push(name);
+                    }
                     continue;
                 }
 
@@ -169,22 +174,27 @@ namespace DeepX.MdBlogs {
             };
             const path = this._inner.path;
             const fetchHandler = this._inner.fetch;
-            const defs = this._inner.data["$defs"];
-            const col = this._inner.data.hiddenArticles || [];
+            const data = this._inner.data;
+            const col = data.hiddenArticles || [];
             const list = col.map(function (blog) {
                 if (!blog || !blog.name || getLocaleProp(blog, "disable", localeOptions)) return null;
                 return new ArticleInfo(blog, {
                     rela: path,
                     fetch: fetchHandler,
-                    definitions: defs,
+                    definitions: data["$defs"],
+                    series: data.series,
                 });
             }).filter(function (blog) {
                 if (!blog || !blog.getPath()) return false;
                 blog.children();
                 return true;
-            });
+            }) as ArticleInfo[];
             if (!specificMkt) this._inner.hidden = list;
             return list;
+        }
+
+        series() {
+            return this._inner.data.series;
         }
 
         links(options?: {
@@ -202,23 +212,25 @@ namespace DeepX.MdBlogs {
                     newWindow: item.newWindow
                 };
             }).filter(item => {
-                return item.name && item.url && typeof item.name === "string" && typeof item.url === "string";
-            });
+                return item && item.name && item.url && typeof item.name === "string" && typeof item.url === "string";
+            }) as NonNullable<IArticleCollection["links"]>;
         }
 
         addBlog(article: IArticleInfo) {
             if (!article?.name) return undefined;
+            const data = this._inner.data;
             const item = new ArticleInfo(article, {
                 rela: this._inner.path,
                 year: this._inner.blogConfig.year || true,
                 fetch: this._inner.fetch,
-                definitions: this._inner.data["$defs"],
+                definitions: data["$defs"],
+                series: data.series,
             });
             const arr = this.blog();
-            let source = this._inner.data.blog;
+            let source = data.blog;
             if (!source) {
                 source = [];
-                this._inner.data.blog = source;
+                data.blog = source;
             }
             
             if (source instanceof Array) {
@@ -235,41 +247,45 @@ namespace DeepX.MdBlogs {
 
         addDocs(article: IArticleInfo | string | IArticleLabelInfo) {
             if (!article) return undefined;
+            const data = this._inner.data;
             if (typeof article === "string") {
                 this._inner.docs = undefined;
-                if (!this._inner.data.docs) this._inner.data.docs = [];
-                this._inner.data.docs.push(article);
+                if (!data.docs) data.docs = [];
+                data.docs.push(article);
                 return article;
             }
 
             if (!article.name) return undefined;
             this._inner.docs = undefined;
-            if (!this._inner.data.docs) this._inner.data.docs = [];
+            if (!data.docs) data.docs = [];
             if (typeof article.disable === "string") {
-                this._inner.data.docs.push(article);
+                data.docs.push(article);
                 return getLocaleProp(article);
             }
 
             const item = new ArticleInfo(article, {
                 rela: this._inner.path,
                 fetch: this._inner.fetch,
-                definitions: this._inner.data["$defs"],
+                definitions: data["$defs"],
+                series: data.series,
             });
-            this._inner.data.docs.push(article);
+            data.docs.push(article);
             return item;
         }
 
         addHiddenArticle(article: IArticleInfo) {
             if (!article?.name) return undefined;
+            const data = this._inner.data;
             const item = new ArticleInfo(article, {
                 rela: this._inner.path,
                 fetch: this._inner.fetch,
-                definitions: this._inner.data["$defs"],
+                definitions: data["$defs"],
+                series: data.series,
             });
             const arr = this.hiddenArticles();
             arr.push(item);
-            if (!this._inner.data.hiddenArticles) this._inner.data.hiddenArticles = [];
-            this._inner.data.hiddenArticles.push(article);
+            if (!data.hiddenArticles) data.hiddenArticles = [];
+            data.hiddenArticles.push(article);
             return item;
         }
 
@@ -389,10 +405,12 @@ namespace DeepX.MdBlogs {
 
         genInfo(article: IArticleInfo, list?: ArticleInfo[] | any[]) {
             if (!article) return undefined;
+            const data = this._inner.data;
             var info = new ArticleInfo(article, {
                 rela: this._inner.path,
                 fetch: this._inner.fetch,
-                definitions: this._inner.data["$defs"],
+                definitions: data["$defs"],
+                series: data.series,
             });
             if (list instanceof Array) list.push(info);
             return info;
@@ -417,11 +435,12 @@ namespace DeepX.MdBlogs {
             return false;
         }
 
-        nextArticle(current: ArticleInfo, options?: {
+        nextArticle(current: ArticleInfo | undefined | null, options?: {
             mkt?: string | boolean
         }) {
+            if (!current) return undefined;
             let match = false;
-            let target: ArticleInfo;
+            let target: ArticleInfo | undefined | null;
             this.some(article => {
                 if (match) {
                     target = article;
@@ -437,11 +456,12 @@ namespace DeepX.MdBlogs {
             return target;
         }
 
-        previousArticle(current: ArticleInfo, options?: {
+        previousArticle(current: ArticleInfo | undefined | null, options?: {
             mkt?: string | boolean
         }) {
-            let temp: ArticleInfo = null;
-            let target: ArticleInfo;
+            if (!current) return undefined;
+            let temp: ArticleInfo | null = null;
+            let target: ArticleInfo | null | undefined;
             this.some(article => {
                 if (article === current) {
                     target = temp;
@@ -454,9 +474,10 @@ namespace DeepX.MdBlogs {
             return target;
         }
 
-        parentArticle(current: ArticleInfo, options?: {
+        parentArticle(current: ArticleInfo | undefined | null, options?: {
             mkt?: string | boolean
         }) {
+            if (!current) return undefined;
             const blog = this.blog(options);
             for (let i = 0; i < blog.length; i++) {
                 const item = blog[i];
@@ -466,6 +487,17 @@ namespace DeepX.MdBlogs {
             }
 
             return undefined;
+        }
+
+        string(key: string, options?: {
+            mkt?: string | boolean;
+            fallback?: string;
+        }) {
+            if (!key || typeof key !== "string") return undefined;
+            if (!options) options = {};
+            return getLocaleProp(this._inner.data["$defs"]?.strings, key, {
+                mkt: options.mkt
+            }) || getLocaleString(key as any, options.mkt) || options.fallback;
         }
     }
 
@@ -486,14 +518,14 @@ namespace DeepX.MdBlogs {
 
     function getArticle(list: ArticleInfo[], name: string, options?: {
         mkt?: string | boolean;
-    }) {
+    }): ArticleInfo | undefined {
         for (let i = 0; i < list.length; i++) {
             const item = list[i];
             if (!item || !(item instanceof ArticleInfo)) continue
             if (item.is(name, options)) return item;
             const children = item.children(options);
             if (!children) continue;
-            const child: ArticleInfo = getArticle(children, name, options);
+            const child: ArticleInfo | undefined = getArticle(children, name, options);
             if (!child) continue;
             return child;
         }

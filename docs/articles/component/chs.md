@@ -11,18 +11,17 @@ export interface ISampleComponentData {
 }
 
 export class SampleComponent extends Hje.BaseComponent {
-    constructor(element: any, options?: Hje.ComponentOptionsContract<ISampleComponentData>) {
-        super(element, options);
-        const data = options?.data || {};
-        if (data.title) this.currentModel.children.push({ key: "title", tagName: "h1", children: data.title });
-        if (data.list instanceof Array && data.list.length > 0) {
+    constructor(args: any) {
+        super(args);
+        const { title, list } = super.data();
+        if (title) this.currentModel.children.push({ key: "title", tagName: "h1", children: title });
+        if (list instanceof Array && list.length > 0) {
             const list: Hje.DescriptionContract[] = [];
             this.currentModel.children.push({ tagName: "ul", children: list });
-            for (let i = 0; i < data.list.length; i++) {
-                list.push({ tagName: "li", children: data.list[i] });
+            for (let i = 0; i < list.length; i++) {
+                list.push({ tagName: "li", children: list[i] });
             }
         }
-        this.refreshChild();
     }
 
     get title() {
@@ -43,7 +42,7 @@ export class SampleComponent extends Hje.BaseComponent {
 
 ```javascript
 Hje.render("main-container", {
-    control: SampleComponent,
+    component: SampleComponent,
     data: {
         title: "Test",
         list: [

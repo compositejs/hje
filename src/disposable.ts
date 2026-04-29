@@ -4,14 +4,24 @@ namespace Hje {
  * Removes an item from given array.
  * @param {Array} originalList  The array to be merged.
  * @param {*} item  An item to remove.
- * @param {string | function} compare  The property key; or, a function.
+ * @param {string | function} compare  The property key; or a function to compare.
  */
-function removeFromList(list: any[], item: any) {
+function removeFromList(list: any[], item: any, compare?: string | number | ((a: any, b: any) => boolean)) {
     if (!list) return 0;
     let removing: number[] = [];
-    list.forEach((ele, eleIndex, eleArr) => {
-        if (ele === item) removing.push(eleIndex);
-    });
+    if (!compare) {
+        list.forEach((ele, eleIndex) => {
+            if (ele === item) removing.push(eleIndex);
+        });
+    } else if (typeof compare === "string" || typeof compare === "number") {
+        list.forEach((ele, eleIndex) => {
+            if (ele[compare] === item) removing.push(eleIndex);
+        });
+    } else if (typeof compare === "function") {
+        list.forEach((ele, eleIndex) => {
+            if (compare(ele, item)) removing.push(eleIndex);
+        });
+    }
 
     let count = removing.length;
     for (let i = count - 1; i--; i >= 0) {
@@ -43,7 +53,7 @@ function disposeDisposable(disposable: DisposableContract | DisposableContract[]
 }
 
 const regs = {} as any;
-function accessRegInstance<T = any>(key: string, value?: T, validation?: (v: T) => boolean) {
+function accessRegInstance<T = any>(key: string, value?: T, validation?: (v: T | undefined) => boolean) {
     if (!key) return undefined;
     let needSet = false;
     if (typeof validation === "function") {
@@ -71,6 +81,15 @@ export const InternalInjectionPool = {
     }
 };
 
+export function errorDisposable(message?: string) {
+    return {
+        error: true,
+        message,
+        dispose() {
+        }
+    };
+}
+
 /**
  * A container for store and manage a number of disposable object.
  * @param items  The objects to add.
@@ -84,17 +103,18 @@ export class DisposableArray {
      */
     public push(...items: DisposableContract[]) {
         let count = 0;
+        const self = this;
         items.forEach(item => {
-            if (!item || this._list.indexOf(item) >= 0) return;
+            if (!item || self._list.indexOf(item) >= 0) return;
             if (!item.dispose) {
                 if (typeof (item as any).unsubscribe === "function") item.dispose = (item as any).unsubscribe;
                 // else if (typeof item === "function") item = { dispose: item };
             }
 
-            this._list.push(item);
+            self._list.push(item);
             if (typeof (item as DisposableArray).pushDisposable === "function") (item as DisposableArray).pushDisposable({
                 dispose() {
-                    removeFromList(this._list, item);
+                    removeFromList(self._list, item);
                 }
             });
             count++;

@@ -1,7 +1,7 @@
 namespace DeepX.MdBlogs {
     export const hooks = {
-        renderMd: undefined as ((element: HTMLElement, md: string) => void),
-        fetchList: undefined as ((input: RequestInfo | URL, init?: RequestInit) => Promise<Response>),
+        renderMd: undefined as undefined | ((element: HTMLElement, md: string) => void),
+        fetchList: undefined as undefined | ((input: RequestInfo | URL, init?: RequestInit) => Promise<Response>),
     };
 
     export function showElements(show: string[], hide: string[]) {
@@ -18,7 +18,7 @@ namespace DeepX.MdBlogs {
     export function codeElements(element: HTMLElement) {
         if (!element) return undefined;
         if (typeof element === "string") {
-            element = document.getElementById(element);
+            element = document.getElementById(element)!;
             if (!element) return undefined;
         }
 
@@ -37,14 +37,14 @@ namespace DeepX.MdBlogs {
         if (!options) options = {};
         if (!params || params.length < 1) return {
             tagName: "ul",
-            styleRefs: options.styleRefs
+            className: options.className
         };
         const arr = options.arr || [];
         const deep = options.deep;
         const localeOptions = options.mkt != null ? { mkt: options.mkt } : undefined;
         const level = deep === true ? 1 : (typeof deep === "number" && deep >= 0 ? (deep + 1) : 0);
-        let group: number | string = undefined;
-        let label: string;
+        let group: number | string | undefined = undefined;
+        let label: string | undefined;
         const now = new Date();
         for (let i = 0; i < params.length; i++) {
             const article = params[i];
@@ -56,7 +56,7 @@ namespace DeepX.MdBlogs {
             if (label) {
                 arr.push({
                     tagName: "li",
-                    styleRefs: "grouping-header",
+                    className: "grouping-header",
                     children: label
                 });
                 label = undefined;
@@ -70,7 +70,7 @@ namespace DeepX.MdBlogs {
                 const groupName = isThisYear ? getLocaleString("thisYear") : (typeof group === "number" ? group.toString(10) : group);
                 arr.push({
                     tagName: "li",
-                    styleRefs: "grouping-header",
+                    className: "grouping-header",
                     children: groupName
                 });
             }
@@ -78,7 +78,7 @@ namespace DeepX.MdBlogs {
             const path = genArticlePath(article, options.path, localeOptions);
             const result = generateMenuItemInternal(article, (deep === -1 || deep === -2) ? deep : level, path, options.click, localeOptions);
             const hasSelected = options.select === article;
-            if (hasSelected) result.styleRefs = "state-sel";
+            if (hasSelected) result.className = "state-sel";
             if (typeof options.render === "function") options.render(result, article, {
                 level,
                 mkt: options.mkt,
@@ -100,7 +100,7 @@ namespace DeepX.MdBlogs {
 
         return {
             tagName: "ul",
-            styleRefs: options.styleRefs,
+            className: options.className,
             children: arr
         };
     }
@@ -158,72 +158,72 @@ namespace DeepX.MdBlogs {
         url += s + path;
         return {
             tagName: "div",
-            styleRefs: "x-part-code",
+            className: "x-part-code",
             children: [{
                 tagName: "code",
                 children: [{
                     tagName: "span",
-                    styleRefs: "x-code-pack",
+                    className: "x-code-pack",
                     children: "<"
                 }, {
                     tagName: "span",
-                    styleRefs: "x-code-tag",
+                    className: "x-code-tag",
                     children: "script"
                 }, {
                     tagName: "span",
                     children: " "
                 }, {
                     tagName: "span",
-                    styleRefs: "x-code-attr",
+                    className: "x-code-attr",
                     children: "type"
                 }, {
                     tagName: "span",
                     children: "="
                 }, {
                     tagName: "span",
-                    styleRefs: "x-code-quote",
+                    className: "x-code-quote",
                     children: "\""
                 }, {
                     tagName: "span",
-                    styleRefs: "x-code-string",
+                    className: "x-code-string",
                     children: "text/javascript"
                 }, {
                     tagName: "span",
-                    styleRefs: "x-code-quote",
+                    className: "x-code-quote",
                     children: "\""
                 }, {
                     tagName: "span",
                     children: " "
                 }, {
                     tagName: "span",
-                    styleRefs: "x-code-attr",
+                    className: "x-code-attr",
                     children: "src"
                 }, {
                     tagName: "span",
                     children: "="
                 }, {
                     tagName: "span",
-                    styleRefs: "x-code-quote",
+                    className: "x-code-quote",
                     children: "\""
                 }, {
                     tagName: "span",
-                    styleRefs: "x-code-string",
+                    className: "x-code-string",
                     children: url
                 }, {
                     tagName: "span",
-                    styleRefs: "x-code-quote",
+                    className: "x-code-quote",
                     children: "\""
                 }, {
                     tagName: "span",
-                    styleRefs: "x-code-pack",
+                    className: "x-code-pack",
                     children: " ></"
                 }, {
                     tagName: "span",
-                    styleRefs: "x-code-tag",
+                    className: "x-code-tag",
                     children: "script"
                 }, {
                     tagName: "span",
-                    styleRefs: "x-code-pack",
+                    className: "x-code-pack",
                     children: ">"
                 }]
             }]
@@ -231,7 +231,7 @@ namespace DeepX.MdBlogs {
     }
 
     interface IButtonListItem {
-        styleRefs?: string[] | string | {
+        className?: string[] | string | {
             subscribe(h: any): any;
             [property: string]: any;
         };
@@ -284,7 +284,9 @@ namespace DeepX.MdBlogs {
             tagName: "li",
             props: {},
             children: [text],
-            data: article,
+            data: {
+                article,
+            }
         } as Hje.DescriptionContract;
         const dateStr = article.dateString;
         if (!intro && !dateStr) return result;
@@ -295,9 +297,9 @@ namespace DeepX.MdBlogs {
             }];
             if (text.children instanceof Array) {
                 const publishDate = article.dateObj;
-                if (dateStr) text.children.push({ tagName: "br" }, {
+                if (publishDate && dateStr) text.children.push({ tagName: "br" }, {
                     tagName: "time",
-                    styleRefs: "x-font-size-s",
+                    className: "x-font-size-s",
                     props: {
                         datetime: `${publishDate.year.toString(10)}-${publishDate.month.toString(10)}-${publishDate.date.toString(10)}`
                     },
@@ -320,13 +322,13 @@ namespace DeepX.MdBlogs {
             const publishDate = article.dateObj;
             const secondLine = {
                 tagName: "div",
-                children: [{
+                children: publishDate ? [{
                     tagName: "time",
                     props: {
                         datetime: `${publishDate.year.toString(10)}-${publishDate.month.toString(10)}-${publishDate.date.toString(10)}`
                     },
                     children: article.dateString
-                }]
+                }] : []
             };
             const thumb = article.getThumb("wide");
             if (thumb) (secondLine.children as Hje.DescriptionContract[]).push({
@@ -350,7 +352,7 @@ namespace DeepX.MdBlogs {
         return result;
     }
 
-    function genArticlePath(article: ArticleInfo, path: string | ((original: string, article: ArticleInfo) => string), localeOptions: { mkt?: string | boolean }) {
+    function genArticlePath(article: ArticleInfo, path: string | undefined | ((original: string, article: ArticleInfo) => string), localeOptions?: { mkt?: string | boolean }) {
         let path1 = `${typeof path === "string" ? path : ""}?${article.getRoutePath(localeOptions)}`;
         if (typeof path === "function") {
             const path2 = path(path1, article);
@@ -361,12 +363,12 @@ namespace DeepX.MdBlogs {
     }
 
     export function buttonList(config: {
-        styleRefs?: string[] | string | {
+        className?: string[] | string | {
             subscribe(h: any): any;
             [property: string]: any;
         };
         style?: any;
-        groupStyleRefs?: string[] | string | {
+        groupclassName?: string[] | string | {
             subscribe(h: any): any;
             [property: string]: any;
         };
@@ -379,7 +381,7 @@ namespace DeepX.MdBlogs {
     }) {
         if (!config) return undefined;
         let m: Hje.DescriptionContract = {};
-        if (config.styleRefs) m.styleRefs = config.styleRefs;
+        if (config.className) m.className = config.className;
         if (config.style) m.style = config.style;
         if (config.props) m.props = config.props;
         if (config.data) m.data = config.data;
@@ -389,7 +391,7 @@ namespace DeepX.MdBlogs {
             m.children = Hje.toSpan(config.text, true) as Hje.DescriptionContract[];
             if (typeof config.click === "function") m.on = {
                 click(ev) {
-                    config.click(ev);
+                    if (typeof config.click === "function") config.click(ev);
                 }
             };
             return m;
@@ -405,7 +407,7 @@ namespace DeepX.MdBlogs {
                 if (typeof item === "string") {
                     m.children.push({
                         tagName: "span",
-                        styleRefs: config.groupStyleRefs,
+                        className: config.groupclassName,
                         children: item
                     });
                     continue;
@@ -421,14 +423,15 @@ namespace DeepX.MdBlogs {
                 let itemProps: any = {};
                 if (item.url) itemProps.href = item.url;
                 if (item.title) itemProps.title = item.title;
-                m.children.push(buttonList({
+                const button = buttonList({
                     text: item.text,
-                    styleRefs: item.styleRefs || itemConfig.styleRefs,
+                    className: item.className || itemConfig.className,
                     style: item.style || itemConfig.style,
                     props: itemProps,
                     click: item.click || itemConfig.click,
                     item: true
-                }));
+                });
+                if (button) m.children.push(button);
             }
         }
 

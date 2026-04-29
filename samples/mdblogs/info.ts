@@ -1,5 +1,5 @@
 namespace DeepX.MdBlogs {
-    function toDate(s: string | Date | number) {
+    function toDate(s: string | Date | number | undefined) {
         if (s instanceof Date) return s;
         if (typeof s === "number") return new Date(s);
         let time: Date;
@@ -10,12 +10,14 @@ namespace DeepX.MdBlogs {
             time = new Date(parseInt(s.substring(0, 5)), parseInt(s.substring(5, 7)) - 1, parseInt(s.substring(7, 9)));
         } else if (s.length > 9 && s.includes("-")) {
             time = new Date(s);
+        } else {
+            return undefined;
         }
 
         return isNaN(time as any) ? undefined : time;
     }
 
-    function isSamePath(test: string, file: string | boolean, dir: string) {
+    function isSamePath(test: string, file: string | boolean | null | undefined, dir: string) {
         if (typeof file === "boolean" || file == null) {
         } else if (typeof file === "string") {
             dir += file.toLowerCase().endsWith(".md") ? file.substring(0, file.length - 3) : file;
@@ -28,10 +30,11 @@ namespace DeepX.MdBlogs {
 
     export class ArticleInfo {
         private _inner: {
-            rela?: Hje.RelativePathInfo;
-            data?: IArticleInfo;
+            rela: Hje.RelativePathInfo;
+            data: IArticleInfo;
             date?: Date;
-            definitions?: IArticlesDefinitions;
+            definitions: IArticlesDefinitions;
+            series?: IImageSeriesInfo[];
             y: IArticleYearConfig;
             year?: string;
             children?: ArticleInfo[];
@@ -40,14 +43,15 @@ namespace DeepX.MdBlogs {
             author?: ContributorCollection;
             keywords?: NameValueModel[];
         } = {
-            y: false
-        }
+            y: false,
+        } as any;
 
         constructor(data: IArticleInfo, options: IArticleInfoOptions) {
             this._inner.fetch = options?.fetch;
             this._inner.rela = options?.rela || new Hje.RelativePathInfo("./");
-            const defs = options?.definitions || {};;
+            const defs = options?.definitions || {};
             this._inner.definitions = defs;
+            this._inner.series = options?.series || [];
             if (!data) {
                 this._inner.data = {} as any;
                 this._inner.keywords = []
@@ -56,7 +60,7 @@ namespace DeepX.MdBlogs {
 
             this._inner.data = data;
             this._inner.date = toDate(data.date);
-            this._inner.keywords = nameValueModels(data.keywords, defs.keywords);
+            this._inner.keywords = nameValueModels(data.keywords!, defs.keywords);
             let p = "./";
             const y = options?.year;
             this._inner.y = y;
@@ -123,10 +127,26 @@ namespace DeepX.MdBlogs {
             return (getLocaleProp(this._inner.data, "notes") || []) as string[];
         }
 
+        get series() {
+            const series = this._inner.series;
+            let col = this._inner.data.options?.series;
+            if (!col || !series) return [];
+            if (typeof col === "string") col = [col];
+            if (!(col instanceof Array)) return [];
+            const arr = [] as IImageSeriesInfo[];
+            for (const item of col) {
+                if (!item || typeof item !== "string") continue;
+                for (const ele of series) {
+                    if (ele?.id === item) arr.push(ele);
+                }
+            }
+            return arr;
+        }
+
         get authors() {
             if (this._inner.author) return this._inner.author;
             let name: IContributorsInfo = this._inner.data.author || this._inner.data.authors || this._inner.data.contributors;
-            this._inner.author = new ContributorCollection(name, this._inner.definitions.contributors, this._inner.definitions.roles, ["author", "translator"]);
+            this._inner.author = new ContributorCollection(name, this._inner.definitions.contributors!, this._inner.definitions.roles!, ["author", "translator"]);
             return this._inner.author;
         }
 
@@ -250,7 +270,7 @@ namespace DeepX.MdBlogs {
             return pic && typeof pic === "string" && pic.startsWith(".") ? this.relative(pic) : pic;
         }
 
-        getContent(options: IArticleLocaleOptions) {
+        getContent(options?: IArticleLocaleOptions) {
             if (this._inner.content !== undefined && !options?.reload) return Promise.resolve(this._inner.content);
             const path = this.getPath({ mkt: options?.mkt });
             if (!path) return Promise.reject("No path.");
@@ -333,7 +353,11 @@ namespace DeepX.MdBlogs {
                 if (!name) return undefined;
                 const disable = getLocaleProp<any>(link, "disable", options);
                 if (disable) {
-                    if (disable === "label" || disable === "header") return name;
+                    if (disable === "label" || disable === "header") {
+                        const lableRefKey = getLocaleProp(link as IArticleLabelInfo, "ref", options);
+                        if (!lableRefKey) return name;
+                        return this.string(lableRefKey === true ? name : lableRefKey, options) || name;
+                    }
                     return undefined;
                 }
 
@@ -362,6 +386,7 @@ namespace DeepX.MdBlogs {
             const rela = this._inner.rela;
             const y = this._inner.y;
             const fetchHandler = this._inner.fetch;
+            const series = this._inner.series;
             const list = arr.map(function (blog) {
                 if (!blog || !blog.name || getLocaleProp(blog, "disable", localeOptions)) return null;
                 return new ArticleInfo(blog, {
@@ -369,10 +394,11 @@ namespace DeepX.MdBlogs {
                     year: y,
                     fetch: fetchHandler,
                     definitions: defs,
+                    series,
                 });
             }).filter(function (blog) {
-                return blog != null && blog.getPath() != null;
-            });
+                return blog && blog.getPath() != null;
+            }) as ArticleInfo[];
             if (!specificMkt) this._inner.children = list;
             return list;
         }
@@ -383,6 +409,17 @@ namespace DeepX.MdBlogs {
 
         isKind(test: string) {
             return isStringInArray(this._inner.data.options?.kind, test);
+        }
+
+        string(key: string, options?: {
+            mkt?: string | boolean;
+            fallback?: string;
+        }) {
+            if (!key || typeof key !== "string") return undefined;
+            if (!options) options = {};
+            return getLocaleProp(this._inner.definitions?.strings, key, {
+                mkt: options.mkt
+            }) || getLocaleString(key as any, options.mkt) || options.fallback;
         }
 
         toJSON() {
@@ -405,7 +442,7 @@ namespace DeepX.MdBlogs {
     function getThumbInternal(pic: IArticleInfo["thumb"], kind?: "square" | "common" | "wide" | "tall") {
         if (!pic) return undefined;
         if (typeof pic === "string") return pic;
-        let p = pic[kind];
+        const p = kind ? pic[kind] : undefined;
         if (p) return p;
         switch (kind) {
             case "square":
@@ -421,7 +458,7 @@ namespace DeepX.MdBlogs {
         }
     }
 
-    function isStringInArray(arr: string[] | INameValueModelValue | string, test: string) {
+    function isStringInArray(arr: string[] | INameValueModelValue | string | null | undefined, test: string) {
         if (!test || typeof test !== "string") return false;
         if (!arr) return false;
         if (typeof arr === "string") arr = [arr];
@@ -430,7 +467,7 @@ namespace DeepX.MdBlogs {
             let item = arr[i];
             if (!item) continue;
             if (typeof item !== "string") {
-                item = item.value;
+                item = item.value!;
                 if (!item || typeof item !== "string") continue;
             }
 

@@ -1,102 +1,97 @@
 namespace DeepX.MdBlogs {
-    export class ArticlesPart extends Hje.BaseComponent {
-        readonly __inner = {} as {
-            select?: ArticleInfo;
+    export class ArticlesPart extends Hje.DataComponent<IArticlesPartData> {
+        readonly __inner: {
+            select?: ArticleInfo | null;
             info?: Articles;
             mkt?: string | boolean;
             lifecycle?: IArticlesLifecycle;
             title?: string;
-        };
+        } = {} as any;
 
-        constructor(element: any, options?: Hje.ComponentOptionsContract<IArticlesPartData>) {
-            super(element, options);
-            const data = options?.data;
-            if (data?.mkt != null) this.__inner.mkt = data.mkt;
-            this.currentModel = {
+        constructor(args: any) {
+            super(args);
+            this.__inner.mkt = this.data("mkt");
+            this.childrenAccess.set([{
+                key: "content",
+                tagName: "article",
+                children: []
+            }, {
+                tagName: "aside",
                 children: [{
-                    key: "content",
-                    tagName: "article",
-                    children: []
-                }, {
-                    tagName: "aside",
+                    tagName: "nav",
                     children: [{
-                        tagName: "nav",
-                        children: [{
-                            key: "contents",
-                            tagName: "ul",
-                            styleRefs: "link-tile-compact",
-                            children: [],
-                            style: { display: "none" }
-                        }, {
-                            key: "title",
-                            tagName: "h1",
-                            style: { display: "none" }
-                        }, {
-                            key: "menu",
-                            tagName: "ul",
-                            styleRefs: "link-tile-compact",
-                            children: []
-                        }, {
-                            key: "linksTitle",
-                            tagName: "h1",
-                            style: { display: "none" }
-                        }, {
-                            key: "links",
-                            tagName: "ul",
-                            styleRefs: "link-tile-compact",
-                            children: [],
-                            style: { display: "none" }
-                        }]
+                        key: "contents",
+                        tagName: "ul",
+                        className: "link-tile-compact",
+                        children: [],
+                        style: { display: "none" }
+                    }, {
+                        key: "title",
+                        tagName: "h1",
+                        style: { display: "none" }
+                    }, {
+                        key: "menu",
+                        tagName: "ul",
+                        className: "link-tile-compact",
+                        children: []
+                    }, {
+                        key: "linksTitle",
+                        tagName: "h1",
+                        style: { display: "none" }
+                    }, {
+                        key: "links",
+                        tagName: "ul",
+                        className: "link-tile-compact",
+                        children: [],
+                        style: { display: "none" }
                     }]
                 }]
-            };
-            this.refreshChild();
-            if (!data) return;
-            const lifecycle: IArticlesLifecycle = data.lifecycle || { disable: true };
+            }]);
+            const lifecycle: IArticlesLifecycle = this.data("lifecycle") || { disable: true };
             this.__inner.lifecycle = lifecycle;
-            if (typeof data.articles === "string") {
-                fetchArticles(data.articles).then(r => {
-                    if (typeof data.onfetch === "function") data.onfetch({
+            const { articles, onfetch, store } = this.data();
+            if (typeof articles === "string") {
+                fetchArticles(articles).then(r => {
+                    if (typeof onfetch === "function") onfetch({
                         articles: r,
                         mkt: this.__inner.mkt,
-                        store: data.store
+                        store
                     });
-                    this.initRender(r, data.select, data.q, lifecycle);
+                    this.initRender(r, this.data("select"), this.data("q"), lifecycle);
                 });
-            } else if (data.articles instanceof Articles) {
-                if (typeof data.onfetch === "function") data.onfetch({
-                    articles: data.articles,
+            } else if (articles instanceof Articles) {
+                if (typeof onfetch === "function") onfetch({
+                    articles,
                     mkt: this.__inner.mkt,
-                    store: data.store
+                    store,
                 });
-                this.initRender(data.articles, data.select, data.q, lifecycle);
+                this.initRender(articles, this.data("select"), this.data("q"), lifecycle);
             }
         }
 
-        get title(): string {
+        get title(): string | undefined {
             return this.__inner.title;
         }
 
         set title(value: string) {
             this.__inner.title = value;
             const self = this;
-            super.childModel("title", {
-                children: [{
-                    tagName: "a",
-                    props: { href: "./" },
-                    on: {
-                        click(ev: Event) {
-                            ev.preventDefault();
-                            self.home();
-                        }
-                    },
-                    children: value
-                }],
-                style: value ? {} : { display: "none" }
-            })
+            const c = super.getChild("title") as Hje.ElementComponent;
+            c.setChildren([{
+                tagName: "a",
+                props: { href: "./" },
+                on: {
+                    click(ev: Event) {
+                        ev.preventDefault();
+                        self.home();
+                    }
+                },
+                children: value
+            }]);
+            c.style(value ? {} : { display: "none" });
         }
 
-        get mkt() {
+        get mkt(): string | boolean | undefined {
             return this.__inner.mkt;
         }
 
@@ -105,52 +100,58 @@ namespace DeepX.MdBlogs {
         }
 
         defs(key: string) {
-            return this.__inner.info.defs(key);
+            return this.__inner.info?.defs(key);
         }
         
         home(q?: string) {
             const already = !this.__inner.select;
             this.__inner.select = null;
             const children: Hje.DescriptionContract[] = [];
-            const config = this.__inner.info.options;
+            const info = this.__inner.info;
+            if (!info) return;
+            const config = info.options;
             const options = this.createLocaleOptions();
             if (!config.disableName) {
                 children.push({
                     tagName: "h1",
-                    children: this.__inner.info.getName(options)
+                    children: info.getName(options)
                 });
-                const desc = this.__inner.info.getDescription(options);
+                const desc = info.getDescription(options);
                 if (desc) children.push({
                     tagName: "p",
-                    children: this.__inner.info.getDescription(options)
+                    children: info.getDescription(options)
                 });
             }
 
-            const data: IArticlesPartData = this.data || {};
-            if (data.banner) children.push(data.banner);
-            const part = this.__inner.info.home(options);
+            const { banner, supplement, onhome } = this.data("banner", "supplement") as IArticlesPartData;
+            if (banner) children.push(banner);
+            const part = info.home(options);
             if (part) children.push({
                 tagName: "main",
-                onInit(c) {
-                    if (part.contentCache) renderMd(c.element(), part.contentCache);
-                    else part.getContent(options).then(r => {
-                        renderMd(c.element(), r);
-                    });
+                lifecycle: {
+                    init(c) {
+                        if (part.contentCache) renderMd(c.element(), part.contentCache, info.string("renderFailed", options));
+                        else part.getContent(options).then(r => {
+                            renderMd(c.element(), r, info.string("renderFailed", options));
+                        });
+                    },
                 },
                 children: part.contentCache
             });
             const self = this;
             const listRef: {
-                list?: Hje.ViewGeneratingContextContract<any>;
+                list?: Hje.ElementComponent;
                 search?: number;
             } = {};
             const ul = this.genArticleList(q, options);
-            (ul as Hje.DescriptionContract).onInit = c => {
-                listRef.list = c;
+            (ul as Hje.DescriptionContract).lifecycle = {
+                init(c) {
+                    listRef.list = c as Hje.ElementComponent;
+                }
             };
             const main: Hje.DescriptionContract[] = !config.disableSearch && (q || ul.children.length > 10) ? [{
                 tagName: "div",
-                styleRefs: "x-part-blog-search",
+                className: "x-part-blog-search",
                 children: [{
                     tagName: "input",
                     props: {
@@ -158,23 +159,21 @@ namespace DeepX.MdBlogs {
                         name: "blog-search",
                         value: q || "",
                         maxLength: 60,
-                        placeholder: getLocaleString("search", options?.mkt)
+                        placeholder: this.string("search", options)
                     },
                     on: {
                         input(ev) {
                             if (listRef.search) {
                                 clearTimeout(listRef.search);
-                                listRef.search = null;
+                                listRef.search = undefined;
                             }
 
                             if (!listRef.list) return;
                             listRef.search = setTimeout(() => {
                                 if (!listRef.list) return;
                                 const ul = self.genArticleList(ev.target.value, options);
-                                const searchModel = listRef.list.model();
-                                searchModel.children = ul.children;
-                                searchModel.styleRefs = ul.styleRefs;
-                                listRef.list.refresh();
+                                listRef.list.setChildren(ul.children);
+                                listRef.list.className(ul.className);
                             }, 600);
                         }
                     }
@@ -182,42 +181,44 @@ namespace DeepX.MdBlogs {
             }, ul] : [ul];
             children.push({
                 tagName: "main",
-                styleRefs: "x-part-blog-menu",
+                className: "x-part-blog-menu",
                 children: main
             });
-            const links = this.__inner.info.links(options);
+            const links = info.links(options);
             if (links.length > 0) {
                 main.push({
                     tagName: "h2",
-                    children: this.__inner.info.options?.linksTitle || getLocaleString("otherLinks", options?.mkt)
+                    children: info.options?.linksTitle || this.string("otherLinks", options)
                 }, {
                     tagName: "section",
-                    styleRefs: "link-tile-wide",
+                    className: "link-tile-wide",
                     children: links.map(link => generateLink(link))
                 });
             }
 
-            if (data.supplement) children.push(data.supplement);
-            const model = super.childModel("content", { children });
-            super.childModel("contents", {
-                children: [],
-                style: { display: "none" }
-            });
+            if (supplement) children.push(supplement);
+            const model = super.getChild("content") as Hje.ElementComponent;
+            model.setChildren(children);
+            const contentsModel = super.getChild("contents") as Hje.ElementComponent;
+            contentsModel.clearChildren();
+            contentsModel.style({ display: "none" });
             scrollToTop();
-            if (typeof data.onhome === "function") data.onhome({
+            if (typeof onhome === "function") onhome({
                 model,
                 mkt: options?.mkt,
-                store: data.store,
+                store: this.data("store"),
                 defs(key) {
                     return self.defs(key);
                 }
             });
             this.refreshMenu();
             if (!already) this.lifecycle()?.onhome?.(this);
-            this.__inner.info.loadMoreBlog();
+            info.loadMoreBlog();
         }
 
         select(article?: ArticleInfo | string) {
+            const info = this.__inner.info;
+            if (!info) return;
             const options = this.createLocaleOptions();
             if (typeof article === "number") {
                 if (article === -1) {
@@ -227,6 +228,7 @@ namespace DeepX.MdBlogs {
 
                 if (isNaN(article) || article < 0) return this.__inner.select;
                 const blog = this.__inner.info?.blog(options);
+                if (!blog) return undefined;
                 article = blog[article];
                 if (!article) return undefined;
             } else if (typeof article === "string") {
@@ -260,15 +262,15 @@ namespace DeepX.MdBlogs {
 
                 children.push({
                     tagName: "section",
-                    styleRefs: "x-part-blog-note",
+                    className: "x-part-blog-note",
                     children: [{
                         tagName: "div",
-                        styleRefs: "x-part-blog-banner",
+                        className: "x-part-blog-banner",
                         children: [{
                             tagName: "img",
                             props: {
                                 alt: banner.name || title,
-                                src: banner.url.startsWith(".") ? self.__inner.info.relative(banner.url) : banner.url
+                                src: banner.url.startsWith(".") ? info.relative(banner.url) : banner.url
                             },
                             style: bannerStyle
                         }]
@@ -282,24 +284,24 @@ namespace DeepX.MdBlogs {
             });
             const infoModel = {
                 tagName: "section",
-                styleRefs: "x-part-blog-note",
+                className: "x-part-blog-note",
                 children: [] as Hje.DescriptionContract[]
             };
             const subtitle = article.getSubtitle(options);
             if (subtitle) infoModel.children.push({
                 tagName: "div",
-                styleRefs: "x-part-blog-subtitle",
+                className: "x-part-blog-subtitle",
                 children: [{
                     tagName: "strong",
                     children: subtitle
                 }]
             });
-            const disableAuthors = article.disableAuthors || this.__inner.info.options.disableAuthors;
+            const disableAuthors = article.disableAuthors || info.options.disableAuthors;
             if (!disableAuthors) {
                 let infoChildren = getMembersModel(toMembers(article.authors?.priorityList()), null, options);
                 if (infoChildren.length > 0) infoModel.children.push({
                     tagName: "div",
-                    styleRefs: "x-part-blog-authors",
+                    className: "x-part-blog-authors",
                     children: infoChildren
                 });
 
@@ -322,7 +324,7 @@ namespace DeepX.MdBlogs {
                     } else {
                         infoModel.children.push({
                             tagName: "div",
-                            styleRefs: "x-part-blog-date",
+                            className: "x-part-blog-date",
                             children: dateArr
                         })
                     }
@@ -331,45 +333,82 @@ namespace DeepX.MdBlogs {
 
             if (infoModel.children.length > 0) children.push(infoModel);
             const mkt = options?.mkt;
-            const data: IArticlesPartData = self.data || {};
             children.push({
                 tagName: "main",
                 children: [{
                     tagName: "div",
-                    styleRefs: "x-part-blog-notification",
-                    children: [{ tagName: "em", children: getLocaleString("loading", mkt) }]
+                    className: "x-part-blog-notification",
+                    children: [{ tagName: "em", children: self.string("loading", options) }]
                 }],
-                onInit(c) {
-                    const cm = c.model();
-                    if (!cm || !cm.children || cm.data?.state) return;
-                    cm.data = { state: "pending" };
-                    const config = self.__inner.info.options;
-                    article.getContent(options).then(md => {
-                        cm.data.state = "render";
-                        const mdEle = c.element();
-                        renderMd(mdEle, md);
-                        cm.data.state = "done";
-                        if (article.disableMenu || config.disableMenu) return;
-                        self.childModel("contents", getContentsModel(mdEle, mkt));
-                    }, err => {
-                        cm.data.state = "error";
-                        cm.children = [{
-                            tagName: "div",
-                            styleRefs: "x-part-blog-notification",
-                            children: [{ tagName: "em", children: getLocaleString("loadFailed") }]
-                        }];
-                        c.refresh();
-                    });
+                lifecycle: {
+                    init(c: Hje.ElementComponent) {
+                        if (!c || c.data("state")) return;
+                        c.data("state", "pending");
+                        const config = info.options;
+                        article.getContent(options).then(md => {
+                            c.data("state", "render");
+                            const mdEle = c.element;
+                            renderMd(mdEle, md, self.string("renderFailed", options));
+                            c.data("state", "done");
+                            if (article.disableMenu || config.disableMenu) return;
+                            getContentsModel(mdEle, self.getChild("contents") as Hje.ElementComponent, self.string("top", options));
+                        }, err => {
+                            c.data("state", "error");
+                            c.setChildren([{
+                                tagName: "div",
+                                className: "x-part-blog-notification",
+                                children: [{ tagName: "em", children: self.string("loadFailed", options) }]
+                            }]);
+                        });
+                    },
                 }
             });
             const related: Hje.DescriptionContract[] = [];
             fillParagraph(article.getNotes(options), related);
-            fillKeywords(article.keywords, related, options);
-            if (!disableAuthors) fillContributors(article.authors, related, options);
-            fillRelatedLinks(article.related(options), related, options);
+            if (article.series?.length) {
+                children.push({
+                    tagName: "h2",
+                    children: [{
+                        tagName: "span",
+                        children: this.string("relatedPaintings", options),
+                    }]
+                }, {
+                    tagName: "div",
+                    children: article.series.map(series => {
+                        return {
+                            tagName: "a",
+                            className: "link-long-button",
+                            props: {
+                                href: series.url
+                            },
+                            children: [{
+                                tagName: "img",
+                                props: {
+                                    src: series.logo,
+                                    alt: name
+                                }
+                            }, {
+                                tagName: "span",
+                                children: name,
+                            }],
+                        } as Hje.DescriptionContract;
+                    }),
+                }, {
+                    tagName: "div",
+                    className: "x-part-info",
+                    children: [{
+                        tagName: "span",
+                        children: "注：猫头鱼尾兽图标、MuseTuan.com、摸凹喵（Mor-Ow Meow）及其形象、星娜喵（Starna）及其形象，是 Muse Tuan 和 Kingcean Tuan 的商标，摸凹喵画作及其衍生品均受知识产权保护，版权所有；Kingcean、Jinchen Art、金辰艺术、CompositeJs、金山旭日翼盾、红日黑山徽标，是 Kingcean Tuan、南昌金辰软件有限公司或江西金辰装饰设计工程有限公司的商标或注册商标；其它商标分别归属其所拥有的组织。",
+                    }]
+                });
+            }
+
+            fillKeywords(article.keywords!, related, this.string("keywords", options), options);
+            if (!disableAuthors) fillContributors(article.authors, related, this.string("contentCreator", options), options);
+            fillRelatedLinks(article.related(options), related, this.string("seeAlso", options), options);
             if (related.length > 0) children.push({
                 tagName: "section",
-                styleRefs: "x-part-blog-related",
+                className: "x-part-blog-related",
                 children: related
             });
             const previous = this.__inner.info?.previousArticle(article, options);
@@ -377,7 +416,7 @@ namespace DeepX.MdBlogs {
             const parent = this.__inner.info?.parentArticle(article, options);
             if (previous || next) children.push({
                 tagName: "section",
-                styleRefs: "x-part-blog-next",
+                className: "x-part-blog-next",
                 children: [{
                     tagName: "a",
                     props: {
@@ -393,7 +432,7 @@ namespace DeepX.MdBlogs {
                     },
                     children: [
                         { "tagName": "span", children: "<" },
-                        { "tagName": "span", children: getLocaleString("previous", mkt) },
+                        { "tagName": "span", children: this.string("previous", options) },
                     ]
                 }, {
                     tagName: "a",
@@ -409,14 +448,14 @@ namespace DeepX.MdBlogs {
                         }
                     },
                     children: [
-                        { "tagName": "span", children: getLocaleString("next", mkt) },
+                        { "tagName": "span", children: this.string("next", options) },
                         { "tagName": "span", children: ">" },
                     ]
                 }]
             });
             else children.push({
                 tagName: "section",
-                styleRefs: "x-part-blog-back",
+                className: "x-part-blog-back",
                 children: [{
                     tagName: "a",
                     props: {
@@ -432,15 +471,15 @@ namespace DeepX.MdBlogs {
                     },
                     children: [
                         { "tagName": "span", children: "<" },
-                        { "tagName": "span", children: getLocaleString("back", mkt) },
+                        { "tagName": "span", children: this.string("back", options) },
                     ]
                 }]
             });
-            if (typeof data.onselect === "function") data.onselect({
+            self.callDataHandler("onselect", null, {
                 children,
                 article,
                 mkt,
-                store: data.store,
+                store: self.data("store"),
                 defs(key) {
                     return self.defs(key);
                 },
@@ -471,8 +510,9 @@ namespace DeepX.MdBlogs {
 
                     children.splice(insertion, 0, ...models);
                 }
-            });
-            super.childModel("content", { children });
+            } as IArticlesPartDataSelectParams);
+            const model = super.getChild("content") as Hje.ElementComponent;
+            model.setChildren(children);
             this.__inner.select = article;
             this.refreshMenu();
             scrollToTop();
@@ -524,47 +564,44 @@ namespace DeepX.MdBlogs {
             this.__inner.info = articles;
             const options = this.createLocaleOptions();
             this.title = articles.getName(options);
-            const m: Hje.DescriptionContract = {};
-            let arr = m.children;
-            if (!(arr instanceof Array)) {
-                arr = [];
-                m.children = arr;
-            }
-
-            const menu = this.genMenu(arr, articles.docs(options), true);
+            let arr = [] as Hje.DescriptionContract[];
+            this.genMenu(arr, articles.docs(options), true);
             this.genMenu(arr, articles.blog(options), false);
-            m.style = arr.length > 0 ? {} : { display: "none" };
-            super.childModel("menu", m);
+            const menu = super.getChild("menu") as Hje.ElementComponent;
+            menu.setChildren(arr);
+            menu.style(arr.length > 0 ? {} : { display: "none" });
             const linkModels = this.__inner.info.links(options).map(item => {
                 return {
                     tagName: "li",
                     children: [generateLink(item)]
                 };
             });
-            super.childModel("links", {
-                style: linkModels.length > 0 ? {} : { display: "none" },
-                children: linkModels
-            });
-            super.childModel("linksTitle", {
-                style: linkModels.length > 0 ? {} : { display: "none" },
-                children: articles.options?.linksTitle || getLocaleString("otherLinks", options?.mkt)
-            });
-            let article: ArticleInfo;
+            const linksStyle = linkModels.length > 0 ? {} : { display: "none" };
+            const linksComponent = super.getChild("links") as Hje.ElementComponent;
+            linksComponent.setChildren(linkModels);
+            linksComponent.style(linksStyle);
+            const linksTitleComponent = super.getChild("linksTitle") as Hje.ElementComponent;
+            linksTitleComponent.setChildren(articles.options?.linksTitle || this.string("otherLinks", options));
+            linksTitleComponent.style(linksStyle);
+            let article: ArticleInfo | null | undefined;
             if (select) article = this.select(select);
             if (!article) this.home(q);
             if (!lifecycle.disable && typeof lifecycle.oninit === "function") lifecycle.oninit(this);
         }
 
         protected refreshMenu() {
-            const list = super.childModel("menu");
-            if (!(list.children instanceof Array)) list.children = [];
-            for (let i = 0; i < list.children.length; i++) {
-                const item = list.children[i];
-                if (!(item.data instanceof ArticleInfo)) continue;
-                item.styleRefs = this.__inner.select === item.data ? "state-sel" : null;
-            }
-
-            super.refreshChild("menu");
+            const menu = super.getChild("menu") as Hje.ElementComponent;
+            menu.forEachChild(item => {
+                const data = (item as Hje.ElementComponent).data("article") as ArticleInfo | undefined;
+                if (!(data instanceof ArticleInfo)) return;
+                if (data === this.__inner.select) {
+                    if (item.className().indexOf("state-sel") < 0)
+                        item.className({ add: "state-sel" });
+                } else {
+                    if (item.className().indexOf("state-sel") >= 0)
+                        item.className({ remove: "state-sel" });
+                }
+            });
         }
 
         protected createLocaleOptions() {
@@ -577,40 +614,49 @@ namespace DeepX.MdBlogs {
             return !l || l.disable ? undefined : l;
         }
 
-        genArticleList(q: string, options?: {
+        genArticleList(q: string | undefined, options?: {
             mkt?: string | boolean
         }) {
             const ul = {
                 tagName: "ul",
-                styleRefs: "link-tile-compact",
+                className: "link-tile-compact",
                 children: [] as Hje.DescriptionContract[]
             };
+            const info = this.__inner.info;
+            if (!info) return ul;
             if (q && typeof q === "string") {
-                const searchResult = this.__inner.info.search(q);
-                if (searchResult.length < 1) ul.children.push({
+                const searchResult = info.search(q);
+                if (!searchResult || searchResult.length < 1) ul.children.push({
                     tagName: "li",
-                    styleRefs: "grouping-header",
-                    children: getLocaleString("empty", options?.mkt)
+                    className: "grouping-header",
+                    children: this.string("empty", options)
                 });
                 else this.genMenu(ul.children, searchResult, 0);
             } else {
-                const docs = this.__inner.info.docs(options);
+                const docs = info.docs(options);
                 if (docs.length > 0) {
                     this.genMenu(ul.children, docs, true);
-                    this.genMenu(ul.children, this.__inner.info.blog(options), false);
+                    this.genMenu(ul.children, info.blog(options), false);
                 } else {
-                    this.genMenu(ul.children, this.__inner.info.blog(options), -2);
-                    ul.styleRefs = "link-item-blog";
+                    this.genMenu(ul.children, info.blog(options), -2);
+                    ul.className = "link-item-blog";
                 }
             }
 
             return ul;
         }
 
+        string(key: string, options?: {
+            mkt?: string | boolean;
+            fallback?: string;
+        }) {
+            return this.__inner.info?.string(key, options);
+        }
+
         protected genMenu(arr: Hje.DescriptionContract[], params: (ArticleInfo | string)[], deep?: boolean | number) {
             const self = this;
             return generateMenu(params, {
-                select: this.__inner.select,
+                select: this.__inner.select ? this.__inner.select : undefined,
                 mkt: this.createLocaleOptions()?.mkt,
                 deep,
                 arr,
@@ -630,7 +676,7 @@ namespace DeepX.MdBlogs {
         name: string;
         url: string;
         newWindow?: boolean;
-    }, styleRefs?: string | string[]) {
+    }, className?: string | string[]) {
         const m: Hje.DescriptionContract = {
             tagName: "a",
             props: {
@@ -639,12 +685,12 @@ namespace DeepX.MdBlogs {
             },
             children: item.name
         };
-        if (item.newWindow) m.props.target = "_blank";
-        if (styleRefs) m.styleRefs = styleRefs;
+        if (item.newWindow) m.props!.target = "_blank";
+        if (className) m.className = className;
         return m;
     }
 
-    function renderMd(element: HTMLElement, md: string) {
+    function renderMd(element: HTMLElement, md: string, renderFailedString?: string) {
         if (typeof hooks.renderMd === "function") {
             hooks.renderMd(element, md);
             return;
@@ -664,7 +710,7 @@ namespace DeepX.MdBlogs {
                 }
             }
         } catch (ex) {
-            element.innerText = getLocaleString("renderFailed");
+            if (element) element.innerText = renderFailedString || "";
         }
     }
 
@@ -732,13 +778,15 @@ namespace DeepX.MdBlogs {
         return list;
     }
 
-    function getContentsModel(mdEle: HTMLElement, mkt?: string | boolean) {
-        const articleContents: Hje.DescriptionContract = {};
-        articleContents.children = [];
+    function getContentsModel(mdEle: HTMLElement, component: Hje.ElementComponent, topString?: string) {
         let headers = getHeadings(mdEle);
         let levels = getHeadingLevels(headers);
-        if (!headers || headers.length < 2 || levels.length < 1) return articleContents;
-        articleContents.children.push({
+        if (!headers || headers.length < 2 || levels.length < 1) {
+            component.clearChildren();
+            return;
+        }
+        const children = [] as Hje.DescriptionContract[];
+        children.push({
             tagName: "li",
             children: [{
                 tagName: "a",
@@ -748,7 +796,7 @@ namespace DeepX.MdBlogs {
                         scrollToTop();
                     }
                 },
-                children: "⇮ " + getLocaleString("top", mkt)
+                children: "⇮ " + topString,
             }]
         });
         if (levels.length == 1) levels.push(levels[0] + 1);
@@ -756,16 +804,16 @@ namespace DeepX.MdBlogs {
             let item = headers[i];
             switch (item.level) {
                 case levels[0]:
-                    articleContents.children.push(genHeadModel(item));
+                    children.push(genHeadModel(item));
                     break;
                 case levels[1]:
-                    articleContents.children.push(genHeadModel(item, true));
+                    children.push(genHeadModel(item, true));
                     break;
             }
         }
 
-        articleContents.style = {};
-        return articleContents;
+        component.setChildren(children);
+        component.style({});
     }
 
     function getMembersModel(authors: IContributorInfo[], role: NameValueModel | null, options?: {
@@ -836,7 +884,7 @@ namespace DeepX.MdBlogs {
         }
     }
 
-    function fillKeywords(keywords: NameValueModel[], children: Hje.DescriptionContract[], options?: {
+    function fillKeywords(keywords: NameValueModel[], children: Hje.DescriptionContract[], keywordsString?: string, options?: {
         mkt?: string | boolean;
     }) {
         const arr: Hje.DescriptionContract[] = [];
@@ -850,16 +898,16 @@ namespace DeepX.MdBlogs {
 
         if (arr.length > 0) children.push({
             tagName: "h2",
-            children: getLocaleString("keywords", options?.mkt)
+            children: keywordsString,
         }, {
             tagName: "div",
-            styleRefs: "x-part-blog-keywords",
-            children: arr
+            className: "x-part-blog-keywords",
+            children: arr,
         });
         return arr;
     }
 
-    function fillContributors(source: ContributorCollection, children: Hje.DescriptionContract[], options?: {
+    function fillContributors(source: ContributorCollection, children: Hje.DescriptionContract[], contentCreatorString?: string, options?: {
         mkt?: string | boolean;
     }) {
         const contributors = source?.all();
@@ -867,7 +915,7 @@ namespace DeepX.MdBlogs {
         if (contributors.length === 1 && contributors[0].role?.value === "author") return;
         children.push({
             tagName: "h2",
-            children: getLocaleString("contentCreator")
+            children: contentCreatorString,
         });
         for (let i = 0; i < contributors.length; i++) {
             const list = contributors[i];
@@ -876,13 +924,13 @@ namespace DeepX.MdBlogs {
             if (members.length < 1) continue;
             children.push({
                 tagName: "div",
-                styleRefs: "x-part-blog-authors",
+                className: "x-part-blog-authors",
                 children: members
             });
         }
     }
 
-    function fillRelatedLinks(source: (IArticleRelatedLinkItemInfo | string)[], children: Hje.DescriptionContract[], options?: {
+    function fillRelatedLinks(source: (IArticleRelatedLinkItemInfo | string)[], children: Hje.DescriptionContract[], seeAlsoString?: string, options?: {
         mkt?: string | boolean;
     }) {
         if (!source || !children) return;
@@ -894,15 +942,15 @@ namespace DeepX.MdBlogs {
         if (source.length < 1) return;
         children.push({
             tagName: "h2",
-            children: getLocaleString("seeAlso", options?.mkt)
+            children: seeAlsoString,
         });
         const relatedItems: Hje.DescriptionContract[] = [];
         children.push({
             tagName: "ul",
-            styleRefs: "link-tile-compact",
+            className: "link-tile-compact",
             children: relatedItems
         });
-        let label: string;
+        let label: string | undefined;
         for (let i = 0; i < source.length; i++) {
             const link = source[i];
             if (typeof link === "string") {
@@ -913,7 +961,7 @@ namespace DeepX.MdBlogs {
             if (label) {
                 relatedItems.push({
                     tagName: "li",
-                    styleRefs: "grouping-header",
+                    className: "grouping-header",
                     children: label
                 });
                 label = undefined;
@@ -941,8 +989,8 @@ namespace DeepX.MdBlogs {
         }
     }
 
-    function tipArticleName(key: string, article: ArticleInfo, options?: ILocalePropOptions) {
-        key = getLocaleString("previous", options?.mkt);
+    function tipArticleName(key: "previous" | "next" | "back" | "home", article: ArticleInfo | undefined | null, options?: ILocalePropOptions) {
+        key = getLocaleString(key, options?.mkt);
         if (!article) return key;
         const name = article.getName(options);
         if (!name) return key;

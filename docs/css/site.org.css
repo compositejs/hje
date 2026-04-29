@@ -981,8 +981,8 @@ section ul.link-item-bloglink-tile-compact > li,
     overflow-x: hidden;
 }
 #blog_content > article > main img {
-    width: 100%;
-    max-width: 660px;
+    width: fit-content;
+    max-width: min(660px, 100%);
 }
 #blog_content > article > main > h1 {
     font-size: 32px;

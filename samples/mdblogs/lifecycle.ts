@@ -37,7 +37,8 @@ namespace DeepX.MdBlogs {
             onhome(instance) {
                 if (monitor.skip) return;
                 history.pushState({ select: "" }, "", "./");
-                document.title = defaultTitle || instance.title;
+                const title = defaultTitle || instance.title;
+                if (title) document.title = title;
             }
         };
         const d = {
@@ -56,21 +57,20 @@ namespace DeepX.MdBlogs {
         }
 
         const component = Hje.render(element, {
-            control: ArticlesPart,
+            component: ArticlesPart,
             data: d
-        });
-        const control = component.control() as ArticlesPart;
+        }) as ArticlesPart;
         window.addEventListener("popstate", function (ev) {
             lifecycle.disable = true;
             const path = !ev.state ? "" : ev.state.select;
             if (typeof path === "string" || path === null) {
-                let title = defaultTitle || control.title;
+                let title = defaultTitle || component.title;
                 if (path) {
-                    const article = control.select(path);
+                    const article = component.select(path);
                     if (!article) return;
                     document.title = title ? `${article.name} - ${title}` : article.name;
                 } else {
-                    control.home();
+                    component.home();
                     document.title = title || getLocaleString("blog");
                 }
             }

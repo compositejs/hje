@@ -18,7 +18,7 @@ namespace DeepX.MdBlogs {
             return this._model.value;
         }
 
-        getName(options: ILocalePropOptions<string>) {
+        getName(options?: ILocalePropOptions<string>) {
             return getLocaleProp(this._model, null, options) || this._model.value;
         }
     }
@@ -230,7 +230,7 @@ namespace DeepX.MdBlogs {
         return roles[name];
     }
 
-    function formatNameValueModelDefs(defs: INameValueModelDefinitions, ensure?: boolean) {
+    function formatNameValueModelDefs(defs: INameValueModelDefinitions | undefined) {
         const defs2: Record<string, NameValueModel> = {};
         if (defs instanceof Array) {
             for (let j = 0; j < defs.length; j++) {

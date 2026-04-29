@@ -10,10 +10,10 @@ var curSite = {};
         if (list === true) {
             m.children = [{
                 tagName: "em",
-                styleRefs: "x-part-blog-notification",
+                className: "x-part-blog-notification",
                 children: DeepX.MdBlogs.getLocaleString("loading")
             }];
-            const context = element ? Hje.render(element, m) : undefined;
+            const component = element ? Hje.render(element, m) : undefined;
             DeepX.MdBlogs.fetchArticles("./articles/config.json").then(function (articles) {
                 list = articles.docs().filter(function (article) {
                     return article instanceof DeepX.MdBlogs.ArticleInfo && article.isKind("featured");
@@ -25,16 +25,14 @@ var curSite = {};
                         url: "./articles/?" + article.getRoutePath()
                     }
                 });
-                m.children = generateHomeMenuModel(list);
-                if (context) context.refresh();
+                component.setChildren(generateHomeMenuModel(list));
                 return m;
             }, function (error) {
-                m.children = [{
+                component.setChildren([{
                     tagName: "em",
-                    styleRefs: "x-part-blog-notification",
+                    className: "x-part-blog-notification",
                     children: DeepX.MdBlogs.getLocaleString("loadFailed")
-                }];
-                if (context) context.refresh();
+                }]);
             });
             return m;
         }
@@ -59,7 +57,7 @@ var curSite = {};
             return {
                 tagName: "a",
                 props: { href: DeepX.MdBlogs.getLocaleProp(item, "url") },
-                styleRefs: "link-long-button",
+                className: "link-long-button",
                 children: text
             };
         }).filter(function (item) {
@@ -98,10 +96,10 @@ var curSite = {};
 
         const m = {
             tagName: "section",
-            styleRefs: ["x-part-installation", "x-part-intro"],
+            className: ["x-part-installation", "x-part-intro"],
             children: [{
                 tagName: "div",
-                styleRefs: "x-bg-stars",
+                className: "x-bg-stars",
                 children: [{
                     tagName: "img",
                     props: { alt: "npm", src: "https://static-production.npmjs.com/f1786e9b7cba9753ca7b9c40e8b98f67.png" }
@@ -117,31 +115,31 @@ var curSite = {};
                     }]
                 }, {
                     tagName: "div",
-                    styleRefs: "x-part-code",
+                    className: "x-part-code",
                     children: [{
                         tagName: "span",
-                        styleRefs: "x-part-code",
+                        className: "x-part-code",
                         children: ">"
                     }, {
                         tagName: "code",
                         children: [
-                            { tagName: "span", styleRefs: "x-code-command", children: "npm" },
-                            { tagName: "span", styleRefs: "x-code-args", children: " i " + config.name }
+                            { tagName: "span", className: "x-code-command", children: "npm" },
+                            { tagName: "span", className: "x-code-args", children: " i " + config.name }
                         ]
                     }]
                 }]
             }, {
                 tagName: "div",
-                styleRefs: "x-bg-stars",
+                className: "x-bg-stars",
                 children: installModel
             }, {
                 tagName: "div",
-                styleRefs: "x-bg-stars",
+                className: "x-bg-stars",
                 children: [{
                     tagName: "div",
                     children: [{
                         tagName: "a",
-                        styleRefs: "x-link-more",
+                        className: "x-link-more",
                         props: { href: "./articles/?installation" },
                         children: [{ tagName: "span", children: DeepX.MdBlogs.getLocaleString("getDetails") }]
                     }]
