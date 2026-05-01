@@ -32,6 +32,12 @@ declare namespace Hje {
          */
         get(index: number | string): BaseComponent | undefined;
         /**
+         * Gets the index of the given child item.
+         * @param child The item to test.
+         * @returns The index; or -1, if non-exists.
+         */
+        indexOf(child: BaseComponent): number;
+        /**
          * Checks if has the index or contains the child context key.
          * @param key The index of child, or the key of child declared in description.
          */
@@ -59,7 +65,7 @@ declare namespace Hje {
          * @param models The models to append.
          * @returns The count of items added.
          */
-        append(...models: DescriptionContract[]): number;
+        append(...models: (DescriptionContract | undefined)[]): number;
         /**
          * Inserts the child items at the specific position.
          * @param index The index to insert.
@@ -72,7 +78,7 @@ declare namespace Hje {
          * @param index The index of child.
          * @returns true if the item has removed; otherwise, false. Not exists also returns false.
          */
-        remove(index: number): boolean;
+        remove(index: number | BaseComponent): boolean;
         /**
          * Replaces an existed child item by given one.
          * @param index The index of child.
@@ -224,22 +230,6 @@ declare namespace Hje {
          */
         patchProps(obj: IDeltaObject, remove?: boolean | string[]): void;
         /**
-         * Calls the method which is the specific property in data, substituting another object for the current object.
-         * @param key The property key of data.
-         * @param thisArg The object to be used as the current object.
-         * @param argArray A list of arguments to be passed to the method.
-         * @returns The result of the method; or undefined, if no such method, or the result is undefined.
-         */
-        callDataHandler(key: string, thisArg: any, ...argArray: any[]): DataHanlderResult;
-        /**
-         * Calls the function which is the specific property in data, substituting the specified object for the this value of the function, and the specified array for the arguments of the function.
-         * @param key The property key of data.
-         * @param thisArg The object to be used as the this object.
-         * @param argArray A set of arguments to be passed to the function.
-         * @returns The result of the function; or undefined, if no such function, or the result is undefined.
-         */
-        applyDataHandler(key: string, thisArg: any, argArray?: any): DataHanlderResult;
-        /**
          * Gets or sets the class name list of the style.
          * @param value Optional. To get only if no such parameter. The new class name list of the style, if set.
          * @returns The class name list of the style.
@@ -291,42 +281,73 @@ declare namespace Hje {
         protected onUnload(): void;
     }
     /**
-     * The list component.
+     * The base component with data driven.
      */
-    export class DataComponent<T extends Record<string, any>> extends BaseComponent {
+    export class DataComponent<TData extends Record<string, any> = Record<string, any>, TInternal extends Record<string, any> = Record<string, any>> extends BaseComponent {
+        private __innerStore2;
+        /**
+         * Initializes a new instance of the BaseComponent class.
+         * @param args The intialization arguments.
+         */
+        constructor(args: Object);
+        /**
+         * Gets the internal context.
+         */
+        protected get internal(): TInternal;
         /**
          * Gets the data copied.
          * @param key The property key of data.
          * @returns The value of the data property; or undefined, if does not exist.
          */
-        data(): T;
+        data(): TData;
         /**
          * Gets the data property bound.
          * @param key The property key of data.
          * @returns The value of the data property; or undefined, if does not exist.
          */
-        data<P extends keyof T>(key: P): any;
+        data<P extends keyof TData>(key: P): TData[P];
         /**
          * Gets the data copied with the specific properties.
          * @param key The property keys of data.
          * @returns All the value of the data property in the object.
          */
-        data<P extends keyof T>(key: P[]): Record<typeof key[number], any>;
+        data<P extends keyof TData>(key: P[]): Record<P, TData[P]>;
         /**
          * Sets the data property bound.
          * @param key The property key of data.
          * @param value The value of data property; or undefined, if remove the property.
          * @returns The value of the data property; or undefined, if does not exist.
          */
-        data<P extends keyof T>(key: P, value: any): any;
-        patchData(obj: IDeltaObject<T>): void;
-        patchData(obj: IDeltaObject<T>, remove: boolean): void;
-        patchData<P extends keyof T>(obj: IDeltaObject<T>, remove: P[]): void;
+        data<P extends keyof TData>(key: P, value: any): TData[P];
+        patchData(obj: IDeltaObject<TData>): void;
+        patchData(obj: IDeltaObject<TData>, remove: boolean): void;
+        patchData<P extends keyof TData>(obj: IDeltaObject<TData>, remove: P[]): void;
+        /**
+         * Calls the method which is the specific property in data, substituting another object for the current object.
+         * @param key The property key of data.
+         * @param thisArg The object to be used as the current object.
+         * @param argArray A list of arguments to be passed to the method.
+         * @returns The result of the method; or undefined, if no such method, or the result is undefined.
+         */
+        callDataHandler<P extends keyof TData>(key: P, thisArg: any, ...argArray: any[]): DataHanlderResult;
+        /**
+         * Calls the function which is the specific property in data, substituting the specified object for the this value of the function, and the specified array for the arguments of the function.
+         * @param key The property key of data.
+         * @param thisArg The object to be used as the this object.
+         * @param argArray A set of arguments to be passed to the function.
+         * @returns The result of the function; or undefined, if no such function, or the result is undefined.
+         */
+        applyDataHandler<P extends keyof TData>(key: P, thisArg: any, argArray?: any): DataHanlderResult;
         /**
          * Occurs when the data changes.
          * @param delta The changed and current data.
          */
-        protected onDataChange(info: ComponentDataUpdateInfo<T>): void;
+        protected onDataChange(info: ComponentDataUpdateInfo<TData>): void;
+        /**
+         * Occurs when initialize to access the internal context object.
+         * @returns The object created for internal context.
+         */
+        protected onInitInternal(): TInternal;
     }
     /**
      * Creates a component instance with the given element and description model.
@@ -688,21 +709,43 @@ declare namespace Hje {
     }
 }
 declare namespace Hje {
-    interface IListComponentData<T = any> {
+    type IListComponentItemGenerator<T> = (model: T) => DescriptionContract | undefined;
+    export interface IListComponentData<T = any> {
         source?: T[];
-        item?(model: T): DescriptionContract | undefined;
+        item?: IListComponentItemGenerator<T>;
+    }
+    interface IListComponentInternal<T> {
+        source: {
+            model: T;
+            info?: any;
+        }[];
     }
     /**
      * The list component.
      */
-    class ListComponent<T = any> extends DataComponent<IListComponentData<T>> {
+    export class ListComponent<T = any> extends DataComponent<IListComponentData<T>, IListComponentInternal<T>> {
         /**
          * Initializes a new instance of the ListComponent class.
          * @param args The intialization arguments.
          */
         constructor(args: Object);
-        onDataChange(info: ComponentDataUpdateInfo<IListComponentData<T>>): void;
+        indexOf(model: T | BaseComponent): number;
+        push(...items: T[]): void;
+        remove(model: T | BaseComponent): boolean;
+        removeAt(index: number): boolean;
+        toDescription(model: T): DescriptionContract | undefined;
+        forEach(callbackfn: (value: T, index: number, array: T[]) => void, thisArg?: any): void;
+        map<U>(callbackfn: (value: T, index: number, array: T[]) => U, thisArg?: any): U[];
+        filter(predicate: (value: T, index: number, array: T[]) => unknown, thisArg?: any): T[];
+        get(index: number): T;
+        first(): T | undefined;
+        last(): T | undefined;
+        protected onDataChange(info: ComponentDataUpdateInfo<IListComponentData<T>>): void;
+        protected onInitInternal(): {
+            source: never[];
+        };
     }
+    export {};
 }
 declare namespace Hje {
     /**

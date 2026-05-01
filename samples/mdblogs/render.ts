@@ -559,7 +559,7 @@ namespace DeepX.MdBlogs {
             return blog;
         }
 
-        protected initRender(articles: Articles, select: string, q: string, lifecycle: IArticlesLifecycle) {
+        protected initRender(articles: Articles, select: string | undefined, q: string | undefined, lifecycle: IArticlesLifecycle) {
             if (this.__inner.info === articles || !articles) return;
             this.__inner.info = articles;
             const options = this.createLocaleOptions();

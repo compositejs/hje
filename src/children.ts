@@ -89,6 +89,21 @@ export class ComponentChildren {
     }
 
     /**
+     * Gets the index of the given child item.
+     * @param child The item to test.
+     * @returns The index; or -1, if non-exists.
+     */
+    indexOf(child: BaseComponent) {
+        if (!child || !(child instanceof BaseComponent)) return -1;
+        const list = this.__innerStore.items;
+        for (let i = 0; i < list.length; i++) {
+            const item = list[i];
+            if (item.component === child) return i;
+        }
+        return -1;
+    }
+
+    /**
      * Checks if has the index or contains the child context key.
      * @param key The index of child, or the key of child declared in description.
      */
@@ -165,13 +180,13 @@ export class ComponentChildren {
      * @param models The models to append.
      * @returns The count of items added.
      */
-    append(...models: DescriptionContract[]) {
+    append(...models: (DescriptionContract | undefined)[]) {
         if (!models?.length) return 0;
         models = models.filter(ele => !!ele);
         if (models.length < 1) return 0;
         this.__innerStore.text = undefined;
-        const arr = this.__innerStore.engine.append(this.__innerStore.element, models, this.items());
-        fillComponentContextList(this.__innerStore.items, arr, models, this.__innerStore.engine, this.__innerStore.keyed);
+        const arr = this.__innerStore.engine.append(this.__innerStore.element, models as DescriptionContract[], this.items());
+        fillComponentContextList(this.__innerStore.items, arr, models as DescriptionContract[], this.__innerStore.engine, this.__innerStore.keyed);
         return models.length;
     }
 
@@ -201,8 +216,11 @@ export class ComponentChildren {
      * @param index The index of child.
      * @returns true if the item has removed; otherwise, false. Not exists also returns false.
      */
-    remove(index: number) {
-        if (typeof index !== "number") return false;
+    remove(index: number | BaseComponent) {
+        if (typeof index !== "number") {
+            index = this.indexOf(index);
+            if (index < 0) return false;
+        }
         if (index < 0 || index >= this.__innerStore.items.length || !Number.isInteger(index) || isNaN(index)) return false;
         const deleting = this.__innerStore.items.splice(index, 1);
         if (deleting.length < 1 || !deleting[0]) return false;
@@ -354,7 +372,7 @@ class ComponentChildCreationOptions {
         return {
             component,
             dispose: this.__innerStore.remove || emptyFunction,
-        };
+        } as IAdvancedComponentInfo;
     }
 }
 
@@ -366,7 +384,7 @@ function fillComponentContextList(items: IAdvancedComponentInfo[], elements: any
         const m = models[i];
         const options = new ComponentChildCreationOptions(keyed);
         const info = options.render(ele, m, engine);
-        if (info.component) items.push();
+        if (info.component) items.push(info);
     }
 }
 

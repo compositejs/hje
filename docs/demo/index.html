@@ -68,30 +68,42 @@
                 "font-size": "14px"
             },
             children: [{
+                component: A,
+                key: "x",
+                tagName: "p",
+                children: "Greetings!",
+                props: {
+                    x: "abc"
+                },
+                on: {
+                    click(ev) {
+                        console.log("A click", ev);
+                    }
+                }
+            }, {
                 tagName: "ul",
+                key: "list",
+                component: Hje.ListComponent,
+                data: {
+                    source: ["ABCDEFG", "HIJKLMN", "OPQ RST", "UVW XYZ"],
+                    item(m) {
+                        return { tagName: "li", children: [{
+                            tagName: "span",
+                            children: m
+                        }, {
+                            tagName: "button",
+                            children: "x",
+                            on: {
+                                click(ev) {
+                                    testComponent.getChild("list").remove(m);
+                                }
+                            }
+                        }] };
+                    }
+                },
                 props: {
                     type: "circle",
-                },
-                children: [
-                    { tagName: "li", children: "ABCDEFG" },
-                    { tagName: "li", children: "HIJKLMN" },
-                    { tagName: "li", children: "OPQ RST" },
-                    { tagName: "li", children: "UVW XYZ" },
-                    {
-                        component: A,
-                        key: "x",
-                        tagName: "li",
-                        children: "Greetings!",
-                        props: {
-                            x: "abc"
-                        },
-                        on: {
-                            click(ev) {
-                                console.log("A click", ev);
-                            }
-                        }
-                    },
-                ]
+                }
             }, {
                 children: [{
                     tagName: "svg:svg",
@@ -123,7 +135,23 @@
                     tagName: "input",
                     props: {
                         value: store.createPropObservable("value"),
+                    },
+                    on: {
+                        change(ev) {
+                            if (!ev.target) return;
+                            store.setProp("value", ev.target.value);
+                        }
                     }
+                }, {
+                    tagName: "button",
+                    on: {
+                        click(ev) {
+                            const v = store.getProp("value");
+                            const listComponent = testComponent.getChild("list");
+                            if (v && v !== listComponent.last()) listComponent.push(v);
+                        }
+                    },
+                    children: "Add"
                 }]
             }],
             lifecycle: {

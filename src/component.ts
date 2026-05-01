@@ -241,46 +241,6 @@ export class BaseComponent {
     }
 
     /**
-     * Calls the method which is the specific property in data, substituting another object for the current object.
-     * @param key The property key of data.
-     * @param thisArg The object to be used as the current object.
-     * @param argArray A list of arguments to be passed to the method.
-     * @returns The result of the method; or undefined, if no such method, or the result is undefined.
-     */
-    callDataHandler(key: string, thisArg: any, ...argArray: any[]): DataHanlderResult {
-        const h = this.__innerStore.current.data[key];
-        if (typeof h !== "function") return {
-            key,
-            handler: false,
-        };
-        return {
-            key,
-            handler: true,
-            result: (h as Function).call(thisArg, ...argArray)
-        };
-    }
-
-    /**
-     * Calls the function which is the specific property in data, substituting the specified object for the this value of the function, and the specified array for the arguments of the function.
-     * @param key The property key of data.
-     * @param thisArg The object to be used as the this object.
-     * @param argArray A set of arguments to be passed to the function.
-     * @returns The result of the function; or undefined, if no such function, or the result is undefined.
-     */
-    applyDataHandler(key: string, thisArg: any, argArray?: any): DataHanlderResult {
-        const h = this.__innerStore.current.data[key];
-        if (typeof h !== "function") return {
-            key,
-            handler: false,
-        };
-        return {
-            key,
-            handler: true,
-            result: (h as Function).apply(thisArg, argArray)
-        };
-    }
-
-    /**
      * Gets or sets the class name list of the style.
      * @param value Optional. To get only if no such parameter. The new class name list of the style, if set.
      * @returns The class name list of the style.
@@ -501,41 +461,63 @@ export class BaseComponent {
 }
 
 /**
- * The list component.
+ * The base component with data driven.
  */
-export class DataComponent<T extends Record<string, any>> extends BaseComponent {
+export class DataComponent<TData extends Record<string, any> = Record<string, any>, TInternal extends Record<string, any> = Record<string, any>>
+extends BaseComponent {
+    private __innerStore2: TInternal | undefined;
+
+    /**
+     * Initializes a new instance of the BaseComponent class.
+     * @param args The intialization arguments.
+     */
+    constructor(args: Object) {
+        super(args);
+    }
+
+    /**
+     * Gets the internal context.
+     */
+    protected get internal() {
+        if (this.__innerStore2 === undefined) {
+            this.__innerStore2 = this.onInitInternal();
+            if (this.__innerStore2 === undefined) this.__innerStore2 = {} as TInternal;
+        }
+        return this.__innerStore2;
+    }
+
     /**
      * Gets the data copied.
      * @param key The property key of data.
      * @returns The value of the data property; or undefined, if does not exist.
      */
-    data(): T;
+    data(): TData;
     /**
      * Gets the data property bound.
      * @param key The property key of data.
      * @returns The value of the data property; or undefined, if does not exist.
      */
-    data<P extends keyof T>(key: P): any;
+    data<P extends keyof TData>(key: P): TData[P];
     /**
      * Gets the data copied with the specific properties.
      * @param key The property keys of data.
      * @returns All the value of the data property in the object.
      */
-    data<P extends keyof T>(key: P[]): Record<typeof key[number], any>;
+    data<P extends keyof TData>(key: P[]): Record<P, TData[P]>;
     /**
      * Sets the data property bound.
      * @param key The property key of data.
      * @param value The value of data property; or undefined, if remove the property.
      * @returns The value of the data property; or undefined, if does not exist.
      */
-    data<P extends keyof T>(key: P, value: any): any;
+    data<P extends keyof TData>(key: P, value: any): TData[P];
     /**
      * Gets or sets the data property bound.
      * @param key The property key of data.
      * @param value The value of data property; or undefined, if remove the property.
      * @returns The value of the data property; or undefined, if does not exist.
      */
-    data<P extends keyof T>(key?: P | P[], value?: any) {
+    data<P extends keyof TData>(key?: P | P[], value?: any) {
         if (!key) return arguments.length === 0 ? this.getData() : undefined;
         if (key instanceof Array) {
             const obj: Record<typeof key[number], any> = {} as any;
@@ -548,18 +530,66 @@ export class DataComponent<T extends Record<string, any>> extends BaseComponent 
         return this.getData(key as any);
     }
 
-    patchData(obj: IDeltaObject<T>): void;
-    patchData(obj: IDeltaObject<T>, remove: boolean): void;
-    patchData<P extends keyof T>(obj: IDeltaObject<T>, remove: P[]): void;
-    patchData<P extends keyof T>(obj: IDeltaObject<T>, remove?: boolean | P[]) {
-        super.setDataByDelta(new ComponentDeltaUpdateInfo<T>(obj, info => this.onDataChange(info), remove));
+    patchData(obj: IDeltaObject<TData>): void;
+    patchData(obj: IDeltaObject<TData>, remove: boolean): void;
+    patchData<P extends keyof TData>(obj: IDeltaObject<TData>, remove: P[]): void;
+    patchData<P extends keyof TData>(obj: IDeltaObject<TData>, remove?: boolean | P[]) {
+        super.setDataByDelta(new ComponentDeltaUpdateInfo<TData>(obj, info => this.onDataChange(info), remove));
+    }
+
+    /**
+     * Calls the method which is the specific property in data, substituting another object for the current object.
+     * @param key The property key of data.
+     * @param thisArg The object to be used as the current object.
+     * @param argArray A list of arguments to be passed to the method.
+     * @returns The result of the method; or undefined, if no such method, or the result is undefined.
+     */
+    callDataHandler<P extends keyof TData>(key: P, thisArg: any, ...argArray: any[]): DataHanlderResult {
+        const h = super.getData(key as string);
+        if (typeof h !== "function") return {
+            key: key as string,
+            handler: false,
+        };
+        return {
+            key: key as string,
+            handler: true,
+            result: (h as Function).call(thisArg, ...argArray)
+        };
+    }
+
+    /**
+     * Calls the function which is the specific property in data, substituting the specified object for the this value of the function, and the specified array for the arguments of the function.
+     * @param key The property key of data.
+     * @param thisArg The object to be used as the this object.
+     * @param argArray A set of arguments to be passed to the function.
+     * @returns The result of the function; or undefined, if no such function, or the result is undefined.
+     */
+    applyDataHandler<P extends keyof TData>(key: P, thisArg: any, argArray?: any): DataHanlderResult {
+        const h = super.getData(key as string);
+        if (typeof h !== "function") return {
+            key: key as string,
+            handler: false,
+        };
+        return {
+            key: key as string,
+            handler: true,
+            result: (h as Function).apply(thisArg, argArray)
+        };
     }
 
     /**
      * Occurs when the data changes.
      * @param delta The changed and current data.
      */
-    protected onDataChange(info: ComponentDataUpdateInfo<T>) {
+    protected onDataChange(info: ComponentDataUpdateInfo<TData>) {
+    }
+
+    /**
+     * Occurs when initialize to access the internal context object.
+     * @returns The object created for internal context.
+     */
+    protected onInitInternal(): TInternal {
+        return {} as TInternal;
     }
 }
 

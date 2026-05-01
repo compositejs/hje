@@ -908,7 +908,7 @@ declare namespace DeepX.MdBlogs {
         next(): ArticleInfo | null | undefined;
         previous(): ArticleInfo | null | undefined;
         parent(): ArticleInfo | null | undefined;
-        protected initRender(articles: Articles, select: string, q: string, lifecycle: IArticlesLifecycle): void;
+        protected initRender(articles: Articles, select: string | undefined, q: string | undefined, lifecycle: IArticlesLifecycle): void;
         protected refreshMenu(): void;
         protected createLocaleOptions(): {
             mkt: string | false;
