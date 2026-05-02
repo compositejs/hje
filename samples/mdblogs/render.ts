@@ -370,7 +370,7 @@ namespace DeepX.MdBlogs {
                     tagName: "h2",
                     children: [{
                         tagName: "span",
-                        children: this.string("relatedPaintings", options),
+                        children: getLocaleProp(this.__inner.info?.options, "seriesTitle", options) || this.string("relatedPaintings", options),
                     }]
                 }, {
                     tagName: "div",
@@ -393,12 +393,14 @@ namespace DeepX.MdBlogs {
                             }],
                         } as Hje.DescriptionContract;
                     }),
-                }, {
+                });
+                const seriesTips = getLocaleProp(this.__inner.info?.options, "seriesTips", options);
+                if (seriesTips) children.push({
                     tagName: "div",
                     className: "x-part-info",
                     children: [{
                         tagName: "span",
-                        children: "注：猫头鱼尾兽图标、MuseTuan.com、摸凹喵（Mor-Ow Meow）及其形象、星娜喵（Starna）及其形象，是 Muse Tuan 和 Kingcean Tuan 的商标，摸凹喵画作及其衍生品均受知识产权保护，版权所有；Kingcean、Jinchen Art、金辰艺术、CompositeJs、金山旭日翼盾、红日黑山徽标，是 Kingcean Tuan、南昌金辰软件有限公司或江西金辰装饰设计工程有限公司的商标或注册商标；其它商标分别归属其所拥有的组织。",
+                        children: seriesTips,
                     }]
                 });
             }
@@ -666,10 +668,6 @@ namespace DeepX.MdBlogs {
                 }
             });
         }
-    }
-
-    function scrollToTop() {
-        window.scrollTo({ top: 0, behavior: "smooth" });
     }
 
     function generateLink(item: {

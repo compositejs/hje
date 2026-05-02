@@ -40,6 +40,10 @@ namespace DeepX.MdBlogs {
         return arr.length > 0 ? arr[0] : undefined;
     }
 
+    export function scrollToTop() {
+        window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+
     /* Copied from LangPack */
 
     function getKeyedPropValue(obj: any, key1: string, key2: string | undefined, options?: {

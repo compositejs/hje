@@ -64,6 +64,128 @@ declare namespace DeepX.MdBlogs {
     export {};
 }
 declare namespace DeepX.MdBlogs {
+    type IImageUrlKind = 'thumb' | 'source';
+    export type ITitleCaseKind = "upper" | "lower" | "capital" | "small" | "normal" | "none" | null;
+    export interface IImageItemInfo {
+        id: string;
+        disable?: boolean;
+        name?: string;
+        year: number;
+        month?: number;
+        day?: number;
+        url?: string;
+        thumb?: boolean | string;
+        keywords?: string[];
+        size?: string;
+        data?: any;
+    }
+    export interface IImageClickInfo {
+        item: IImageItemInfo;
+        component: ImageCollectionPart;
+        info: {
+            name: string;
+            url: string;
+            thumb?: string;
+        };
+    }
+    export interface IImageCollectionPartOptions {
+        itemUrl?(item: IImageItemInfo, kind: IImageUrlKind): string | undefined;
+        click?(data: IImageClickInfo, ev: MouseEvent): void;
+        close?(ev: MouseEvent): void;
+        mkt?: string | boolean;
+        page?: number;
+    }
+    export interface IImageSeriesPartData extends IImageCollectionPartOptions {
+        series: (IImageSeriesInfo | string | DeepX.MdBlogs.IArticleLabelInfo)[];
+        items: Record<string, IImageItemInfo[]>;
+        select?: string | boolean;
+        blogRela?: string | Hje.RelativePathInfo;
+        imageRela?: string | Hje.RelativePathInfo;
+        styles?: {
+            header?: string | string[];
+            main?: string | string[];
+            next?: string | string[];
+            related?: string | string[];
+            share?: string | string[];
+        };
+        strings?: {
+            all?: string;
+            pics?: string;
+            site?: string;
+        };
+        urls?: {
+            share?: string;
+            qr?: string;
+            series?: string;
+        };
+        before?: Hje.DescriptionContract;
+        after?: Hje.DescriptionContract;
+        selected?(info: IImageSeriesInfo, component: ImageSeriesPart): void;
+    }
+    export interface IImageCollectionPartData extends IImageCollectionPartOptions {
+        rela?: string | Hje.RelativePathInfo;
+        items: IImageItemInfo[];
+        defaultName?: string;
+    }
+    export interface IRelatedInfoPartData {
+        title?: string;
+        links?: DeepX.MdBlogs.IArticleRelatedLinkItemInfo[];
+        images?: IImageItemInfo[];
+        imageRela?: string | Hje.RelativePathInfo;
+        defaultImageName?: string;
+        mkt?: string | boolean;
+        itemUrl?(item: IImageItemInfo, kind: IImageUrlKind): string | undefined;
+        click?(data: IImageClickInfo, ev?: MouseEvent): void;
+        close?(ev?: MouseEvent): void;
+    }
+    export class ImageSeriesPart extends Hje.DataComponent {
+        private __inner;
+        constructor(args: any);
+        get series(): IImageSeriesInfo[];
+        getSeries(id: string): IImageSeriesInfo | undefined;
+        selectSeries(id: string | IImageSeriesInfo): IImageSeriesInfo | undefined;
+        scrollContentIntoView(): false | undefined;
+        scrollMenuIntoView(): false | undefined;
+        imageRelative(url: string | undefined): string | undefined;
+        closeImage(ev?: MouseEvent): void;
+        registerHistoryPop(): void;
+        private refreshRelated;
+        private genSeriesMenu;
+        private getSeriesLinkInfo;
+    }
+    export class ImageCollectionPart extends Hje.DataComponent {
+        private __inner;
+        constructor(args: any);
+        get length(): IImageItemInfo[];
+        setDefaultName(value: string): void;
+        getItem(index: number | string): IImageItemInfo | undefined;
+        pushWithoutRender(...items: IImageItemInfo[]): number;
+        push(...items: IImageItemInfo[]): number;
+        clear(): void;
+        nextPage(): boolean;
+        indexOf(item: string | IImageItemInfo): number;
+        imageRelative(url: string | undefined): string | undefined;
+        openImage(item: IImageItemInfo | string, ev?: MouseEvent): undefined;
+        closeImage(ev?: MouseEvent): void;
+        private genItemModel;
+    }
+    export class RelatedInfoPart extends Hje.DataComponent {
+        constructor(args: any);
+        setData(links: DeepX.MdBlogs.IArticleRelatedLinkItemInfo[] | null | undefined, images: IImageItemInfo[] | null | undefined): number;
+    }
+    export function seriesList(col: IImageSeriesInfo[], imageRela: string | Hje.RelativePathInfo | ImageSeriesPart | ImageCollectionPart, link?: string, options?: {
+        mkt?: string | boolean;
+    }): {
+        tagName: string;
+        className: string;
+        props: {
+            href: string;
+        };
+        children: Hje.DescriptionContract[];
+    }[] | null;
+    export {};
+}
+declare namespace DeepX.MdBlogs {
     class Articles {
         private _inner;
         constructor(data: IArticleCollection, options: {
@@ -78,6 +200,8 @@ declare namespace DeepX.MdBlogs {
             disableMenu?: boolean;
             disableSearch?: boolean;
             linksTitle?: string;
+            seriesTitle?: string;
+            seriesTips?: string;
         };
         defs(key: string): any;
         blogsInfo(options?: {
@@ -174,6 +298,7 @@ declare namespace DeepX.MdBlogs {
             cover?: boolean;
         } | undefined;
         defs(key: string): any;
+        hasSeries(value: string): boolean;
         getRoutePath(options?: {
             mkt?: string | boolean;
         }): string | undefined;
@@ -687,6 +812,14 @@ declare namespace DeepX.MdBlogs {
              * The title of links.
              */
             linksTitle?: string;
+            /**
+             * The title to display under series collection.
+             */
+            seriesTitle?: string;
+            /**
+             * The tips to display under series collection.
+             */
+            seriesTips?: string;
         };
         /**
          * The definitions.
@@ -937,6 +1070,7 @@ declare namespace DeepX.MdBlogs {
     }[]): void;
     function firstQuery(): string;
     function filterFirst<T>(arr: T[], predicate: (item: T, index?: number) => boolean): T | undefined;
+    function scrollToTop(): void;
     function getLocaleProp<T = any>(obj: T | undefined, key?: keyof (T) | null, options?: {
         mkt?: string | boolean;
         fallback?: any;

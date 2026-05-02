@@ -197,6 +197,15 @@ namespace DeepX.MdBlogs {
             return this._inner.definitions[key];
         }
 
+        hasSeries(value: string) {
+            if (!value) return false;
+            const series = this._inner.data.options?.series;
+            if (!series) return false;
+            if (typeof series === "string") return value === series;
+            if (series instanceof Array) return series.indexOf(value) >= 0;
+            return false;
+        }
+
         getRoutePath(options?: {
             mkt?: string | boolean;
         }) {

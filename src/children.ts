@@ -260,6 +260,48 @@ export class ComponentChildren {
     }
 
     /**
+     * Updates a specific child item by given patch.
+     * @param index The index or key of child.
+     * @param patch The patch data.
+     * @returns true if update successfully; otherwise, false. Not exists also returns false.
+     */
+    update(index: number | string, patch: {
+        props?: IDeltaObject;
+        children?: DescriptionContract["children"];
+        style?: DescriptionContract["style"];
+        className?: IClassNameSetValue;
+        data?: IDeltaObject;
+        appendChildren?: boolean | number;
+        overrideStyle?: boolean;
+    }) {
+        if (!patch) return false;
+        const item = this.get(index);
+        if (!item) return false;
+        if (patch.props) item.patchProps(patch.props);
+        if (patch.className) item.className(patch.className);
+        if (patch.style) {
+            if (patch.overrideStyle) item.style(patch.style);
+            else item.patchStyle(patch.style);
+        }
+        if (patch.data) {
+            if (!(item instanceof DataComponent)) return false;
+            item.patchData(patch.data);
+        }
+        if (patch.children !== undefined) {
+            if (!(item instanceof ElementComponent)) return false;
+            if (!(patch.children instanceof Array))
+                item.setChildren(patch.children);
+            else if (patch.appendChildren === true)
+                item.appendChild(...patch.children);
+            else if (typeof patch.appendChildren === "number")
+                item.insertChild(patch.appendChildren, ...patch.children);
+            else
+                item.setChildren(patch.children);
+        }
+        return true;
+    }
+
+    /**
      * Clears all child items.
      */
     clear() {

@@ -112,7 +112,7 @@ export class ListComponent<T = any> extends DataComponent<IListComponentData<T>,
         if (!(source instanceof Array)) source = [];
         const h = modelToDescriptionHandler(info.get("item"), this.originalTagName);
         const store = this.internal.source;
-        store.splice(0, this.internal.source.length);
+        store.splice(0);
         const children = [] as DescriptionContract[];
         for (const model of source) {
             if (model === undefined) continue;

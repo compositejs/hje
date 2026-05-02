@@ -87,6 +87,21 @@ declare namespace Hje {
          */
         replace(index: number, model: DescriptionContract): BaseComponent | undefined;
         /**
+         * Updates a specific child item by given patch.
+         * @param index The index or key of child.
+         * @param patch The patch data.
+         * @returns true if update successfully; otherwise, false. Not exists also returns false.
+         */
+        update(index: number | string, patch: {
+            props?: IDeltaObject;
+            children?: DescriptionContract["children"];
+            style?: DescriptionContract["style"];
+            className?: IClassNameSetValue;
+            data?: IDeltaObject;
+            appendChildren?: boolean | number;
+            overrideStyle?: boolean;
+        }): boolean;
+        /**
          * Clears all child items.
          */
         clear(): void;
@@ -242,7 +257,7 @@ declare namespace Hje {
          */
         style(value?: Partial<CSSStyleDeclaration>): Partial<CSSStyleDeclaration>;
         /**
-         * Gets the inline style.
+         * Patches the inline style.
          * @returns The inline style.
          */
         patchStyle(value: Partial<CSSStyleDeclaration>): void;
@@ -459,7 +474,22 @@ declare namespace Hje {
          * @param model The description model of new item.
          * @returns The component; or undefined, if the index is out of range.
          */
-        replace(index: number, model: DescriptionContract): BaseComponent | undefined;
+        replaceChild(index: number, model: DescriptionContract): BaseComponent | undefined;
+        /**
+         * Updates a specific child item by given patch.
+         * @param index The index or key of child.
+         * @param patch The patch data.
+         * @returns true if update successfully; otherwise, false. Not exists also returns false.
+         */
+        updateChild(index: number | string, patch: {
+            props?: IDeltaObject;
+            children?: DescriptionContract["children"];
+            style?: DescriptionContract["style"];
+            className?: IClassNameSetValue;
+            data?: IDeltaObject;
+            appendChildren?: boolean | number;
+            overrideStyle?: boolean;
+        }): boolean;
         /**
          * Clears all child items.
          */

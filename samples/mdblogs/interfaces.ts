@@ -506,6 +506,14 @@ namespace DeepX.MdBlogs {
              * The title of links.
              */
             linksTitle?: string;
+            /**
+             * The title to display under series collection.
+             */
+            seriesTitle?: string;
+            /**
+             * The tips to display under series collection.
+             */
+            seriesTips?: string;
         };
         /**
          * The definitions.

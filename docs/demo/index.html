@@ -148,7 +148,7 @@
                         click(ev) {
                             const v = store.getProp("value");
                             const listComponent = testComponent.getChild("list");
-                            if (v && v !== listComponent.last()) listComponent.push(v);
+                            if (v && listComponent.indexOf(v) === -1) listComponent.push(v);
                         }
                     },
                     children: "Add"

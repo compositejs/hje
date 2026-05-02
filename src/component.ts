@@ -288,7 +288,7 @@ export class BaseComponent {
     }
 
     /**
-     * Gets the inline style.
+     * Patches the inline style.
      * @returns The inline style.
      */
     patchStyle(value: Partial<CSSStyleDeclaration>) {

@@ -63,8 +63,26 @@ export class ElementComponent extends DataComponent<Record<string, any>> {
      * @param model The description model of new item.
      * @returns The component; or undefined, if the index is out of range.
      */
-    replace(index: number, model: DescriptionContract) {
+    replaceChild(index: number, model: DescriptionContract) {
         return this.childrenAccess.replace(index, model);
+    }
+
+    /**
+     * Updates a specific child item by given patch.
+     * @param index The index or key of child.
+     * @param patch The patch data.
+     * @returns true if update successfully; otherwise, false. Not exists also returns false.
+     */
+    updateChild(index: number | string, patch: {
+        props?: IDeltaObject;
+        children?: DescriptionContract["children"];
+        style?: DescriptionContract["style"];
+        className?: IClassNameSetValue;
+        data?: IDeltaObject;
+        appendChildren?: boolean | number;
+        overrideStyle?: boolean;
+    }) {
+        return this.childrenAccess.update(index, patch);
     }
 
     /**
