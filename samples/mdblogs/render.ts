@@ -366,7 +366,7 @@ namespace DeepX.MdBlogs {
             const related: Hje.DescriptionContract[] = [];
             fillParagraph(article.getNotes(options), related);
             if (article.series?.length) {
-                children.push({
+                related.push({
                     tagName: "h2",
                     children: [{
                         tagName: "span",
@@ -409,9 +409,9 @@ namespace DeepX.MdBlogs {
                     }).filter(ele => !!ele),
                 });
                 const seriesTips = getLocaleProp(this.__inner.info?.options, "seriesTips", options);
-                if (seriesTips) children.push({
+                if (seriesTips) related.push({
                     tagName: "div",
-                    className: "x-part-info",
+                    className: "x-part-footnote",
                     children: [{
                         tagName: "span",
                         children: seriesTips,

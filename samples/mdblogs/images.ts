@@ -337,13 +337,13 @@ namespace DeepX.MdBlogs {
         }
 
         scrollContentIntoView() {
-            const element = this.getChild("title-container")?.element() as HTMLElement | undefined;
+            const element = this.getChild("title-container")?.element as HTMLElement | undefined;
             if (!element) return false;
             element.scrollIntoView({ behavior: "smooth" });
         }
 
         scrollMenuIntoView() {
-            const element = this.getChild("menu")?.element() as HTMLElement | undefined;
+            const element = this.getChild("menu")?.element as HTMLElement | undefined;
             if (!element) return false;
             element.scrollIntoView({ behavior: "smooth" });
         }
@@ -1031,15 +1031,6 @@ namespace DeepX.MdBlogs {
         if (!url || typeof url !== "string") return undefined;
         if (url.indexOf("://") >= 0) return url;
         return rela.relative(url)?.value || url;
-    }
-
-    function hasShareApi() {
-        try {
-            if (typeof navigator !== "object") return false;
-            return typeof navigator.share === "function";
-        } catch {
-            return false;
-        }
     }
 
 }
