@@ -9,6 +9,7 @@ namespace Hje {
             back: undefined as unknown as number,
             value: undefined as unknown as string,
             part: undefined as unknown as string,
+            q: undefined as string | undefined,
         };
 
         /**
@@ -17,7 +18,9 @@ namespace Hje {
          */
         constructor(path: string) {
             if (!path) return;
-            path = removeQuestionAndHash(path);
+            const pathInfo = removeQuestionAndHash(path);
+            path = pathInfo.path;
+            this._info.q = pathInfo.q;
             let protocal = path.indexOf("://");
             let host: string | undefined = undefined;
             if (protocal >= 0 && protocal < path.indexOf("/")) {
@@ -64,6 +67,13 @@ namespace Hje {
          */
         get value() {
             return this._info.value;
+        }
+
+        /**
+         * Gets the query and hash string in the path, including the mark.
+         */
+        get queryAndHash() {
+            return this._info.q || "";
         }
 
         /**
@@ -118,7 +128,7 @@ namespace Hje {
             let p = this._info.value;
             const i = p.lastIndexOf("/");
             if (i < 0) return path;
-            p = p.substring(0, i + 1) + path.value;
+            p = `${p.substring(0, i + 1)}${path.value}${path.queryAndHash || ""}`;
             path = new RelativePathInfo(p);
             return path;
         }
@@ -128,7 +138,7 @@ namespace Hje {
          * @returns A string about this path.
          */
         toString() {
-            return this._info.value;
+            return `${this._info.value}${this._info.q || ""}`;
         }
 
         /**
@@ -136,7 +146,7 @@ namespace Hje {
          * @returns A JSON converted.
          */
         toJSON() {
-            return this._info.value;
+            return `${this._info.value}${this._info.q || ""}`;
         }
     }
 
@@ -239,11 +249,26 @@ namespace Hje {
      * @param path The query string.
      * @returns A query without question mark and hash mark.
      */
-    function removeQuestionAndHash(path: string): string {
-        let j = path.indexOf("?");
-        if (j < 0) j = path.indexOf("#");
-        if (j < 0) j = path.indexOf("\n");
-        if (j < 0) j = path.indexOf("\r");
-        return j < 0 ? path : path.substring(0, j);
+    function removeQuestionAndHash(path: string): {
+        path: string;
+        q?: string;
+     } {
+        let i = path.indexOf("\n");
+        if (i >= 0) path = path.substring(0, i);
+        i = path.indexOf("\r");
+        if (i >= 0) path = path.substring(0, i);
+        i = path.indexOf("\t");
+        if (i >= 0) path = path.substring(0, i);
+        i = path.indexOf("?");
+        if (i > 0) {
+            const q = path.substring(i);
+            path = path.substring(0, i);
+            return { path, q };
+        }
+
+        i = path.indexOf("#");
+        if (i < 0) return { path };
+        const hash = path.substring(i);
+        return { path: path.substring(0, i), q: hash };
     }
 }

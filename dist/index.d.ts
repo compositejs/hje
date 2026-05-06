@@ -800,6 +800,10 @@ declare namespace Hje {
          */
         get value(): string;
         /**
+         * Gets the query and hash string in the path, including the mark.
+         */
+        get queryAndHash(): string;
+        /**
          * Gets the path started from the directory marked.
          */
         get childPath(): string;

@@ -375,24 +375,38 @@ namespace DeepX.MdBlogs {
                 }, {
                     tagName: "div",
                     children: article.series.map(series => {
+                        const mktOptions = mkt ? { mkt } : undefined;
+                        const name = getLocaleProp(series, null, mktOptions);
+                        if (!name || getLocaleProp(series, "disable", mktOptions)) return undefined;
+                        const elementItems: Hje.DescriptionContract[] = [];
+                        if (series.logo) elementItems.push({
+                            tagName: "img",
+                            props: {
+                                src: self.__inner.info?.relative(series.logo)?.toString(),
+                                alt: name
+                            }
+                        });
+                        elementItems.push({
+                            tagName: "span",
+                            children: name,
+                        });
+                        const subtitle = getLocaleProp(series, "subtitle", mktOptions);
+                        if (subtitle) elementItems.push({
+                            tagName: "span",
+                            children: [{
+                                tagName: "span",
+                                children: subtitle,
+                            }]
+                        })
                         return {
                             tagName: "a",
                             className: "link-long-button",
                             props: {
-                                href: series.url
+                                href: self.__inner.info?.relative(series.url)?.toString(),
                             },
-                            children: [{
-                                tagName: "img",
-                                props: {
-                                    src: series.logo,
-                                    alt: name
-                                }
-                            }, {
-                                tagName: "span",
-                                children: name,
-                            }],
+                            children: elementItems,
                         } as Hje.DescriptionContract;
-                    }),
+                    }).filter(ele => !!ele),
                 });
                 const seriesTips = getLocaleProp(this.__inner.info?.options, "seriesTips", options);
                 if (seriesTips) children.push({

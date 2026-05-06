@@ -99,8 +99,11 @@ declare namespace DeepX.MdBlogs {
         series: (IImageSeriesInfo | string | DeepX.MdBlogs.IArticleLabelInfo)[];
         items: Record<string, IImageItemInfo[]>;
         select?: string | boolean;
+        seriesRela?: string | Hje.RelativePathInfo;
         blogRela?: string | Hje.RelativePathInfo;
         imageRela?: string | Hje.RelativePathInfo;
+        url?: string | boolean;
+        blogs?: DeepX.MdBlogs.ArticleInfo[];
         styles?: {
             header?: string | string[];
             main?: string | string[];
@@ -112,11 +115,6 @@ declare namespace DeepX.MdBlogs {
             all?: string;
             pics?: string;
             site?: string;
-        };
-        urls?: {
-            share?: string;
-            qr?: string;
-            series?: string;
         };
         before?: Hje.DescriptionContract;
         after?: Hje.DescriptionContract;
@@ -138,9 +136,13 @@ declare namespace DeepX.MdBlogs {
         click?(data: IImageClickInfo, ev?: MouseEvent): void;
         close?(ev?: MouseEvent): void;
     }
-    export class ImageSeriesPart extends Hje.DataComponent {
+    export class ImageSeriesPart extends Hje.DataComponent<IImageSeriesPartData> {
         private __inner;
         constructor(args: any);
+        get imageRela(): Hje.RelativePathInfo;
+        get blogRela(): Hje.RelativePathInfo;
+        get before(): Hje.BaseComponent | undefined;
+        get after(): Hje.BaseComponent | undefined;
         get series(): IImageSeriesInfo[];
         getSeries(id: string): IImageSeriesInfo | undefined;
         selectSeries(id: string | IImageSeriesInfo): IImageSeriesInfo | undefined;
@@ -149,9 +151,14 @@ declare namespace DeepX.MdBlogs {
         imageRelative(url: string | undefined): string | undefined;
         closeImage(ev?: MouseEvent): void;
         registerHistoryPop(): void;
+        protected onSelect(info: IImageSeriesInfo): void;
         private refreshRelated;
         private genSeriesMenu;
-        private getSeriesLinkInfo;
+        getSeriesLinkInfo(value: IImageSeriesInfo): {
+            title: string;
+            url: string | undefined;
+            kind: "route" | "link" | "func";
+        };
     }
     export class ImageCollectionPart extends Hje.DataComponent {
         private __inner;

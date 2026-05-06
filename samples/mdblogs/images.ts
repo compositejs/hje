@@ -41,8 +41,11 @@ namespace DeepX.MdBlogs {
         series: (IImageSeriesInfo | string | DeepX.MdBlogs.IArticleLabelInfo)[];
         items: Record<string, IImageItemInfo[]>;
         select?: string | boolean;
+        seriesRela?: string | Hje.RelativePathInfo;
         blogRela?: string | Hje.RelativePathInfo;
         imageRela?: string | Hje.RelativePathInfo;
+        url?: string | boolean;
+        blogs?: DeepX.MdBlogs.ArticleInfo[];
         styles?: {
             header?: string | string[];
             main?: string | string[];
@@ -54,11 +57,6 @@ namespace DeepX.MdBlogs {
             all?: string;
             pics?: string;
             site?: string;
-        };
-        urls?: {
-            share?: string;
-            qr?: string;
-            series?: string;
         };
         before?: Hje.DescriptionContract;
         after?: Hje.DescriptionContract;
@@ -83,19 +81,22 @@ namespace DeepX.MdBlogs {
         close?(ev?: MouseEvent): void;
     }
 
-    export class ImageSeriesPart extends Hje.DataComponent {
+    export class ImageSeriesPart extends Hje.DataComponent<IImageSeriesPartData> {
         private __inner: {
             series: (IImageSeriesInfo | string | DeepX.MdBlogs.IArticleLabelInfo)[];
             items: Record<string, IImageItemInfo[]>;
+            seriesRela: Hje.RelativePathInfo;
             blogRela: Hje.RelativePathInfo;
             imageRela: Hje.RelativePathInfo;
             mkt?: { mkt: string | boolean };
             mainStyle: string[];
             select?: IImageSeriesInfo;
-            urls: IImageSeriesPartData["urls"];
             siteName?: string;
             defaultItemName?: string;
             needBack?: boolean;
+            url?: string | boolean;
+            before?: string;
+            after?: string;
             selected?: (info: IImageSeriesInfo, component: ImageSeriesPart) => void;
         };
 
@@ -104,20 +105,21 @@ namespace DeepX.MdBlogs {
             const data = this.data();
             const seriesCol = data.series || [];
             const mktOptions = data.mkt !== undefined ? { mkt: data.mkt } : undefined;
+            const seriesRela = toRela(data.seriesRela || "./");
             const blogRela = toRela(data.blogRela || "../blog/");
             const imageRela = toRela(data.imageRela || "../images/");
             const styles = data.styles || {};
             const strings = data.strings || {};
-            const urls = data.urls || {};
             const mainStyle = mergeArray(["x-container-pics"], styles.main);
             this.__inner = {
                 series: seriesCol,
                 items: data.items || {},
+                seriesRela,
                 blogRela,
                 mkt: mktOptions,
                 imageRela,
                 mainStyle,
-                urls: urls,
+                url: data.url,
                 siteName: strings.site,
                 defaultItemName: strings.pics,
                 selected: data.selected,
@@ -126,6 +128,20 @@ namespace DeepX.MdBlogs {
             let select = data.select;
             if (select === true || select === undefined) select = this.series[0]?.id;
             else if (!select || typeof select !== "string") select = undefined;
+            if (data.before) {
+                this.__inner.before = data.before.key;
+                if (!this.__inner.before) {
+                    this.__inner.before = "comp-ref-image-series-part-before";
+                    data.before.key = this.__inner.before;
+                }
+            }
+            if (data.after) {
+                this.__inner.after = data.after.key;
+                if (!this.__inner.after) {
+                    this.__inner.after = "comp-ref-image-series-part-after";
+                    data.after.key = this.__inner.after;
+                }
+            }
             this.childrenAccess.setRange({
                 tagName: "article",
                 children: [data.before, genHeader([{
@@ -134,7 +150,7 @@ namespace DeepX.MdBlogs {
                 }], styles.header, "h1", "title", "title-container"), {
                     key: "gallery",
                     tagName: "main",
-                    control: ImageCollectionPart,
+                    component: ImageCollectionPart,
                     className: mainStyle,
                     data: {
                         rela: imageRela,
@@ -189,11 +205,6 @@ namespace DeepX.MdBlogs {
                     style: { display: "none" },
                     className: mergeArray(["x-part-blog-related"], styles.related),
                     children: [],
-                }, {
-                    key: "share",
-                    tagName: "section",
-                    className: mergeArray(["x-part-blog-share"], styles.share),
-                    style: { display: "none" },
                 }, data.after,
             ].filter(ele => !!ele)}, {
                 tagName: "nav",
@@ -228,6 +239,22 @@ namespace DeepX.MdBlogs {
             const imageSelected = gallery.getItem(imageId);
             history.replaceState(new ImageHistoryState(sel, imageSelected), "", url2);
             if (imageSelected?.id) gallery.openImage(imageSelected.id);
+        }
+
+        get imageRela() {
+            return this.__inner.imageRela;
+        }
+
+        get blogRela() {
+            return this.__inner.blogRela;
+        }
+
+        get before() {
+            return this.__inner.before ? this.childrenAccess.get(this.__inner.before) : undefined;
+        }
+
+        get after() {
+            return this.__inner.after ? this.childrenAccess.get(this.__inner.after) : undefined;
         }
 
         get series() {
@@ -301,18 +328,9 @@ namespace DeepX.MdBlogs {
             text = DeepX.MdBlogs.getLocaleProp(id, "subtitle", mkt);
             if (text) title.push(span(text, caseStyleRef(id.options, "subtitleCase", mkt)));
             this.childrenAccess.update("title", { children: title });
-            const info = this.getSeriesLinkInfo(id);
-            const share = sharePanel({
-                qr: DeepX.MdBlogs.getLocaleProp(id.options, "qr", mkt) || this.__inner.urls?.qr,
-                share: this.__inner.urls?.share,
-                page: info.url,
-            }, DeepX.MdBlogs.getLocaleProp(id, "intro", mkt), rela, info.title, mkt);
-            this.childrenAccess.update("share", {
-                style: { display: share.length ? "" : "none" },
-                children: share,
-            });
             this.refreshRelated();
             this.childrenAccess.update("all", { children: this.genSeriesMenu(id.id) });
+            this.onSelect(id);
             const h = this.__inner.selected;
             if (typeof h === "function") h(id, this);
             return id;
@@ -367,6 +385,9 @@ namespace DeepX.MdBlogs {
             });
         }
 
+        protected onSelect(info: IImageSeriesInfo) {
+        }
+
         private async refreshRelated() {
             const series = this.__inner.select;
             if (!series) return;
@@ -377,7 +398,8 @@ namespace DeepX.MdBlogs {
                 style: { display: elements.length ? "" : "none" },
                 children: elements,
             });
-            const articles = series.id ? (this.data("blogs") as ArticleInfo[]).filter(ele => ele && ele.hasSeries(series.id)) : undefined;
+            const blogs = this.data("blogs");
+            const articles = series.id && blogs ? blogs.filter(ele => ele && ele.hasSeries(series.id)) : undefined;
             if (this.__inner.select !== series || !articles?.length) return;
             const mkt = this.__inner.mkt;
             const rela = this.__inner.blogRela;
@@ -467,17 +489,20 @@ namespace DeepX.MdBlogs {
             return arr;
         }
 
-        private getSeriesLinkInfo(value: IImageSeriesInfo): {
+        getSeriesLinkInfo(value: IImageSeriesInfo): {
             title: string;
             url: string | undefined;
             kind: "route" | "link" | "func",
         } {
             const inner = this.__inner;
-            let seriesLink = inner.urls?.series;
+            let seriesLink = inner.url;
             if (seriesLink) {
-                if (seriesLink === "?" || seriesLink === ".") seriesLink = "./";
+                if (seriesLink === true) seriesLink = "./";
+                else if (seriesLink === "?" || seriesLink === ".") seriesLink = "./";
                 else if (seriesLink.endsWith("?")) seriesLink = seriesLink.substring(0, seriesLink.length - 1);
                 else if (seriesLink === "#") seriesLink = undefined;
+            } else {
+                seriesLink = undefined;
             }
             const enableRoute = seriesLink === "./";
             if (seriesLink) {
@@ -749,7 +774,7 @@ namespace DeepX.MdBlogs {
             this.childrenAccess.set([data.title ? genHeader(data.title) : null, {
                 tagName: "section",
                 key: "gallery",
-                control: ImageCollectionPart,
+                component: ImageCollectionPart,
                 data: {
                     rela: data.imageRela,
                     mkt: data.mkt,
@@ -954,64 +979,6 @@ namespace DeepX.MdBlogs {
         }).filter(ele => !!ele);
         if (!elements.length) return null;
         return elements;
-    }
-
-    function sharePanel(
-        urls: {
-            share?: string;
-            qr?: string;
-            page?: string;
-        } | undefined,
-        intro: string | undefined | null,
-        rela: Hje.RelativePathInfo,
-        title: string,
-        mktOptions?: { mkt?: string | boolean }) {
-        if (!urls) urls = {};
-        const mkt = mktOptions?.mkt;
-        const arr: Hje.DescriptionContract[] = [];
-        const introElement = multipleLines(intro, "x-part-blog-note");
-        if (!urls.qr) {
-            if (introElement) arr.push(introElement);
-            return arr;
-        }
-
-        const header: Hje.DescriptionContract[] = urls?.share ? [{
-            tagName: "img",
-            props: {
-                alt: getLocaleString("share", mkt),
-                src: relativePath(rela, urls.share),
-            }
-        }] : [];
-        header.push(urls.page && title && hasShareApi()
-            ? {
-                tagName: "a",
-                children: getLocaleString("share", mkt),
-                on: {
-                    click() {
-                        navigator.share({
-                            title: title,
-                            url: urls.page
-                        });
-                    },
-                },
-            }
-            : span(getLocaleString("share", mktOptions?.mkt)));
-        arr.push({
-            tagName: "h2",
-            children: header,
-        })
-        arr.push({
-            tagName: "div",
-            children: [{
-                tagName: "img",
-                props: {
-                    alt: "QR code",
-                    src: relativePath(rela, urls.qr),
-                },
-            }]
-        });
-        if (introElement) arr.push(introElement);
-        return arr;
     }
 
     function genHeader(
