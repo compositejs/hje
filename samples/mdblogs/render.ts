@@ -130,9 +130,9 @@ namespace DeepX.MdBlogs {
                 tagName: "main",
                 lifecycle: {
                     init(c) {
-                        if (part.contentCache) renderMd(c.element(), part.contentCache, info.string("renderFailed", options));
+                        if (part.contentCache) renderMd(c.element, part.contentCache, info.string("renderFailed", options));
                         else part.getContent(options).then(r => {
-                            renderMd(c.element(), r, info.string("renderFailed", options));
+                            renderMd(c.element, r, info.string("renderFailed", options));
                         });
                     },
                 },
