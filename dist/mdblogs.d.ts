@@ -64,104 +64,64 @@ declare namespace DeepX.MdBlogs {
     export {};
 }
 declare namespace DeepX.MdBlogs {
-    type IImageUrlKind = 'thumb' | 'source';
-    export type ITitleCaseKind = "upper" | "lower" | "capital" | "small" | "normal" | "none" | null;
-    export interface IImageItemInfo {
-        id: string;
-        disable?: boolean;
-        name?: string;
-        year: number;
-        month?: number;
-        day?: number;
-        url?: string;
-        thumb?: boolean | string;
-        keywords?: string[];
-        size?: string;
-        data?: any;
-    }
-    export interface IImageClickInfo {
-        item: IImageItemInfo;
-        component: ImageCollectionPart;
-        info: {
-            name: string;
-            url: string;
-            thumb?: string;
+    interface IImageGalleryPartInternalData {
+        gallery: (IImageGalleryInfo | string | DeepX.MdBlogs.IArticleLabelInfo)[];
+        items: Record<string, {
+            items: IImageItemInfo[];
+            rela?: string | Hje.RelativePathInfo;
+        }>;
+        rela: Hje.RelativePathInfo;
+        blogRela: Hje.RelativePathInfo;
+        mkt?: {
+            mkt?: string | boolean;
         };
-    }
-    export interface IImageCollectionPartOptions {
-        itemUrl?(item: IImageItemInfo, kind: IImageUrlKind): string | undefined;
-        click?(data: IImageClickInfo, ev: MouseEvent): void;
-        close?(ev: MouseEvent): void;
-        mkt?: string | boolean;
-        page?: number;
-    }
-    export interface IImageSeriesPartData extends IImageCollectionPartOptions {
-        series: (IImageSeriesInfo | string | DeepX.MdBlogs.IArticleLabelInfo)[];
-        items: Record<string, IImageItemInfo[]>;
-        select?: string | boolean;
-        seriesRela?: string | Hje.RelativePathInfo;
-        blogRela?: string | Hje.RelativePathInfo;
-        imageRela?: string | Hje.RelativePathInfo;
+        mainStyle: string[];
+        select?: IImageGalleryInfo;
+        siteName?: string;
+        defaultItemName?: string;
+        needBack?: boolean;
         url?: string | boolean;
-        blogs?: DeepX.MdBlogs.ArticleInfo[];
-        styles?: {
-            header?: string | string[];
-            main?: string | string[];
-            next?: string | string[];
-            related?: string | string[];
-            share?: string | string[];
-        };
-        strings?: {
-            all?: string;
-            pics?: string;
-            site?: string;
-        };
-        before?: Hje.DescriptionContract;
-        after?: Hje.DescriptionContract;
-        selected?(info: IImageSeriesInfo, component: ImageSeriesPart): void;
+        before?: string;
+        after?: string;
+        selected?: (info: IImageGalleryInfo, component: ImageGalleryPart) => void;
     }
-    export interface IImageCollectionPartData extends IImageCollectionPartOptions {
-        rela?: string | Hje.RelativePathInfo;
-        items: IImageItemInfo[];
-        defaultName?: string;
-    }
-    export interface IRelatedInfoPartData {
-        title?: string;
-        links?: DeepX.MdBlogs.IArticleRelatedLinkItemInfo[];
-        images?: IImageItemInfo[];
-        imageRela?: string | Hje.RelativePathInfo;
-        defaultImageName?: string;
-        mkt?: string | boolean;
-        itemUrl?(item: IImageItemInfo, kind: IImageUrlKind): string | undefined;
-        click?(data: IImageClickInfo, ev?: MouseEvent): void;
-        close?(ev?: MouseEvent): void;
-    }
-    export class ImageSeriesPart extends Hje.DataComponent<IImageSeriesPartData> {
-        private __inner;
+    export class ImageGalleryPart extends Hje.DataComponent<IImageGalleryPartData, IImageGalleryPartInternalData> {
         constructor(args: any);
-        get imageRela(): Hje.RelativePathInfo;
         get blogRela(): Hje.RelativePathInfo;
         get before(): Hje.BaseComponent | undefined;
         get after(): Hje.BaseComponent | undefined;
-        get series(): IImageSeriesInfo[];
-        getSeries(id: string): IImageSeriesInfo | undefined;
-        selectSeries(id: string | IImageSeriesInfo): IImageSeriesInfo | undefined;
+        get gallery(): IImageGalleryInfo[];
+        getGallery(id: string): IImageGalleryInfo | undefined;
+        selectGalleryAsync(id: string | IImageGalleryInfo): Promise<IImageGalleryInfo | undefined>;
+        selectGalleryInCache(value: IImageGalleryInfo): IImageGalleryInfo;
+        relativePath(path: string | undefined): string;
         scrollContentIntoView(): false | undefined;
         scrollMenuIntoView(): false | undefined;
-        imageRelative(url: string | undefined): string | undefined;
-        closeImage(ev?: MouseEvent): void;
-        registerHistoryPop(): void;
-        protected onSelect(info: IImageSeriesInfo): void;
-        private refreshRelated;
-        private genSeriesMenu;
-        getSeriesLinkInfo(value: IImageSeriesInfo): {
+        getGalleryLinkInfo(value: IImageGalleryInfo): {
             title: string;
             url: string | undefined;
             kind: "route" | "link" | "func";
         };
+        closeImage(ev?: MouseEvent): void;
+        registerHistoryPop(): void;
+        protected onSelect(info: IImageGalleryInfo): void;
+        private refreshRelated;
+        private genGalleryMenu;
     }
-    export class ImageCollectionPart extends Hje.DataComponent {
-        private __inner;
+    export class ImageCollectionPart extends Hje.DataComponent<IImageCollectionPartData, {
+        items: IImageItemInfo[];
+        rela: Hje.RelativePathInfo;
+        itemUrl(item: IImageItemInfo, options: IImageUrlResolveOptions): string | undefined;
+        click?(data: IImageClickInfo, ev?: MouseEvent): void;
+        close?(ev?: MouseEvent): void;
+        mkt?: {
+            mkt: string | boolean;
+        };
+        defaultName?: string;
+        pageSize?: number;
+        nextIndex: number;
+        renderedCount: number;
+    }> {
         constructor(args: any);
         get length(): IImageItemInfo[];
         setDefaultName(value: string): void;
@@ -171,7 +131,8 @@ declare namespace DeepX.MdBlogs {
         clear(): void;
         nextPage(): boolean;
         indexOf(item: string | IImageItemInfo): number;
-        imageRelative(url: string | undefined): string | undefined;
+        setImageRela(value: string | Hje.RelativePathInfo | null): void;
+        imageRelative(url: string | undefined): string;
         openImage(item: IImageItemInfo | string, ev?: MouseEvent): undefined;
         closeImage(ev?: MouseEvent): void;
         private genItemModel;
@@ -180,7 +141,7 @@ declare namespace DeepX.MdBlogs {
         constructor(args: any);
         setData(links: DeepX.MdBlogs.IArticleRelatedLinkItemInfo[] | null | undefined, images: IImageItemInfo[] | null | undefined): number;
     }
-    export function seriesList(col: IImageSeriesInfo[], imageRela: string | Hje.RelativePathInfo | ImageSeriesPart | ImageCollectionPart, link?: string, options?: {
+    export function galleryList(col: IImageGalleryInfo[], imageRela: string | Hje.RelativePathInfo | ImageGalleryPart | ImageCollectionPart, link?: string, options?: {
         mkt?: string | boolean;
     }): {
         tagName: string;
@@ -190,6 +151,7 @@ declare namespace DeepX.MdBlogs {
         };
         children: Hje.DescriptionContract[];
     }[] | null;
+    export function getGallery(gallery: IImageGalleryInfo[], id: string): IImageGalleryInfo | undefined;
     export {};
 }
 declare namespace DeepX.MdBlogs {
@@ -207,8 +169,8 @@ declare namespace DeepX.MdBlogs {
             disableMenu?: boolean;
             disableSearch?: boolean;
             linksTitle?: string;
-            seriesTitle?: string;
-            seriesTips?: string;
+            galleryTitle?: string;
+            galleryTips?: string;
         };
         defs(key: string): any;
         blogsInfo(options?: {
@@ -225,7 +187,7 @@ declare namespace DeepX.MdBlogs {
         blog(options?: IArticleLocaleOptions): ArticleInfo[];
         docs(options?: IArticleLocaleOptions): (string | ArticleInfo)[];
         hiddenArticles(options?: IArticleLocaleOptions): ArticleInfo[];
-        series(): IImageSeriesInfo[] | undefined;
+        gallery(): IImageGalleryInfo[] | undefined;
         links(options?: {
             mkt?: string | boolean;
         }): {
@@ -285,7 +247,7 @@ declare namespace DeepX.MdBlogs {
         get keywords(): NameValueModel[] | undefined;
         get intro(): string;
         get notes(): string[];
-        get series(): IImageSeriesInfo[];
+        get gallery(): IImageGalleryInfo[];
         get authors(): ContributorCollection;
         get contentCache(): string | undefined;
         get dateObj(): {
@@ -304,8 +266,14 @@ declare namespace DeepX.MdBlogs {
             maxHeight?: number;
             cover?: boolean;
         } | undefined;
+        getOptions(key: string): string | boolean | string[] | {
+            name?: string;
+            url: string;
+            maxHeight?: number;
+            cover?: boolean;
+        } | null | undefined;
         defs(key: string): any;
-        hasSeries(value: string): boolean;
+        hasGallery(value: string): boolean;
         getRoutePath(options?: {
             mkt?: string | boolean;
         }): string | undefined;
@@ -335,11 +303,17 @@ declare namespace DeepX.MdBlogs {
     }
 }
 declare namespace DeepX.MdBlogs {
-    type IArticleYearConfig = boolean | "y" | "year" | "m" | "month" | "d" | "date" | "day" | undefined;
-    type INameValueModelValue = (INameValueModel | string)[];
-    type INameValueModelDefinitions = INameValueModel[] | Record<string, INameValueModel | string | boolean>;
-    type IContributorsInfo = string | (string | IContributorInfo)[] | Record<string, string | (string | IContributorInfo)[]>;
-    interface IArticlesPartDataSelectParams {
+    type IImageRatio = "p" | "page" | "v" | "vertical" | "h" | "horizontal" | "s" | "square" | "w" | "wide";
+    type ITitleCaseKind = "upper" | "lower" | "capital" | "small" | "normal" | "none" | null;
+    export type IArticleYearConfig = boolean | "y" | "year" | "m" | "month" | "d" | "date" | "day" | undefined;
+    export type INameValueModelValue = (INameValueModel | string)[];
+    export type INameValueModelDefinitions = INameValueModel[] | Record<string, INameValueModel | string | boolean>;
+    export type IContributorsInfo = string | (string | IContributorInfo)[] | Record<string, string | (string | IContributorInfo)[]>;
+    export interface IImageUrlResolveOptions {
+        kind: "thumb" | "source";
+        rela: Hje.RelativePathInfo;
+    }
+    export interface IArticlesPartDataSelectParams {
         children: Hje.DescriptionContract[];
         article: ArticleInfo;
         mkt: string | boolean | undefined;
@@ -347,18 +321,18 @@ declare namespace DeepX.MdBlogs {
         defs(key: string): any;
         insertChildren(position: "last" | "end" | "start" | number | undefined, ...models: Hje.DescriptionContract[]): void;
     }
-    interface IArticlesPartDataHomeParams {
+    export interface IArticlesPartDataHomeParams {
         model: Hje.BaseComponent;
         mkt: string | boolean | undefined;
         store: any;
         defs(key: string): any;
     }
-    interface IArticlesPartDataFetchParams {
+    export interface IArticlesPartDataFetchParams {
         articles: Articles;
         mkt: string | boolean | undefined;
         store: any;
     }
-    interface IContributorInfo {
+    export interface IContributorInfo {
         /**
          * Nickname.
          */
@@ -377,15 +351,15 @@ declare namespace DeepX.MdBlogs {
         avatar?: string;
         [property: string]: any;
     }
-    interface IRoleContributorInfo {
+    export interface IRoleContributorInfo {
         role: NameValueModel;
         members: IContributorInfo[];
     }
-    interface IArticleLocaleOptions {
+    export interface IArticleLocaleOptions {
         reload?: boolean;
         mkt?: string | boolean;
     }
-    interface IArticleRelatedLinkItemInfo {
+    export interface IArticleRelatedLinkItemInfo {
         /**
          * The display name.
          */
@@ -407,13 +381,13 @@ declare namespace DeepX.MdBlogs {
          */
         data?: any;
     }
-    interface IArticleLabelInfo {
+    export interface IArticleLabelInfo {
         name: string;
         disable: "label" | "header";
         ref?: boolean | string;
         [property: string]: unknown;
     }
-    interface IArticleMenuOptions {
+    export interface IArticleMenuOptions {
         select?: ArticleInfo;
         deep?: boolean | number;
         mkt?: string | boolean;
@@ -429,11 +403,11 @@ declare namespace DeepX.MdBlogs {
         }): void;
     }
     /**
-     * The series information.
+     * The gallery information.
      */
-    interface IImageSeriesInfo {
+    export interface IImageGalleryInfo {
         /**
-         * The identifier of the series.
+         * The identifier of the gallery.
          */
         id: string;
         /**
@@ -441,7 +415,7 @@ declare namespace DeepX.MdBlogs {
          */
         alias?: string[] | null;
         /**
-         * A value indicating whether the series item is disabled.
+         * A value indicating whether the gallery item is disabled.
          */
         disable?: boolean;
         /**
@@ -455,7 +429,14 @@ declare namespace DeepX.MdBlogs {
         /**
          * The options.
          */
-        options: Record<string, any>;
+        options?: {
+            nameCase?: ITitleCaseKind;
+            subtitleCase?: ITitleCaseKind;
+            defaultItemName?: string | boolean;
+            ratio?: IImageRatio;
+            thumb?: boolean;
+            [property: string]: any;
+        };
         /**
          * The icon.
          */
@@ -473,6 +454,10 @@ declare namespace DeepX.MdBlogs {
          */
         links?: DeepX.MdBlogs.IArticleRelatedLinkItemInfo[];
         /**
+         * The link or collection of items.
+         */
+        items: string | IImageItemInfo[];
+        /**
          * The data.
          */
         data?: Record<string, any>;
@@ -481,7 +466,7 @@ declare namespace DeepX.MdBlogs {
     /**
      * The settings and markdown URL of article.
      */
-    interface IArticleInfo {
+    export interface IArticleInfo {
         /**
          * The identifier. Should be a UUID/GUID.
          */
@@ -630,16 +615,20 @@ declare namespace DeepX.MdBlogs {
              */
             kind?: string[] | string;
             /**
-             * The identifier of series to bind
+             * The identifier of gallery to bind
              */
-            series?: string | string[] | null;
+            gallery?: string | string[] | null;
+            /**
+             * The case of name.
+             */
+            nameCase?: ITitleCaseKind;
         };
         [property: string]: any;
     }
     /**
      * The config of blog.
      */
-    interface IArticleBlogConfig {
+    export interface IArticleBlogConfig {
         /**
          * The optional name of blog.
          */
@@ -674,7 +663,7 @@ declare namespace DeepX.MdBlogs {
         reverse?: boolean;
         [property: string]: any;
     }
-    interface IArticlesPartData {
+    export interface IArticlesPartData {
         mkt?: string | boolean;
         banner?: Hje.DescriptionContract;
         supplement?: Hje.DescriptionContract;
@@ -683,18 +672,19 @@ declare namespace DeepX.MdBlogs {
         select?: string;
         q?: string;
         store?: any;
+        galleryUrl?(info: IImageGalleryInfo): string;
         onselect?(ev: IArticlesPartDataSelectParams): void;
         onhome?(ev: IArticlesPartDataHomeParams): void;
         onfetch?(ev: IArticlesPartDataFetchParams): void;
     }
-    interface IArticleInfoOptions {
+    export interface IArticleInfoOptions {
         rela?: Hje.RelativePathInfo;
         year?: IArticleYearConfig;
         fetch?: ((url: Hje.RelativePathInfo) => Promise<string>);
         definitions?: IArticlesDefinitions;
-        series?: IImageSeriesInfo[];
+        gallery?: IImageGalleryInfo[];
     }
-    interface IArticlesDefinitions {
+    export interface IArticlesDefinitions {
         /**
          * All keywords information.
          */
@@ -716,7 +706,7 @@ declare namespace DeepX.MdBlogs {
     /**
      * The model of previous blog articles in page.
      */
-    interface IArticlePagingModel {
+    export interface IArticlePagingModel {
         /**
          * A flag indicating whether this page is disabled.
          */
@@ -742,7 +732,7 @@ declare namespace DeepX.MdBlogs {
     /**
      * The model of blog and docs.
      */
-    interface IArticleCollection {
+    export interface IArticleCollection {
         /**
          * The website name.
          */
@@ -768,9 +758,9 @@ declare namespace DeepX.MdBlogs {
          */
         hiddenArticles?: IArticleInfo[];
         /**
-         * The series collection.
+         * The gallery collection.
          */
-        series?: IImageSeriesInfo[];
+        gallery?: IImageGalleryInfo[];
         /**
          * The mapping of route.
          */
@@ -820,13 +810,13 @@ declare namespace DeepX.MdBlogs {
              */
             linksTitle?: string;
             /**
-             * The title to display under series collection.
+             * The title to display under gallery collection.
              */
-            seriesTitle?: string;
+            galleryTitle?: string;
             /**
-             * The tips to display under series collection.
+             * The tips to display under gallery collection.
              */
-            seriesTips?: string;
+            galleryTips?: string;
         };
         /**
          * The definitions.
@@ -834,18 +824,98 @@ declare namespace DeepX.MdBlogs {
         "$defs"?: IArticlesDefinitions;
         [property: string]: any;
     }
-    interface IArticlesLifecycle {
+    export interface IArticlesLifecycle {
         disable?: boolean;
         oninit?(instance: ArticlesPart): void;
         onselect?(instance: ArticlesPart, article: ArticleInfo): void;
         onhome?(instance: ArticlesPart): void;
     }
-    interface IHeadingLevelInfo {
+    export interface IImageItemInfo {
+        id: string;
+        disable?: boolean;
+        name?: string;
+        year: number;
+        month?: number;
+        day?: number;
+        url?: string;
+        thumb?: boolean | string;
+        keywords?: string[];
+        size?: string;
+        data?: Record<string, unknown>;
+    }
+    export interface IImageClickInfo {
+        item: IImageItemInfo;
+        component: ImageCollectionPart;
+        info: {
+            name: string;
+            url: string;
+            thumb?: string;
+        };
+    }
+    export interface IImageCollectionPartOptions {
+        itemUrl?(item: IImageItemInfo, options: IImageUrlResolveOptions): string | undefined;
+        click?(data: IImageClickInfo, ev: MouseEvent): void;
+        close?(ev: MouseEvent): void;
+        mkt?: string | boolean;
+        page?: number;
+    }
+    export interface IImageGalleryPartData extends IImageCollectionPartOptions {
+        gallery: (IImageGalleryInfo | string | DeepX.MdBlogs.IArticleLabelInfo)[];
+        items?: Record<string, IImageItemInfo[] | {
+            items: IImageItemInfo[];
+            rela?: string | Hje.RelativePathInfo;
+        }>;
+        select?: string | boolean;
+        rela?: string | Hje.RelativePathInfo;
+        blogRela?: string | Hje.RelativePathInfo;
+        url?: string | boolean;
+        blog?: DeepX.MdBlogs.ArticleInfo[];
+        styles?: {
+            header?: string | string[];
+            main?: string | string[];
+            next?: string | string[];
+            related?: string | string[];
+            share?: string | string[];
+        };
+        strings?: {
+            all?: string;
+            pics?: string;
+            site?: string;
+        };
+        before?: Hje.DescriptionContract;
+        after?: Hje.DescriptionContract;
+        selected?(info: IImageGalleryInfo, component: ImageGalleryPart): void;
+        fetch?: (url: Hje.RelativePathInfo) => Promise<any>;
+    }
+    export interface IRelatedInfoPartData {
+        title?: string;
+        links?: DeepX.MdBlogs.IArticleRelatedLinkItemInfo[];
+        images?: IImageItemInfo[];
+        imageRela?: string | Hje.RelativePathInfo;
+        defaultImageName?: string;
+        mkt?: string | boolean;
+        itemUrl?(item: IImageItemInfo, kind: IImageUrlResolveOptions): string | undefined;
+        click?(data: IImageClickInfo, ev?: MouseEvent): void;
+        close?(ev?: MouseEvent): void;
+    }
+    export interface IImageCollectionPartData extends IImageCollectionPartOptions {
+        rela?: string | Hje.RelativePathInfo;
+        items: IImageItemInfo[];
+        defaultName?: string;
+    }
+    export interface IImageItemsData {
+        items: IImageItemInfo[] | Record<string, IImageItemInfo[]>;
+        options?: {
+            imageRela?: string | Hje.RelativePathInfo;
+            [property: string]: any;
+        };
+    }
+    export interface IHeadingLevelInfo {
         level: number;
         text: string;
         scroll(): void;
     }
-    interface INameValueModel {
+    export interface INameValueModel {
         /**
          * The name.
          */
@@ -856,10 +926,11 @@ declare namespace DeepX.MdBlogs {
         value: string | undefined;
         [property: string]: any;
     }
-    interface ILocalePropOptions<T = any> {
+    export interface ILocalePropOptions<T = any> {
         mkt?: string | boolean;
         fallback?: T;
     }
+    export {};
 }
 declare namespace DeepX.MdBlogs {
     /**
@@ -873,6 +944,7 @@ declare namespace DeepX.MdBlogs {
         title?: string | boolean;
         banner?: Hje.DescriptionContract;
         supplement?: Hje.DescriptionContract;
+        galleryUrl?(info: IImageGalleryInfo): string;
         onfetch?(ev: IArticlesPartDataFetchParams): void;
         onselect?(ev: IArticlesPartDataSelectParams): void;
         onhome?(ev: IArticlesPartDataHomeParams): void;
@@ -934,10 +1006,13 @@ declare namespace DeepX.MdBlogs {
         works: string;
         events: string;
         series: string;
+        gallery: string;
         paintings: string;
         related: string;
         relatedBlog: string;
         relatedSeries: string;
+        relatedPhotos: string;
+        relatedGallery: string;
         relatedPaintings: string;
         picLibs: string;
         all: string;
@@ -1029,14 +1104,13 @@ declare namespace DeepX.MdBlogs {
     function name(): string;
 }
 declare namespace DeepX.MdBlogs {
-    class ArticlesPart extends Hje.DataComponent<IArticlesPartData> {
-        readonly __inner: {
-            select?: ArticleInfo | null;
-            info?: Articles;
-            mkt?: string | boolean;
-            lifecycle?: IArticlesLifecycle;
-            title?: string;
-        };
+    class ArticlesPart extends Hje.DataComponent<IArticlesPartData, {
+        select?: ArticleInfo | null;
+        info?: Articles;
+        mkt?: string | boolean;
+        lifecycle?: IArticlesLifecycle;
+        title?: string;
+    }> {
         constructor(args: any);
         get title(): string | undefined;
         set title(value: string);
@@ -1078,6 +1152,9 @@ declare namespace DeepX.MdBlogs {
     function firstQuery(): string;
     function filterFirst<T>(arr: T[], predicate: (item: T, index?: number) => boolean): T | undefined;
     function scrollToTop(): void;
+    function getCaseClassName<T = any>(obj: T | undefined | null, key: keyof T, options?: {
+        mkt?: string | boolean;
+    }): "x-text-case-upper" | "x-text-case-lower" | "x-text-case-capital" | "x-text-case-small" | undefined;
     function getLocaleProp<T = any>(obj: T | undefined, key?: keyof (T) | null, options?: {
         mkt?: string | boolean;
         fallback?: any;

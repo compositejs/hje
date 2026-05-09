@@ -264,6 +264,7 @@ namespace DeepX.MdBlogs {
             title = prefix + title;
         }
 
+        const nameClassName = getCaseClassName({ nameCase: article.getOptions("nameCase") }, "nameCase", localeOptions);
         const text = {
             tagName: "a",
             props: { href: path, title: tips },
@@ -274,12 +275,14 @@ namespace DeepX.MdBlogs {
             },
             children: subtitle ? [{
                 tagName: "span",
+                className: nameClassName,
                 children: title
             }, {
                 tagName: "span",
                 children: subtitle
             }] : title
         } as Hje.DescriptionContract;
+        if (!subtitle) text.className = nameClassName;
         const result = {
             tagName: "li",
             props: {},
@@ -313,6 +316,7 @@ namespace DeepX.MdBlogs {
                 tagName: "div",
                 children: [{
                     tagName: "strong",
+                    className: nameClassName,
                     children: title
                 }, {
                     tagName: "span",

@@ -1,16 +1,14 @@
 namespace DeepX.MdBlogs {
-    export class ArticlesPart extends Hje.DataComponent<IArticlesPartData> {
-        readonly __inner: {
-            select?: ArticleInfo | null;
-            info?: Articles;
-            mkt?: string | boolean;
-            lifecycle?: IArticlesLifecycle;
-            title?: string;
-        } = {} as any;
-
+    export class ArticlesPart extends Hje.DataComponent<IArticlesPartData, {
+        select?: ArticleInfo | null;
+        info?: Articles;
+        mkt?: string | boolean;
+        lifecycle?: IArticlesLifecycle;
+        title?: string;
+    }> {
         constructor(args: any) {
             super(args);
-            this.__inner.mkt = this.data("mkt");
+            this.internal.mkt = this.data("mkt");
             this.childrenAccess.set([{
                 key: "content",
                 tagName: "article",
@@ -48,13 +46,13 @@ namespace DeepX.MdBlogs {
                 }]
             }]);
             const lifecycle: IArticlesLifecycle = this.data("lifecycle") || { disable: true };
-            this.__inner.lifecycle = lifecycle;
+            this.internal.lifecycle = lifecycle;
             const { articles, onfetch, store } = this.data();
             if (typeof articles === "string") {
                 fetchArticles(articles).then(r => {
                     if (typeof onfetch === "function") onfetch({
                         articles: r,
-                        mkt: this.__inner.mkt,
+                        mkt: this.internal.mkt,
                         store
                     });
                     this.initRender(r, this.data("select"), this.data("q"), lifecycle);
@@ -62,7 +60,7 @@ namespace DeepX.MdBlogs {
             } else if (articles instanceof Articles) {
                 if (typeof onfetch === "function") onfetch({
                     articles,
-                    mkt: this.__inner.mkt,
+                    mkt: this.internal.mkt,
                     store,
                 });
                 this.initRender(articles, this.data("select"), this.data("q"), lifecycle);
@@ -70,11 +68,11 @@ namespace DeepX.MdBlogs {
         }
 
         get title(): string | undefined {
-            return this.__inner.title;
+            return this.internal.title;
         }
 
         set title(value: string) {
-            this.__inner.title = value;
+            this.internal.title = value;
             const self = this;
             const c = super.getChild("title") as Hje.ElementComponent;
             c.setChildren([{
@@ -92,22 +90,22 @@ namespace DeepX.MdBlogs {
         }
 
         get mkt(): string | boolean | undefined {
-            return this.__inner.mkt;
+            return this.internal.mkt;
         }
 
         set mkt(value: string | boolean) {
-            this.__inner.mkt = value;
+            this.internal.mkt = value;
         }
 
         defs(key: string) {
-            return this.__inner.info?.defs(key);
+            return this.internal.info?.defs(key);
         }
         
         home(q?: string) {
-            const already = !this.__inner.select;
-            this.__inner.select = null;
+            const already = !this.internal.select;
+            this.internal.select = null;
             const children: Hje.DescriptionContract[] = [];
-            const info = this.__inner.info;
+            const info = this.internal.info;
             if (!info) return;
             const config = info.options;
             const options = this.createLocaleOptions();
@@ -217,7 +215,7 @@ namespace DeepX.MdBlogs {
         }
 
         select(article?: ArticleInfo | string) {
-            const info = this.__inner.info;
+            const info = this.internal.info;
             if (!info) return;
             const options = this.createLocaleOptions();
             if (typeof article === "number") {
@@ -226,8 +224,8 @@ namespace DeepX.MdBlogs {
                     return undefined;
                 }
 
-                if (isNaN(article) || article < 0) return this.__inner.select;
-                const blog = this.__inner.info?.blog(options);
+                if (isNaN(article) || article < 0) return this.internal.select;
+                const blog = info?.blog(options);
                 if (!blog) return undefined;
                 article = blog[article];
                 if (!article) return undefined;
@@ -237,11 +235,11 @@ namespace DeepX.MdBlogs {
                     return undefined;
                 }
 
-                article = this.__inner.info?.get(article, options);
+                article = info?.get(article, options);
                 if (!article) return undefined;
             }
 
-            if (!article || this.__inner.select === article) return this.__inner.select;
+            if (!article || this.internal.select === article) return this.internal.select;
             const children: Hje.DescriptionContract[] = [];
             const self = this;
             const title = article.getName(options);
@@ -280,7 +278,8 @@ namespace DeepX.MdBlogs {
 
             children.push({
                 tagName: "h1",
-                children: title
+                children: title,
+                className: getCaseClassName({ nameCase: article.getOptions("nameCase") }, "nameCase", options),
             });
             const infoModel = {
                 tagName: "section",
@@ -365,56 +364,59 @@ namespace DeepX.MdBlogs {
             });
             const related: Hje.DescriptionContract[] = [];
             fillParagraph(article.getNotes(options), related);
-            if (article.series?.length) {
+            if (article.gallery?.length) {
                 related.push({
                     tagName: "h2",
                     children: [{
                         tagName: "span",
-                        children: getLocaleProp(this.__inner.info?.options, "seriesTitle", options) || this.string("relatedPaintings", options),
+                        children: getLocaleProp(info.options, "galleryTitle", options) || this.string("relatedGallery", options),
                     }]
                 }, {
                     tagName: "div",
-                    children: article.series.map(series => {
+                    children: article.gallery.map(gallery => {
                         const mktOptions = mkt ? { mkt } : undefined;
-                        const name = getLocaleProp(series, null, mktOptions);
-                        if (!name || getLocaleProp(series, "disable", mktOptions)) return undefined;
+                        const name = getLocaleProp(gallery, null, mktOptions);
+                        if (!name || getLocaleProp(gallery, "disable", mktOptions)) return undefined;
                         const elementItems: Hje.DescriptionContract[] = [];
-                        if (series.logo) elementItems.push({
+                        if (gallery.logo) elementItems.push({
                             tagName: "img",
                             props: {
-                                src: self.__inner.info?.relative(series.logo)?.toString(),
+                                src: info.relative(gallery.logo)?.toString(),
                                 alt: name
                             }
                         });
                         elementItems.push({
                             tagName: "span",
+                            className: getCaseClassName(gallery.options, "nameCase", mktOptions),
                             children: name,
                         });
-                        const subtitle = getLocaleProp(series, "subtitle", mktOptions);
+                        const subtitle = getLocaleProp(gallery, "subtitle", mktOptions);
                         if (subtitle) elementItems.push({
                             tagName: "span",
                             children: [{
                                 tagName: "span",
+                            className: getCaseClassName(gallery.options, "subtitleCase", mktOptions),
                                 children: subtitle,
                             }]
-                        })
+                        });
+                        const url = gallery.options?.url || self.callDataHandler("galleryUrl", null, gallery)?.result;
                         return {
                             tagName: "a",
                             className: "link-long-button",
                             props: {
-                                href: self.__inner.info?.relative(series.url)?.toString(),
+                                href: url ? info.relative(url)?.toString() : "javascript:void 0;",
                             },
                             children: elementItems,
                         } as Hje.DescriptionContract;
                     }).filter(ele => !!ele),
                 });
-                const seriesTips = getLocaleProp(this.__inner.info?.options, "seriesTips", options);
-                if (seriesTips) related.push({
+                const galleryTips = getLocaleProp(info.options, "galleryTips", options);
+                if (galleryTips) related.push({
                     tagName: "div",
                     className: "x-part-footnote",
                     children: [{
                         tagName: "span",
-                        children: seriesTips,
+                        children: galleryTips,
                     }]
                 });
             }
@@ -427,9 +429,9 @@ namespace DeepX.MdBlogs {
                 className: "x-part-blog-related",
                 children: related
             });
-            const previous = this.__inner.info?.previousArticle(article, options);
-            const next = this.__inner.info?.nextArticle(article, options);
-            const parent = this.__inner.info?.parentArticle(article, options);
+            const previous = info.previousArticle(article, options);
+            const next = info.nextArticle(article, options);
+            const parent = info.parentArticle(article, options);
             if (previous || next) children.push({
                 tagName: "section",
                 className: "x-part-blog-next",
@@ -529,7 +531,7 @@ namespace DeepX.MdBlogs {
             } as IArticlesPartDataSelectParams);
             const model = super.getChild("content") as Hje.ElementComponent;
             model.setChildren(children);
-            this.__inner.select = article;
+            this.internal.select = article;
             this.refreshMenu();
             scrollToTop();
             this.lifecycle()?.onselect?.(this, article);
@@ -538,7 +540,7 @@ namespace DeepX.MdBlogs {
 
         next() {
             const options = this.createLocaleOptions();
-            const blog = this.__inner.info?.nextArticle(this.__inner.select, options);
+            const blog = this.internal.info?.nextArticle(this.internal.select, options);
             if (blog === undefined) return blog;
             if (blog === null) {
                 this.home();
@@ -551,7 +553,7 @@ namespace DeepX.MdBlogs {
 
         previous() {
             const options = this.createLocaleOptions();
-            const blog = this.__inner.info?.previousArticle(this.__inner.select, options);
+            const blog = this.internal.info?.previousArticle(this.internal.select, options);
             if (blog === undefined) return blog;
             if (blog === null) {
                 this.home();
@@ -564,7 +566,7 @@ namespace DeepX.MdBlogs {
 
         parent() {
             const options = this.createLocaleOptions();
-            const blog = this.__inner.info?.parentArticle(this.__inner.select, options);
+            const blog = this.internal.info?.parentArticle(this.internal.select, options);
             if (blog === undefined) return blog;
             if (blog === null) {
                 this.home();
@@ -576,8 +578,8 @@ namespace DeepX.MdBlogs {
         }
 
         protected initRender(articles: Articles, select: string | undefined, q: string | undefined, lifecycle: IArticlesLifecycle) {
-            if (this.__inner.info === articles || !articles) return;
-            this.__inner.info = articles;
+            if (this.internal.info === articles || !articles) return;
+            this.internal.info = articles;
             const options = this.createLocaleOptions();
             this.title = articles.getName(options);
             let arr = [] as Hje.DescriptionContract[];
@@ -586,7 +588,7 @@ namespace DeepX.MdBlogs {
             const menu = super.getChild("menu") as Hje.ElementComponent;
             menu.setChildren(arr);
             menu.style(arr.length > 0 ? {} : { display: "none" });
-            const linkModels = this.__inner.info.links(options).map(item => {
+            const linkModels = this.internal.info.links(options).map(item => {
                 return {
                     tagName: "li",
                     children: [generateLink(item)]
@@ -610,7 +612,7 @@ namespace DeepX.MdBlogs {
             menu.forEachChild(item => {
                 const data = (item as Hje.ElementComponent).data("article") as ArticleInfo | undefined;
                 if (!(data instanceof ArticleInfo)) return;
-                if (data === this.__inner.select) {
+                if (data === this.internal.select) {
                     if (item.className().indexOf("state-sel") < 0)
                         item.className({ add: "state-sel" });
                 } else {
@@ -621,12 +623,12 @@ namespace DeepX.MdBlogs {
         }
 
         protected createLocaleOptions() {
-            const mkt = this.__inner.mkt;
+            const mkt = this.internal.mkt;
             return mkt == null || mkt === true ? undefined : { mkt };
         }
 
         protected lifecycle() {
-            const l = this.__inner.lifecycle;
+            const l = this.internal.lifecycle;
             return !l || l.disable ? undefined : l;
         }
 
@@ -638,7 +640,7 @@ namespace DeepX.MdBlogs {
                 className: "link-tile-compact",
                 children: [] as Hje.DescriptionContract[]
             };
-            const info = this.__inner.info;
+            const info = this.internal.info;
             if (!info) return ul;
             if (q && typeof q === "string") {
                 const searchResult = info.search(q);
@@ -666,13 +668,13 @@ namespace DeepX.MdBlogs {
             mkt?: string | boolean;
             fallback?: string;
         }) {
-            return this.__inner.info?.string(key, options);
+            return this.internal.info?.string(key, options);
         }
 
         protected genMenu(arr: Hje.DescriptionContract[], params: (ArticleInfo | string)[], deep?: boolean | number) {
             const self = this;
             return generateMenu(params, {
-                select: this.__inner.select ? this.__inner.select : undefined,
+                select: this.internal.select ? this.internal.select : undefined,
                 mkt: this.createLocaleOptions()?.mkt,
                 deep,
                 arr,

@@ -121,7 +121,7 @@ namespace Hje {
          * @param path The path relatived with this one.
          * @returns A new relative path info of the specific.
          */
-        relative(path: string | RelativePathInfo) {
+        relative(path: string | RelativePathInfo | null | undefined) {
             if (!path) return this;
             if (typeof path === "string") path = new RelativePathInfo(path);
             if (path.isAbsolute) return path;

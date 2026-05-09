@@ -826,7 +826,7 @@ declare namespace Hje {
          * @param path The path relatived with this one.
          * @returns A new relative path info of the specific.
          */
-        relative(path: string | RelativePathInfo): RelativePathInfo;
+        relative(path: string | RelativePathInfo | null | undefined): RelativePathInfo;
         /**
          * Converts to a string.
          * @returns A string about this path.

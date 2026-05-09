@@ -44,6 +44,24 @@ namespace DeepX.MdBlogs {
         window.scrollTo({ top: 0, behavior: "smooth" });
     }
 
+    export function getCaseClassName<T = any>(obj: T | undefined | null, key: keyof T, options?: { mkt?: string | boolean }) {
+        if (!obj) return undefined;
+        const cap = DeepX.MdBlogs.getLocaleProp(obj, key || ("nameCase" as keyof T), options) as NonNullable<IImageGalleryInfo["options"]>["nameCase"];
+        if (!cap) return undefined;
+        switch (cap.toLowerCase()) {
+            case "upper":
+                return "x-text-case-upper";
+            case "lower":
+                return "x-text-case-lower";
+            case "captial":
+                return "x-text-case-capital";
+            case "small":
+                return "x-text-case-small";
+            default:
+                return undefined;
+        }
+    }
+
     /* Copied from LangPack */
 
     function getKeyedPropValue(obj: any, key1: string, key2: string | undefined, options?: {

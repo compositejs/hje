@@ -1,145 +1,90 @@
 namespace DeepX.MdBlogs {
 
-    type IImageUrlKind = 'thumb' | 'source';
-    type IImageRatio = "p" | "page" | "v" | "vertical" | "h" | "horizontal" | "s" | "square" | "w" | "wide";
-
-    export type ITitleCaseKind = "upper" | "lower" | "capital" | "small" | "normal" | "none" | null;
-
-    export interface IImageItemInfo {
-        id: string;
-        disable?: boolean;
-        name?: string;
-        year: number;
-        month?: number;
-        day?: number;
-        url?: string;
-        thumb?: boolean | string;
-        keywords?: string[];
-        size?: string;
-        data?: any;
-    }
-
-    export interface IImageClickInfo {
-        item: IImageItemInfo;
-        component: ImageCollectionPart;
-        info: {
-            name: string;
-            url: string;
-            thumb?: string;
-        };
-    }
-
-    export interface IImageCollectionPartOptions {
-        itemUrl?(item: IImageItemInfo, kind: IImageUrlKind): string | undefined;
-        click?(data: IImageClickInfo, ev: MouseEvent): void;
-        close?(ev: MouseEvent): void;
-        mkt?: string | boolean;
-        page?: number;
-    }
-
-    export interface IImageSeriesPartData extends IImageCollectionPartOptions {
-        series: (IImageSeriesInfo | string | DeepX.MdBlogs.IArticleLabelInfo)[];
-        items: Record<string, IImageItemInfo[]>;
-        select?: string | boolean;
-        seriesRela?: string | Hje.RelativePathInfo;
-        blogRela?: string | Hje.RelativePathInfo;
-        imageRela?: string | Hje.RelativePathInfo;
+    interface IImageGalleryPartInternalData {
+        gallery: (IImageGalleryInfo | string | DeepX.MdBlogs.IArticleLabelInfo)[];
+        items: Record<string, {
+            items: IImageItemInfo[];
+            rela?: string | Hje.RelativePathInfo;
+        }>;
+        rela: Hje.RelativePathInfo;
+        blogRela: Hje.RelativePathInfo;
+        mkt?: { mkt?: string | boolean };
+        mainStyle: string[];
+        select?: IImageGalleryInfo;
+        siteName?: string;
+        defaultItemName?: string;
+        needBack?: boolean;
         url?: string | boolean;
-        blogs?: DeepX.MdBlogs.ArticleInfo[];
-        styles?: {
-            header?: string | string[];
-            main?: string | string[];
-            next?: string | string[];
-            related?: string | string[];
-            share?: string | string[];
-        };
-        strings?: {
-            all?: string;
-            pics?: string;
-            site?: string;
-        };
-        before?: Hje.DescriptionContract;
-        after?: Hje.DescriptionContract;
-        selected?(info: IImageSeriesInfo, component: ImageSeriesPart): void;
+        before?: string;
+        after?: string;
+        selected?: (info: IImageGalleryInfo, component: ImageGalleryPart) => void;
     }
 
-    export interface IImageCollectionPartData extends IImageCollectionPartOptions {
-        rela?: string | Hje.RelativePathInfo;
-        items: IImageItemInfo[];
-        defaultName?: string;
-    }
-
-    export interface IRelatedInfoPartData {
-        title?: string;
-        links?: DeepX.MdBlogs.IArticleRelatedLinkItemInfo[];
-        images?: IImageItemInfo[];
-        imageRela?: string | Hje.RelativePathInfo;
-        defaultImageName?: string;
-        mkt?: string | boolean;
-        itemUrl?(item: IImageItemInfo, kind: IImageUrlKind): string | undefined;
-        click?(data: IImageClickInfo, ev?: MouseEvent): void;
-        close?(ev?: MouseEvent): void;
-    }
-
-    export class ImageSeriesPart extends Hje.DataComponent<IImageSeriesPartData> {
-        private __inner: {
-            series: (IImageSeriesInfo | string | DeepX.MdBlogs.IArticleLabelInfo)[];
-            items: Record<string, IImageItemInfo[]>;
-            seriesRela: Hje.RelativePathInfo;
-            blogRela: Hje.RelativePathInfo;
-            imageRela: Hje.RelativePathInfo;
-            mkt?: { mkt: string | boolean };
-            mainStyle: string[];
-            select?: IImageSeriesInfo;
-            siteName?: string;
-            defaultItemName?: string;
-            needBack?: boolean;
-            url?: string | boolean;
-            before?: string;
-            after?: string;
-            selected?: (info: IImageSeriesInfo, component: ImageSeriesPart) => void;
-        };
-
+    export class ImageGalleryPart extends Hje.DataComponent<IImageGalleryPartData, IImageGalleryPartInternalData> {
         constructor(args: any) {
             super(args);
             const data = this.data();
-            const seriesCol = data.series || [];
+            const galleryCol = data.gallery || [];
             const mktOptions = data.mkt !== undefined ? { mkt: data.mkt } : undefined;
-            const seriesRela = toRela(data.seriesRela || "./");
             const blogRela = toRela(data.blogRela || "../blog/");
-            const imageRela = toRela(data.imageRela || "../images/");
             const styles = data.styles || {};
             const strings = data.strings || {};
             const mainStyle = mergeArray(["x-container-pics"], styles.main);
-            this.__inner = {
-                series: seriesCol,
-                items: data.items || {},
-                seriesRela,
+            this.internal.gallery = galleryCol;
+            const items: IImageGalleryPartInternalData["items"] = {};
+            if (data.items) {
+                for (const key in data.items) {
+                    if (!key) continue;
+                    const itemCol = data.items[key];
+                    if (!itemCol) {
+                        continue;
+                    } else if (itemCol instanceof Array) {
+                        items[key] = { items: itemCol };
+                    } else if (itemCol.items instanceof Array) {
+                        items[key] = itemCol;
+                    }
+                }
+            }
+            Object.assign(this.internal, {
+                gallery: galleryCol,
+                items,
+                rela: toRela(data.rela || "./"),
                 blogRela,
                 mkt: mktOptions,
-                imageRela,
                 mainStyle,
                 url: data.url,
                 siteName: strings.site,
                 defaultItemName: strings.pics,
                 selected: data.selected,
-            };
+            });
             const self = this;
             let select = data.select;
-            if (select === true || select === undefined) select = this.series[0]?.id;
+            if (select && typeof select === "string") {
+                select = select.replace(" ", "").replace(" ", "");
+                const eqIndex = select.indexOf("=");
+                if (eqIndex === 0) {
+                    select = select.length > 1 ? select.substring(1) : undefined;
+                } else if (eqIndex > 0) {
+                    if (eqIndex === select.length - 1)
+                        select = select.substring(0, select.length - 1);
+                    else
+                        select = undefined;
+                }
+            }
+            if (select === true || select === undefined) select = this.gallery[0]?.id;
             else if (!select || typeof select !== "string") select = undefined;
             if (data.before) {
-                this.__inner.before = data.before.key;
-                if (!this.__inner.before) {
-                    this.__inner.before = "comp-ref-image-series-part-before";
-                    data.before.key = this.__inner.before;
+                this.internal.before = data.before.key;
+                if (!this.internal.before) {
+                    this.internal.before = "comp-ref-image-gallery-part-before";
+                    data.before.key = this.internal.before;
                 }
             }
             if (data.after) {
-                this.__inner.after = data.after.key;
-                if (!this.__inner.after) {
-                    this.__inner.after = "comp-ref-image-series-part-after";
-                    data.after.key = this.__inner.after;
+                this.internal.after = data.after.key;
+                if (!this.internal.after) {
+                    this.internal.after = "comp-ref-image-gallery-part-after";
+                    data.after.key = this.internal.after;
                 }
             }
             this.childrenAccess.setRange({
@@ -153,20 +98,20 @@ namespace DeepX.MdBlogs {
                     component: ImageCollectionPart,
                     className: mainStyle,
                     data: {
-                        rela: imageRela,
+                        rela: this.internal.rela,
                         itemUrl: data.itemUrl,
                         click: data.click ? (d, ev) => {
                             if (typeof data.click === "function") data.click(d, ev);
-                            const selectItem = self.__inner.select;
+                            const selectItem = self.internal.select;
                             if (!d.component || !d.item?.id || !selectItem) return;
-                            const { url, kind } = self.getSeriesLinkInfo(selectItem);
-                            if (kind !== "route" || !url || !url.includes("?")) return;
+                            const { url, kind } = self.getGalleryLinkInfo(selectItem);
+                            if (kind !== "route" || !url || (!url.includes("?") && url !== "./")) return;
                             const question = url.includes("?") ? "&" : "?";
                             const selectImage = Hje.getQuery("id");
                             if (selectImage) {
                                 history.replaceState(new ImageHistoryState(selectItem, d.item), "", `${url}${question}id=${d.item.id}`);
                             } else {
-                                self.__inner.needBack = true;
+                                self.internal.needBack = true;
                                 history.pushState(new ImageHistoryState(selectItem, d.item), "", `${url}${question}id=${d.item.id}`);
                             }
                         } : undefined,
@@ -214,126 +159,148 @@ namespace DeepX.MdBlogs {
                 }], styles.header, "h1", undefined, "menu"), {
                     key: "all",
                     tagName: "section",
-                    children: select ? [] : this.genSeriesMenu(select),
+                    children: select ? [] : this.genGalleryMenu(select),
                 }].filter(ele => !!ele)
             });
 
-            if (!select || self.__inner.select) return;
-            const sel = self.selectSeries(select);
-            if (!sel) return;
-            const { url, kind, title } = self.getSeriesLinkInfo(sel);
-            if (kind !== "route" || !url) return;
-            if (self.__inner.siteName)
-                document.title = title;
-            const imageId = Hje.getQuery("id");
-            if (!imageId || !url.includes("?")) {
-                history.replaceState(new ImageHistoryState(sel), "", url);
-                return;
-            }
-            const gallery = self.getChild("gallery") as ImageCollectionPart;
-            if (!gallery) {
-                history.replaceState(new ImageHistoryState(sel), "", url);
-                return;
-            }
-            const url2 = `${url}&id=${imageId}`;
-            const imageSelected = gallery.getItem(imageId);
-            history.replaceState(new ImageHistoryState(sel, imageSelected), "", url2);
-            if (imageSelected?.id) gallery.openImage(imageSelected.id);
-        }
-
-        get imageRela() {
-            return this.__inner.imageRela;
+            if (!select || self.internal.select) return;
+            const selPromise = self.selectGalleryAsync(select);
+            if (!selPromise) return;
+            selPromise.then(sel => {
+                if (!sel) return;
+                const { url, kind, title } = self.getGalleryLinkInfo(sel);
+                if (kind !== "route" || !url) return;
+                if (self.internal.siteName)
+                    document.title = title;
+                const imageId = Hje.getQuery("id");
+                if (!imageId || (!url.includes("?") && url !== "./")) {
+                    history.replaceState(new ImageHistoryState(sel), "", url);
+                    return;
+                }
+                const gallery = self.getChild("gallery") as ImageCollectionPart;
+                if (!gallery) {
+                    history.replaceState(new ImageHistoryState(sel), "", url);
+                    return;
+                }
+                const url2 = `${url}${url.includes("?") ? "&" : "?"}id=${imageId}`;
+                const imageSelected = gallery.getItem(imageId);
+                history.replaceState(new ImageHistoryState(sel, imageSelected), "", url2);
+                if (imageSelected?.id) gallery.openImage(imageSelected.id);
+            });
         }
 
         get blogRela() {
-            return this.__inner.blogRela;
+            return this.internal.blogRela;
         }
 
         get before() {
-            return this.__inner.before ? this.childrenAccess.get(this.__inner.before) : undefined;
+            return this.internal.before ? this.childrenAccess.get(this.internal.before) : undefined;
         }
 
         get after() {
-            return this.__inner.after ? this.childrenAccess.get(this.__inner.after) : undefined;
+            return this.internal.after ? this.childrenAccess.get(this.internal.after) : undefined;
         }
 
-        get series() {
-            const col = this.__inner.series;
-            const arr: IImageSeriesInfo[] = [];
+        get gallery() {
+            const col = this.internal.gallery;
+            const arr: IImageGalleryInfo[] = [];
             for (let i = 0; i < col.length; i++) {
-                const series = col[i];
-                if (!series || typeof series === "string" || series.disable) continue;
-                arr.push(series as IImageSeriesInfo);
+                const gallery = col[i];
+                if (!gallery || typeof gallery === "string" || gallery.disable) continue;
+                arr.push(gallery as IImageGalleryInfo);
             }
 
             return arr;
         }
 
-        getSeries(id: string) {
-            if (!id) return undefined;
-            id = id.replace("=", "").replace(" ", "");
-            const series = this.series;
-            for (let i in series) {
-                const item = series[i];
-                if (item?.id !== id || item.disable) continue;
-                return item;
-            }
-
-            for (let i in series) {
-                const item = series[i];
-                if (!item?.alias || item.disable || !(item.alias instanceof Array)) continue;
-                if (item.alias.indexOf(id) > -1) return item;
-            }
-
-            return undefined;
+        getGallery(id: string) {
+            return getGallery(this.gallery, id);
         }
 
-        selectSeries(id: string | IImageSeriesInfo) {
+        async selectGalleryAsync(id: string | IImageGalleryInfo) {
             if (!id) return undefined;
             if (typeof id === "string") {
-                const sel = this.getSeries(id);
+                const sel = this.getGallery(id);
                 if (!sel) return undefined;
                 id = sel;
             }
 
             if (!id.id) return undefined;
-            const items = this.__inner.items[id.id];
+            if (!this.internal.items[id.id]) {
+                if (!id.items) {
+                } else if (id.items instanceof Array) {
+                    this.internal.items[id.id] = { items: id.items };
+                } else if (typeof id.items === "string") {
+                    const fetchHandler = this.data("fetch");
+                    const url = this.internal.rela.relative(id.items);
+                    const resp = await (typeof fetchHandler === "function" ? fetchHandler(url) : fetch(url.toString()));
+                    const json: IImageItemsData = resp ? await resp.json() : { items: [] };
+                    const items = json?.items;
+                    const imagesRela = json.options?.imageRela as string | undefined;
+                    if (!items) {
+                    } else if (items instanceof Array) {
+                        this.internal.items[id.id] = {
+                            items,
+                            rela: url.relative(imagesRela || "./"),
+                        };
+                    } else if (items[id.id] instanceof Array) {
+                        for (const key in items) {
+                            if (!key || this.internal.items[key]) continue;
+                            const itemCol = items[key];
+                            if (itemCol instanceof Array) this.internal.items[key] = {
+                                items: itemCol,
+                                rela: url.relative(imagesRela || "./"),
+                            };
+                        }
+                    }
+                }
+            }
+            return this.selectGalleryInCache(id);
+        }
+
+        selectGalleryInCache(value: IImageGalleryInfo) {
+            const items = this.internal.items[value.id] || [];
             const gallery = this.getChild("gallery") as ImageCollectionPart;
-            if (!gallery) return id;
-            const mkt = this.__inner.mkt;
-            this.__inner.select = id;
+            if (!gallery) return value;
+            const mkt = this.internal.mkt;
+            this.internal.select = value;
             gallery.clear();
-            gallery.className(mergeArray(this.__inner.mainStyle, ratioClassName(id.options?.ratio)));
-            const name: string = DeepX.MdBlogs.getLocaleProp(id, "name", mkt);
-            let defaultName = DeepX.MdBlogs.getLocaleProp(id.options, "defaultItemName", mkt) as string | boolean | undefined;
-            if (!defaultName) defaultName = this.__inner.defaultItemName || DeepX.MdBlogs.getLocaleString("pic");
+            gallery.className(mergeArray(this.internal.mainStyle, ratioClassName(value.options?.ratio)));
+            const name: string = DeepX.MdBlogs.getLocaleProp(value, "name", mkt);
+            let defaultName = DeepX.MdBlogs.getLocaleProp(value.options, "defaultItemName", mkt) as string | boolean | undefined;
+            if (!defaultName) defaultName = this.internal.defaultItemName || DeepX.MdBlogs.getLocaleString("pic");
             else if (defaultName === true) defaultName = name;
             gallery.setDefaultName(name);
-            gallery.pushWithoutRender(...items);
+            gallery.pushWithoutRender(...items.items);
+            gallery.setImageRela(items.rela || this.internal.rela);
             const hasNextPage = gallery.nextPage();
             this.childrenAccess.update("actions", {
                 style: { display: hasNextPage ? "" : "none" },
             });
-            const rela = this.__inner.imageRela;
+            const rela = this.internal.rela;
             const title: Hje.DescriptionContract[] = [];
-            let text = DeepX.MdBlogs.getLocaleProp(id, "icon", mkt);
+            let text = DeepX.MdBlogs.getLocaleProp(value, "icon", mkt);
             if (text) title.push({
                 tagName: "img",
                 props: {
-                    src: relativePath(rela, text),
+                    src: rela.relative(text).toString(),
                     alt: name,
                 },
             });
-            title.push(span(name, caseStyleRef(id.options, "subtitleCase", mkt)));
-            text = DeepX.MdBlogs.getLocaleProp(id, "subtitle", mkt);
-            if (text) title.push(span(text, caseStyleRef(id.options, "subtitleCase", mkt)));
+            title.push(span(name, getCaseClassName(value.options, "subtitleCase", mkt)));
+            text = DeepX.MdBlogs.getLocaleProp(value, "subtitle", mkt);
+            if (text) title.push(span(text, getCaseClassName(value.options, "subtitleCase", mkt)));
             this.childrenAccess.update("title", { children: title });
             this.refreshRelated();
-            this.childrenAccess.update("all", { children: this.genSeriesMenu(id.id) });
-            this.onSelect(id);
-            const h = this.__inner.selected;
-            if (typeof h === "function") h(id, this);
-            return id;
+            this.childrenAccess.update("all", { children: this.genGalleryMenu(value.id) });
+            this.onSelect(value);
+            const h = this.internal.selected;
+            if (typeof h === "function") h(value, this);
+            return value;
+        }
+
+        relativePath(path: string | undefined) {
+            return this.internal.rela.relative(path).toString();
         }
 
         scrollContentIntoView() {
@@ -348,61 +315,95 @@ namespace DeepX.MdBlogs {
             element.scrollIntoView({ behavior: "smooth" });
         }
 
-        imageRelative(url: string | undefined) {
-            return relativePath(this.__inner.imageRela, url);
+        getGalleryLinkInfo(value: IImageGalleryInfo): {
+            title: string;
+            url: string | undefined;
+            kind: "route" | "link" | "func",
+        } {
+            const inner = this.internal;
+            let galleryLink = inner.url;
+            if (galleryLink) {
+                if (galleryLink === true) galleryLink = "./";
+                else if (galleryLink === "?" || galleryLink === ".") galleryLink = "./";
+                else if (galleryLink.endsWith("?")) galleryLink = galleryLink.substring(0, galleryLink.length - 1);
+                else if (galleryLink === "#") galleryLink = undefined;
+            } else {
+                galleryLink = undefined;
+            }
+            const enableRoute = galleryLink === "./";
+            if (galleryLink) {
+                if (galleryLink.endsWith("="))
+                    galleryLink += value.id;
+                else if (enableRoute && (value.id === "default" || value.id === "index") && value === inner.gallery[0])
+                    galleryLink = "./";
+                else
+                    galleryLink += "?" + value.id;
+            }
+            return {
+                title: `${DeepX.MdBlogs.getLocaleProp(value, "name", inner.mkt)} - ${inner.siteName}`,
+                url: galleryLink,
+                kind: enableRoute ? "route" : (galleryLink ? "link" : "func"),
+            };
         }
 
         closeImage(ev?: MouseEvent) {
-            if (this.__inner.needBack) {
+            if (this.internal.needBack) {
                 history.back();
                 return;
             }
             const gallery = this.getChild("gallery") as ImageCollectionPart;
             if (!gallery) return;
+            if (this.internal.select && Hje.getQuery("id")) {
+                const path = this.getGalleryLinkInfo(this.internal.select);
+                if (path.kind === "route" && path.url) {
+                    history.replaceState(new ImageHistoryState(this.internal.select), "", path.url);
+                }
+            }
             gallery.closeImage(ev);
         }
 
         registerHistoryPop() {
             const self = this;
             window.addEventListener("popstate", function(ev) {
-                delete self.__inner.needBack;
+                delete self.internal.needBack;
                 const stateInfo = ev?.state as ImageHistoryState | undefined;
-                if (!stateInfo?.series) return;
-                self.selectSeries(stateInfo.series);
+                const old = self.internal.select;
+                if (!stateInfo?.gallery) return;
+                if (!old || !(stateInfo.gallery.id === old.id && stateInfo.gallery.name === old.name))
+                    self.selectGalleryInCache(stateInfo.gallery);
                 const gallery = self.getChild("gallery") as ImageCollectionPart;
                 if (!gallery) return;
                 if (!stateInfo.image?.id) {
                     gallery.closeImage();
                     const imageId = Hje.getQuery("id");
                     if (imageId) {
-                        const { url } = self.getSeriesLinkInfo(stateInfo.series);
-                        this.history.replaceState(new ImageHistoryState(stateInfo.series), "", url);
+                        const { url } = self.getGalleryLinkInfo(stateInfo.gallery);
+                        history.replaceState(new ImageHistoryState(stateInfo.gallery), "", url);
                     }
                 } else {
-                    console.log("open image");
                     gallery.openImage(stateInfo.image);
                 }
             });
         }
 
-        protected onSelect(info: IImageSeriesInfo) {
+        protected onSelect(info: IImageGalleryInfo) {
         }
 
         private async refreshRelated() {
-            const series = this.__inner.select;
-            if (!series) return;
+            const gallery = this.internal.select;
+            if (!gallery) return;
             const elements: Hje.DescriptionContract[] = [];
-            let links = genLinkList(DeepX.MdBlogs.getLocaleString("relatedLinks", this.__inner.mkt?.mkt), series.links);
+            let links = genLinkList(DeepX.MdBlogs.getLocaleString("relatedLinks", this.internal.mkt?.mkt), gallery.links);
             if (links?.children?.length === 2) elements.push(links.children[0], links.children[1]);
             this.childrenAccess.update("related", {
                 style: { display: elements.length ? "" : "none" },
                 children: elements,
             });
-            const blogs = this.data("blogs");
-            const articles = series.id && blogs ? blogs.filter(ele => ele && ele.hasSeries(series.id)) : undefined;
-            if (this.__inner.select !== series || !articles?.length) return;
-            const mkt = this.__inner.mkt;
-            const rela = this.__inner.blogRela;
+            const blogs = this.data("blog");
+            const articles = gallery.id && blogs ? blogs.filter(ele => ele && ele.hasGallery(gallery.id)) : undefined;
+            if (this.internal.select !== gallery || !articles?.length) return;
+            const mkt = this.internal.mkt;
+            const rela = this.internal.blogRela;
             links = genLinkList(getLocaleString("relatedBlog", mkt?.mkt), articles.map(ele => {
                 const subtitle: string[] = [];
                 let text = ele.getSubtitle(mkt);
@@ -422,12 +423,12 @@ namespace DeepX.MdBlogs {
             });
         }
 
-        private genSeriesMenu(selected?: string) {
+        private genGalleryMenu(selected?: string) {
             const self = this;
-            const inner = self.__inner;
+            const inner = self.internal;
             const arr: Hje.DescriptionContract[] = [];
             let label: string | undefined;
-            inner.series.forEach(ele => {
+            inner.gallery.forEach(ele => {
                 if (!ele) return;
                 if (typeof ele === "string") {
                     label = ele;
@@ -449,36 +450,36 @@ namespace DeepX.MdBlogs {
                     tagName: "img",
                     props: {
                         alt: name,
-                        src: relativePath(inner.imageRela, ele.icon),
+                        src: inner.rela.relative(ele.icon).toString(),
                     }
                 });
-                labels.push(span(name, caseStyleRef(ele.options, "nameCase", inner.mkt)));
+                labels.push(span(name, getCaseClassName(ele.options, "nameCase", inner.mkt)));
                 const desc = DeepX.MdBlogs.getLocaleProp(ele, "subtitle", inner.mkt);
-                if (desc) labels.push(span([span(desc)], caseStyleRef(ele.options, "subtitleCase", inner.mkt)));
+                if (desc) labels.push(span([span(desc)], getCaseClassName(ele.options, "subtitleCase", inner.mkt)));
                 const className = ["link-long-button"];
                 if (selected === ele.id) className.push("state-sel");
-                const { url: seriesLink, kind } = self.getSeriesLinkInfo(ele);
+                const { url: galleryLink, kind } = self.getGalleryLinkInfo(ele);
                 const enableRoute = kind === "route";
                 arr.push({
                     tagName: "a",
                     className,
                     props: {
-                        href: seriesLink || "#",
+                        href: galleryLink || "#",
                     },
                     children: labels,
                     data: ele,
                     on: {
                         click(ev: MouseEvent) {
-                            if (seriesLink && !enableRoute) return;
+                            if (galleryLink && !enableRoute) return;
                             ev.preventDefault();
                             const old = inner.select;
-                            self.selectSeries(ele);
+                            if (old !== ele) self.selectGalleryAsync(ele);
                             if (!enableRoute) {
                                 self.scrollContentIntoView();
                                 return;
                             }
                             if (ele !== old) {
-                                history.pushState(new ImageHistoryState(ele), "", seriesLink);
+                                history.pushState(new ImageHistoryState(ele), "", galleryLink);
                                 if (inner.siteName) document.title = `${name} - ${inner.siteName}`;
                             }
                             scrollToTop();
@@ -488,52 +489,20 @@ namespace DeepX.MdBlogs {
             });
             return arr;
         }
-
-        getSeriesLinkInfo(value: IImageSeriesInfo): {
-            title: string;
-            url: string | undefined;
-            kind: "route" | "link" | "func",
-        } {
-            const inner = this.__inner;
-            let seriesLink = inner.url;
-            if (seriesLink) {
-                if (seriesLink === true) seriesLink = "./";
-                else if (seriesLink === "?" || seriesLink === ".") seriesLink = "./";
-                else if (seriesLink.endsWith("?")) seriesLink = seriesLink.substring(0, seriesLink.length - 1);
-                else if (seriesLink === "#") seriesLink = undefined;
-            } else {
-                seriesLink = undefined;
-            }
-            const enableRoute = seriesLink === "./";
-            if (seriesLink) {
-                if (seriesLink.endsWith("="))
-                    seriesLink += value.id;
-                else if (enableRoute && (value.id === "default" || value.id === "index") && value === inner.series[0])
-                    seriesLink = "./";
-                else
-                    seriesLink += "?" + value.id;
-            }
-            return {
-                title: `${DeepX.MdBlogs.getLocaleProp(value, "name", inner.mkt)} - ${inner.siteName}`,
-                url: seriesLink,
-                kind: enableRoute ? "route" : (seriesLink ? "link" : "func"),
-            };
-        }
     }
 
-    export class ImageCollectionPart extends Hje.DataComponent {
-        private __inner: {
-            items: IImageItemInfo[];
-            rela: Hje.RelativePathInfo;
-            itemUrl(item: IImageItemInfo, kind: IImageUrlKind): string | undefined;
-            click?(data: IImageClickInfo, ev?: MouseEvent): void;
-            close?(ev?: MouseEvent): void;
-            mkt?: { mkt: string | boolean };
-            defaultName?: string;
-            pageSize?: number;
-            nextIndex: number;
-            renderedCount: number;
-        };
+    export class ImageCollectionPart extends Hje.DataComponent<IImageCollectionPartData, {
+        items: IImageItemInfo[];
+        rela: Hje.RelativePathInfo;
+        itemUrl(item: IImageItemInfo, options: IImageUrlResolveOptions): string | undefined;
+        click?(data: IImageClickInfo, ev?: MouseEvent): void;
+        close?(ev?: MouseEvent): void;
+        mkt?: { mkt: string | boolean };
+        defaultName?: string;
+        pageSize?: number;
+        nextIndex: number;
+        renderedCount: number;
+    }> {
         constructor(args: any) {
             super(args);
             const data = this.data() || {
@@ -542,7 +511,7 @@ namespace DeepX.MdBlogs {
             const elements: Hje.DescriptionContract[] = [];
             const self = this;
             const pageSize = data.page && data.page > 0 ? data.page : undefined;
-            this.__inner = {
+            Object.assign(this.internal, {
                 items: [],
                 rela: toRela(data.rela),
                 itemUrl: data.itemUrl || (() => {
@@ -555,7 +524,7 @@ namespace DeepX.MdBlogs {
                 pageSize: pageSize,
                 nextIndex: 0,
                 renderedCount: 0,
-            };
+            });
             const pageSize2 = pageSize || Number.MAX_SAFE_INTEGER;
             if (data?.items) {
                 let i = 0;
@@ -564,33 +533,33 @@ namespace DeepX.MdBlogs {
                     const item = data.items[i];
                     const element = self.genItemModel(item);
                     if (!element) continue;
-                    self.__inner.items.push(item);
+                    self.internal.items.push(item);
                     if (item.disable) continue;
                     if (j >= pageSize2) continue;
                     j++;
                     elements.push(element);
                 }
 
-                this.__inner.nextIndex = i;
-                this.__inner.renderedCount = j;
+                this.internal.nextIndex = i;
+                this.internal.renderedCount = j;
             }
 
             this.childrenAccess.set(elements);
         }
 
         get length() {
-            return this.__inner.items;
+            return this.internal.items;
         }
 
         setDefaultName(value: string) {
-            this.__inner.defaultName = value;
+            this.internal.defaultName = value;
         }
 
         getItem(index: number | string) {
             if (typeof index === "number")
-                return index < 0 ? undefined : this.__inner.items[index];
+                return index < 0 ? undefined : this.internal.items[index];
             if (!index || typeof index !== "string") return undefined;
-            const col = this.__inner.items;
+            const col = this.internal.items;
             for (let i = 0; i < col.length; i++) {
                 const item = col[i];
                 if (index === col[i]?.id) return item;
@@ -604,8 +573,8 @@ namespace DeepX.MdBlogs {
                 const item = items[i];
                 const element = this.genItemModel(item);
                 if (!element) continue;
-                if (this.__inner.items.indexOf(item) >= 0) continue;
-                this.__inner.items.push(item);
+                if (this.internal.items.indexOf(item) >= 0) continue;
+                this.internal.items.push(item);
                 j++;
             }
 
@@ -613,15 +582,15 @@ namespace DeepX.MdBlogs {
         }
 
         push(...items: IImageItemInfo[]) {
-            const pageSize = this.__inner.pageSize || Number.MAX_SAFE_INTEGER;
+            const pageSize = this.internal.pageSize || Number.MAX_SAFE_INTEGER;
             let j = 0;
             let k = 0;
             for (let i = 0; i < items.length; i++) {
                 const item = items[i];
                 const element = this.genItemModel(item);
                 if (!element) continue;
-                if (this.__inner.items.indexOf(item) >= 0) continue;
-                this.__inner.items.push(item);
+                if (this.internal.items.indexOf(item) >= 0) continue;
+                this.internal.items.push(item);
                 j++;
                 if (item.disable || k >= pageSize) continue;
                 this.childrenAccess.append(element);
@@ -632,15 +601,15 @@ namespace DeepX.MdBlogs {
         }
 
         clear() {
-            this.__inner.items = [];
-            this.__inner.nextIndex = 0;
-            this.__inner.renderedCount = 0;
+            this.internal.items = [];
+            this.internal.nextIndex = 0;
+            this.internal.renderedCount = 0;
             this.childrenAccess.clear();
         }
 
         nextPage() {
-            let pageSize = this.__inner.pageSize;
-            let first = this.__inner.renderedCount;
+            let pageSize = this.internal.pageSize;
+            let first = this.internal.renderedCount;
             if (first < 0) first = 0;
             if (!pageSize || pageSize <= 0) {
                 pageSize = Number.MAX_SAFE_INTEGER;
@@ -653,15 +622,15 @@ namespace DeepX.MdBlogs {
                     pageSize = pageSize - more + pageSize;
                 }
             }
-            const col = this.__inner.items;
+            const col = this.internal.items;
             let j = 0;
-            let i = this.__inner.nextIndex;
-            for (; i < this.__inner.items.length; i++) {
+            let i = this.internal.nextIndex;
+            for (; i < this.internal.items.length; i++) {
                 const item = col[i];
                 if (item.disable) continue;
                 if (j >= pageSize) {
-                    this.__inner.nextIndex = i;
-                    this.__inner.renderedCount += j;
+                    this.internal.nextIndex = i;
+                    this.internal.renderedCount += j;
                     return true;
                 }
 
@@ -671,13 +640,13 @@ namespace DeepX.MdBlogs {
                 this.childrenAccess.append(element);
             }
 
-            this.__inner.nextIndex = i;
-            this.__inner.renderedCount += j;
+            this.internal.nextIndex = i;
+            this.internal.renderedCount += j;
             return false;
         }
 
         indexOf(item: string | IImageItemInfo) {
-            const col = this.__inner.items;
+            const col = this.internal.items;
             if (!item) return -1;
             if (typeof item !== "string") {
                 return col.indexOf(item);
@@ -690,8 +659,12 @@ namespace DeepX.MdBlogs {
             return -1;
         }
 
+        setImageRela(value: string | Hje.RelativePathInfo | null) {
+            this.internal.rela = toRela(value);
+        }
+
         imageRelative(url: string | undefined) {
-            return relativePath(this.__inner.rela, url);
+            return this.internal.rela.relative(url).toString();
         }
 
         openImage(item: IImageItemInfo | string, ev?: MouseEvent) {
@@ -701,15 +674,21 @@ namespace DeepX.MdBlogs {
                 if (!item2) return;
                 item = item2;
             }
-            const inner = this.__inner;
+            const inner = this.internal;
             const self = this;
-            const name = DeepX.MdBlogs.getLocaleProp(item, "name", inner.mkt) || this.__inner.defaultName;
-            let url = inner.itemUrl(item, "source");
+            const name = DeepX.MdBlogs.getLocaleProp(item, "name", inner.mkt) || this.internal.defaultName;
+            let url = inner.itemUrl(item, {
+                kind: "source",
+                rela: inner.rela,
+            });
             if (!url) return undefined;
-            url = relativePath(inner.rela, url) || url;
+            url = inner.rela.relative(url).toString();
             let thumb = item.thumb && typeof item.thumb === "string" ? item.thumb : undefined;
-            if (!thumb && item.thumb !== false) thumb = inner.itemUrl(item, "thumb");
-            if (thumb) thumb = relativePath(inner.rela, thumb);
+            if (!thumb && item.thumb !== false) thumb = inner.itemUrl(item, {
+                kind: "thumb",
+                rela: inner.rela,
+            });
+            if (thumb) thumb = inner.rela.relative(thumb).toString();
             else thumb = url;
             if (typeof inner.click !== "function") return;
             inner.click({
@@ -724,20 +703,26 @@ namespace DeepX.MdBlogs {
         }
 
         closeImage(ev?: MouseEvent) {
-            if (typeof this.__inner.close === "function") this.__inner.close(ev);
+            if (typeof this.internal.close === "function") this.internal.close(ev);
         }
 
         private genItemModel(item: IImageItemInfo) {
             if (!item) return undefined;
-            const inner = this.__inner;
+            const inner = this.internal;
             const self = this;
-            const name = DeepX.MdBlogs.getLocaleProp(item, "name", inner.mkt) || this.__inner.defaultName;
-            let url = inner.itemUrl(item, "source");
+            const name = DeepX.MdBlogs.getLocaleProp(item, "name", inner.mkt) || this.internal.defaultName;
+            let url = inner.itemUrl(item, {
+                kind: "source",
+                rela: inner.rela,
+            });
             if (!url) return undefined;
-            url = relativePath(inner.rela, url) || url;
+            url = inner.rela.relative(url).toString();
             let thumb = item.thumb && typeof item.thumb === "string" ? item.thumb : undefined;
-            if (!thumb && item.thumb !== false) thumb = inner.itemUrl(item, "thumb");
-            if (thumb) thumb = relativePath(inner.rela, thumb);
+            if (!thumb && item.thumb !== false) thumb = inner.itemUrl(item, {
+                kind: "thumb",
+                rela: inner.rela,
+            });
+            if (thumb) thumb = inner.rela.relative(thumb).toString();
             else thumb = url;
             return {
                 tagName: "img",
@@ -816,21 +801,21 @@ namespace DeepX.MdBlogs {
     }
 
     class ImageHistoryState {
-        constructor(public series: IImageSeriesInfo, public image?: IImageItemInfo) {
+        constructor(public gallery: IImageGalleryInfo, public image?: IImageItemInfo) {
         }
     }
 
-    export function seriesList(col: IImageSeriesInfo[], imageRela: string | Hje.RelativePathInfo | ImageSeriesPart | ImageCollectionPart, link?: string, options?: {
+    export function galleryList(col: IImageGalleryInfo[], imageRela: string | Hje.RelativePathInfo | ImageGalleryPart | ImageCollectionPart, link?: string, options?: {
         mkt?: string | boolean;
     }) {
         if (!link) link = "./";
         if (!col) return null;
         let imageUrl: (value: string | undefined) => string | undefined;
         if (!imageRela) imageUrl = value => value;
-        else if (typeof imageRela === "string") imageUrl = value => relativePath(toRela(imageRela), value);
-        else if (imageRela instanceof Hje.RelativePathInfo) imageUrl = value => relativePath(imageRela, value);
+        else if (typeof imageRela === "string") imageUrl = value => toRela(imageRela).relative(value).toString();
+        else if (imageRela instanceof Hje.RelativePathInfo) imageUrl = value => imageRela.relative(value).toString();
         else if (imageRela instanceof ImageCollectionPart) imageUrl = value => imageRela.imageRelative(value);
-        else if (imageRela instanceof ImageSeriesPart) imageUrl = value => imageRela.imageRelative(value);
+        else if (imageRela instanceof ImageGalleryPart) imageUrl = value => imageRela.relativePath(value);
         else imageUrl = value => value;
         return col.map(ele => {
             if (!ele?.id || ele.disable) return null;
@@ -847,13 +832,13 @@ namespace DeepX.MdBlogs {
             });
             label.push({
                 tagName: "span",
-                className: caseStyleRef(ele.options, "nameCase", options),
+                className: getCaseClassName(ele.options, "nameCase", options),
                 children: name,
             });
             text = DeepX.MdBlogs.getLocaleProp(ele, "subtitle", options);
             if (text) label.push({
                 tagName: "span",
-                className: caseStyleRef(ele.options, "subtitleCase", options),
+                className: getCaseClassName(ele.options, "subtitleCase", options),
                 children: text,
             });
             return {
@@ -867,22 +852,21 @@ namespace DeepX.MdBlogs {
         }).filter(ele => !!ele);
     }
 
-    function caseStyleRef(ele: any, key: string, options?: { mkt?: string | boolean }) {
-        if (!ele) return undefined;
-        const cap = DeepX.MdBlogs.getLocaleProp(ele, key || "nameCase", options) as ITitleCaseKind;
-        if (!cap) return undefined;
-        switch (cap.toLowerCase()) {
-            case "upper":
-                return "x-text-case-upper";
-            case "lower":
-                return "x-text-case-lower";
-            case "captial":
-                return "x-text-case-capital";
-            case "small":
-                return "x-text-case-small";
-            default:
-                return undefined;
+    export function getGallery(gallery: IImageGalleryInfo[], id: string) {
+        if (!id) return undefined;
+        for (let i in gallery) {
+            const item = gallery[i];
+            if (item?.id !== id || item.disable) continue;
+            return item;
         }
+
+        for (let i in gallery) {
+            const item = gallery[i];
+            if (!item?.alias || item.disable || !(item.alias instanceof Array)) continue;
+            if (item.alias.indexOf(id) > -1) return item;
+        }
+
+        return undefined;
     }
 
     function toRela(rela: string | Hje.RelativePathInfo | null | undefined) {
@@ -1025,12 +1009,6 @@ namespace DeepX.MdBlogs {
             className,
             children,
         } : null;
-    }
-
-    function relativePath(rela: Hje.RelativePathInfo, url: string | undefined) {
-        if (!url || typeof url !== "string") return undefined;
-        if (url.indexOf("://") >= 0) return url;
-        return rela.relative(url)?.value || url;
     }
 
 }

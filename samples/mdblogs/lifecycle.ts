@@ -10,6 +10,7 @@ namespace DeepX.MdBlogs {
         title?: string | boolean;
         banner?: Hje.DescriptionContract;
         supplement?: Hje.DescriptionContract;
+        galleryUrl?(info: IImageGalleryInfo): string;
         onfetch?(ev: IArticlesPartDataFetchParams): void;
         onselect?(ev: IArticlesPartDataSelectParams): void;
         onhome?(ev: IArticlesPartDataHomeParams): void;
@@ -46,6 +47,7 @@ namespace DeepX.MdBlogs {
             lifecycle,
             banner: options.banner,
             supplement: options.supplement,
+            galleryUrl: options.galleryUrl,
             onselect: options.onselect,
             onhome: options.onhome,
             onfetch: options.onfetch,

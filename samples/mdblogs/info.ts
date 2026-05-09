@@ -34,7 +34,7 @@ namespace DeepX.MdBlogs {
             data: IArticleInfo;
             date?: Date;
             definitions: IArticlesDefinitions;
-            series?: IImageSeriesInfo[];
+            gallery?: IImageGalleryInfo[];
             y: IArticleYearConfig;
             year?: string;
             children?: ArticleInfo[];
@@ -51,7 +51,7 @@ namespace DeepX.MdBlogs {
             this._inner.rela = options?.rela || new Hje.RelativePathInfo("./");
             const defs = options?.definitions || {};
             this._inner.definitions = defs;
-            this._inner.series = options?.series || [];
+            this._inner.gallery = options?.gallery || [];
             if (!data) {
                 this._inner.data = {} as any;
                 this._inner.keywords = []
@@ -127,16 +127,16 @@ namespace DeepX.MdBlogs {
             return (getLocaleProp(this._inner.data, "notes") || []) as string[];
         }
 
-        get series() {
-            const series = this._inner.series;
-            let col = this._inner.data.options?.series;
-            if (!col || !series) return [];
+        get gallery() {
+            const gallery = this._inner.gallery;
+            let col = this._inner.data.options?.gallery;
+            if (!col || !gallery) return [];
             if (typeof col === "string") col = [col];
             if (!(col instanceof Array)) return [];
-            const arr = [] as IImageSeriesInfo[];
+            const arr = [] as IImageGalleryInfo[];
             for (const item of col) {
                 if (!item || typeof item !== "string") continue;
-                for (const ele of series) {
+                for (const ele of gallery) {
                     if (ele?.id === item) arr.push(ele);
                 }
             }
@@ -193,16 +193,21 @@ namespace DeepX.MdBlogs {
             return this._inner.data?.options ? this._inner.data.options.banner : undefined;
         }
 
+        getOptions(key: string) {
+            const inner = this._inner.data?.options;
+            return inner ? inner[key as keyof typeof inner] : undefined;
+        }
+
         defs(key: string) {
             return this._inner.definitions[key];
         }
 
-        hasSeries(value: string) {
+        hasGallery(value: string) {
             if (!value) return false;
-            const series = this._inner.data.options?.series;
-            if (!series) return false;
-            if (typeof series === "string") return value === series;
-            if (series instanceof Array) return series.indexOf(value) >= 0;
+            const gallery = this._inner.data.options?.gallery;
+            if (!gallery) return false;
+            if (typeof gallery === "string") return value === gallery;
+            if (gallery instanceof Array) return gallery.indexOf(value) >= 0;
             return false;
         }
 
@@ -395,7 +400,7 @@ namespace DeepX.MdBlogs {
             const rela = this._inner.rela;
             const y = this._inner.y;
             const fetchHandler = this._inner.fetch;
-            const series = this._inner.series;
+            const gallery = this._inner.gallery;
             const list = arr.map(function (blog) {
                 if (!blog || !blog.name || getLocaleProp(blog, "disable", localeOptions)) return null;
                 return new ArticleInfo(blog, {
@@ -403,7 +408,7 @@ namespace DeepX.MdBlogs {
                     year: y,
                     fetch: fetchHandler,
                     definitions: defs,
-                    series,
+                    gallery,
                 });
             }).filter(function (blog) {
                 return blog && blog.getPath() != null;

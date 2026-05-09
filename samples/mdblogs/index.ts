@@ -114,7 +114,7 @@ namespace DeepX.MdBlogs {
                     year: blogInfo.year || true,
                     fetch: fetchHandler,
                     definitions: data["$defs"],
-                    series: data.series,
+                    gallery: data.gallery,
                 });
             }).filter(function (blog) {
                 if (!blog || !blog.dateObj || !blog.getPath()) return false;
@@ -182,7 +182,7 @@ namespace DeepX.MdBlogs {
                     rela: path,
                     fetch: fetchHandler,
                     definitions: data["$defs"],
-                    series: data.series,
+                    gallery: data.gallery,
                 });
             }).filter(function (blog) {
                 if (!blog || !blog.getPath()) return false;
@@ -193,8 +193,8 @@ namespace DeepX.MdBlogs {
             return list;
         }
 
-        series() {
-            return this._inner.data.series;
+        gallery() {
+            return this._inner.data.gallery;
         }
 
         links(options?: {
@@ -224,7 +224,7 @@ namespace DeepX.MdBlogs {
                 year: this._inner.blogConfig.year || true,
                 fetch: this._inner.fetch,
                 definitions: data["$defs"],
-                series: data.series,
+                gallery: data.gallery,
             });
             const arr = this.blog();
             let source = data.blog;
@@ -267,7 +267,7 @@ namespace DeepX.MdBlogs {
                 rela: this._inner.path,
                 fetch: this._inner.fetch,
                 definitions: data["$defs"],
-                series: data.series,
+                gallery: data.gallery,
             });
             data.docs.push(article);
             return item;
@@ -280,7 +280,7 @@ namespace DeepX.MdBlogs {
                 rela: this._inner.path,
                 fetch: this._inner.fetch,
                 definitions: data["$defs"],
-                series: data.series,
+                gallery: data.gallery,
             });
             const arr = this.hiddenArticles();
             arr.push(item);
@@ -410,7 +410,7 @@ namespace DeepX.MdBlogs {
                 rela: this._inner.path,
                 fetch: this._inner.fetch,
                 definitions: data["$defs"],
-                series: data.series,
+                gallery: data.gallery,
             });
             if (list instanceof Array) list.push(info);
             return info;
