@@ -489,6 +489,12 @@ namespace DeepX.MdBlogs {
             return undefined;
         }
 
+        /**
+         * Gets the string registered by given key.
+         * @param key The key to get string.
+         * @param options The options.
+         * @returns A string; or undefined, if does not exist nor has no fallback value.
+         */
         string(key: string, options?: {
             mkt?: string | boolean;
             fallback?: string;

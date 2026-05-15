@@ -1,6 +1,6 @@
 # Component
 
-You can use extend the base class `BaseComponent` for rich UX component.
+You can use extend the base class `BaseComponent` or `DataComponent` for rich UX component.
 
 Following is a sample to render a title and a list.
 
@@ -10,29 +10,43 @@ export interface ISampleComponentData {
     list?: string[];
 }
 
-export class SampleComponent extends Hje.BaseComponent {
-    constructor(element: any, options?: Hje.ComponentOptionsContract<ISampleComponentData>) {
-        super(element, options);
-        const data = options?.data || {};
-        if (data.title) this.currentModel.children.push({ key: "title", tagName: "h1", children: data.title });
-        if (data.list instanceof Array && data.list.length > 0) {
-            const list: Hje.DescriptionContract[] = [];
-            this.currentModel.children.push({ tagName: "ul", children: list });
-            for (let i = 0; i < data.list.length; i++) {
-                list.push({ tagName: "li", children: data.list[i] });
-            }
+export class SampleComponent extends Hje.DataComponent<ISampleComponentData> {
+    constructor(args: any) {
+        super(args);
+        this.childrenAccess.append({ key: "title", tagName: "h1" }, { key: "list", tagName: "ul" });
+    }
+
+    protected onDataChange(info: ComponentDataUpdateInfo<ISampleComponentData>) {
+        this.onDataChange(info);
+
+        if (info.typeOf("title") !== "undefined") {
+            this.childrenAccess.update("title", {
+                children: info.delta.title
+            });
         }
-        this.refreshChild();
+
+        if (info.typeOf("list") !== "undefined") {
+            const list: Hje.DescriptionContract[] = [];
+            if (list instanceof Array && list.length > 0) {
+                for (let i = 0; i < list.length; i++) {
+                    list.push({ tagName: "li", children: list[i] });
+                }
+            }
+
+            this.childrenAccess.update("list", { children: list });
+        }
     }
 
     get title() {
-        return super.childModel("title").children;
+        return this.data("title");
     }
 
-    set title(newValue?: string) {
-        super.refreshChild("title", context => {
-            context.model().children = newValue;
-        });
+    set title(newValue: string) {
+        return this.data("title", newValue);
+    }
+
+    get list() {
+        return this.data("list");
     }
 }
 ```

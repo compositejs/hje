@@ -96,32 +96,169 @@
         "$ref": "#/$defs/articleInfo"
       }
     },
-    "links": {
-      "description": "The additional links",
+    "gallery": {
+      "description": "The gallery collection",
       "type": "array",
       "items": {
         "type": "object",
         "properties": {
-          "name": {
-            "description": "The display name",
-            "type": "string"
+          "id": {
+            "type": "string",
+            "description": "The identifier of the gallery"
           },
-          "url": {
-            "description": "The link URL",
-            "type": "string"
+          "alias": {
+            "anyOf": [
+              {
+                "type": "array",
+                "description": "The additional alias",
+                "items": {
+                  "type": "string"
+                }
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "disable": {
+            "type": "boolean",
+            "description": "A value indicating whether the gallery item is disabled"
+          },
+          "name": {
+            "type": "string",
+            "description": "The display name"
+          },
+          "subtitle": {
+            "type": "string",
+            "description": "The subtitle"
+          },
+          "options": {
+            "type": "object",
+            "description": "The options",
+            "properties": {
+              "nameCase": {
+                "$ref": "#/$defs/titleCaseKind"
+              },
+              "subtitleCase": {
+                "$ref": "#/$defs/titleCaseKind"
+              },
+              "defaultItemName": {
+                "description": "The default name for each image",
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "boolean"
+                  }
+                ]
+              },
+              "ratio": {
+                "description": "The image ratio",
+                "enum": ["p", "page", "v", "vertical", "h", "horizontal", "s", "square", "w", "wide"]
+              },
+              "thumb": {
+                "description": "A value indicating whether each image has a thumbnail",
+                "type": "boolean"
+              }
+            }
+          },
+          "icon": {
+            "type": "string",
+            "description": "The icon"
+          },
+          "intro": {
+            "type": "string",
+            "description": "The introduction"
+          },
+          "year": {
+            "type": "number",
+            "description": "The start year published"
+          },
+          "links": {
+            "type": "array",
+            "description": "The related links",
+            "items": {
+              "$ref": "#/$defs/relatedLinkItemInfo"
+            }
+          },
+          "items": {
+            "anyOf": [
+              {
+                "description": "The link to resolve items",
+                "type": "string"
+              },
+              {
+                "description": "The image item collection",
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string"
+                    },
+                    "display": {
+                      "type": "boolean"
+                    },
+                    "name": {
+                      "type": "string"
+                    },
+                    "year": {
+                      "type": "number"
+                    },
+                    "month": {
+                      "type": "number",
+                      "minimum": 0,
+                      "maximum": 12
+                    },
+                    "day": {
+                      "type": "number",
+                      "minimum": 0,
+                      "maximum": 32
+                    },
+                    "url": {
+                      "type": "string"
+                    },
+                    "thumb": {
+                      "anyOf": [
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "type": "boolean"
+                        }
+                      ]
+                    },
+                    "keywords": {
+                      "items": {
+                        "type": "string"
+                      }
+                    },
+                    "size": {
+                      "type": "string"
+                    },
+                    "data": {
+                      "type": "object"
+                    }
+                  },
+                  "required": ["id", "year"]
+                }
+              }
+            ]
+          },
+          "data": {
+            "type": "object",
+            "description": "The data"
           }
         },
-        "required": ["name", "url"],
-        "patternProperties": {
-          "^name#": {
-            "description": "The display name in the specific language",
-            "type": "string"
-          },
-          "^url#": {
-            "description": "The link URL in the specific language",
-            "type": "string"
-          }
-        }
+        "required": ["id", "name", "year", "items"]
+      }
+    },
+    "links": {
+      "description": "The additional links",
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/relatedLinkItemInfo"
       }
     },
     "redir": {
@@ -150,6 +287,50 @@
         },
         "linksTitle": {
           "description": "The title of links",
+          "type": "string"
+        },
+        "galleryTitle": {
+          "description": "The title of ",
+          "type": "string"
+        },
+        "galleryTips": {
+          "description": "The title of ",
+          "type": "string"
+        },
+        "keywordsTitle": {
+          "description": "The title of ",
+          "type": "string"
+        },
+        "contentCreatorTitle": {
+          "description": "The title of ",
+          "type": "string"
+        },
+        "seeAlsoTitle": {
+          "description": "The title of ",
+          "type": "string"
+        },
+        "otherLinksTitle": {
+          "description": "The title of content creator section",
+          "type": "string"
+        },
+        "search": {
+          "description": "The text of search",
+          "type": "string"
+        },
+        "previous": {
+          "description": "The text of going to previous article",
+          "type": "string"
+        },
+        "next": {
+          "description": "The text of going to next article",
+          "type": "string"
+        },
+        "back": {
+          "description": "The title of turning back",
+          "type": "string"
+        },
+        "empty": {
+          "description": "The title of empty",
           "type": "string"
         }
       }
@@ -192,6 +373,10 @@
           "items": {
             "$ref": "#/$defs/contributorInfo"
           }
+        },
+        "strings": {
+          "description": "The static and locale string",
+          "type": "object"
         }
       }
     }
@@ -614,6 +799,26 @@
                 "items": {
                   "type": "string"
                 }
+              },
+              "gallery": {
+                "description": "The identifier of gallery to bind",
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    }
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "nameCase": {
+                "$ref": "#/$defs/titleCaseKind"
               }
           }
         }
@@ -642,6 +847,34 @@
               "type": "boolean"
             }
           ]
+        }
+      }
+    },
+    "titleCaseKind": {
+      "description": "The string case",
+      "enum": ["upper", "lower", "capital", "small", "normal", "none"]
+    },
+    "relatedLinkItemInfo": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "description": "The display name",
+          "type": "string"
+        },
+        "url": {
+          "description": "The link URL",
+          "type": "string"
+        }
+      },
+      "required": ["name", "url"],
+      "patternProperties": {
+        "^name#": {
+          "description": "The display name in the specific language",
+          "type": "string"
+        },
+        "^url#": {
+          "description": "The link URL in the specific language",
+          "type": "string"
         }
       }
     },

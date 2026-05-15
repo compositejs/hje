@@ -171,6 +171,15 @@ declare namespace DeepX.MdBlogs {
             linksTitle?: string;
             galleryTitle?: string;
             galleryTips?: string;
+            keywordsTitle?: string;
+            contentCreatorTitle?: string;
+            seeAlsoTitle?: string;
+            otherLinksTitle?: string;
+            search?: string;
+            previous?: string;
+            next?: string;
+            back?: string;
+            empty?: string;
         };
         defs(key: string): any;
         blogsInfo(options?: {
@@ -224,6 +233,12 @@ declare namespace DeepX.MdBlogs {
         parentArticle(current: ArticleInfo | undefined | null, options?: {
             mkt?: string | boolean;
         }): ArticleInfo | null | undefined;
+        /**
+         * Gets the string registered by given key.
+         * @param key The key to get string.
+         * @param options The options.
+         * @returns A string; or undefined, if does not exist nor has no fallback value.
+         */
         string(key: string, options?: {
             mkt?: string | boolean;
             fallback?: string;
@@ -419,7 +434,7 @@ declare namespace DeepX.MdBlogs {
          */
         disable?: boolean;
         /**
-         * The name.
+         * The display name.
          */
         name: string;
         /**
@@ -430,10 +445,25 @@ declare namespace DeepX.MdBlogs {
          * The options.
          */
         options?: {
+            /**
+             * The string case of display name.
+             */
             nameCase?: ITitleCaseKind;
+            /**
+             * The string case of subtitle.
+             */
             subtitleCase?: ITitleCaseKind;
+            /**
+             * The default name for each image.
+             */
             defaultItemName?: string | boolean;
+            /**
+             * The image ratio.
+             */
             ratio?: IImageRatio;
+            /**
+             * A value indicating whether each image has a thumbnail.
+             */
             thumb?: boolean;
             [property: string]: any;
         };
@@ -817,6 +847,42 @@ declare namespace DeepX.MdBlogs {
              * The tips to display under gallery collection.
              */
             galleryTips?: string;
+            /**
+             * The title of keywords section.
+             */
+            keywordsTitle?: string;
+            /**
+             * The title of content creator section.
+             */
+            contentCreatorTitle?: string;
+            /**
+             * The title of see also section.
+             */
+            seeAlsoTitle?: string;
+            /**
+             * The title of other links section.
+             */
+            otherLinksTitle?: string;
+            /**
+             * The text of search.
+             */
+            search?: string;
+            /**
+             * The text of going to previous article.
+             */
+            previous?: string;
+            /**
+             * The text of going to next article.
+             */
+            next?: string;
+            /**
+             * The text of turning back.
+             */
+            back?: string;
+            /**
+             * The text of empty.
+             */
+            empty?: string;
         };
         /**
          * The definitions.

@@ -7,12 +7,6 @@ export interface IListComponentData<T = any> {
     item?: IListComponentItemGenerator<T>;
 }
 
-interface IListComponentItemActions {
-    available(): boolean;
-    remove(): void;
-    index(): number;
-}
-
 interface IListComponentInternal<T> {
     source: {
         model: T;
@@ -32,6 +26,11 @@ export class ListComponent<T = any> extends DataComponent<IListComponentData<T>,
         super(args);
     }
 
+    /**
+     * Gets the index of the given child item model.
+     * @param model The item model to test.
+     * @returns The index; or -1, if does not exist.
+     */
     indexOf(model: T | BaseComponent) {
         const index = this.childrenAccess.indexOf(model as BaseComponent);
         if (index >= 0) return index;
@@ -45,6 +44,28 @@ export class ListComponent<T = any> extends DataComponent<IListComponentData<T>,
         return -1;
     }
 
+    /**
+     * Gets the index of the last occurrence of of the given child item model.
+     * @param model The item model to test.
+     * @returns The index; or -1, if does not exist.
+     */
+    lastIndexOf(model: T | BaseComponent) {
+        const index = this.childrenAccess.lastIndexOf(model as BaseComponent);
+        if (index >= 0) return index;
+        else if (model === undefined) return -1;
+        const col = this.internal.source;
+        for (let i = col.length - 1; i >= 0; i--) {
+            const item = col[i];
+            if (item && item.model === model) return i;
+        }
+
+        return -1;
+    }
+
+    /**
+     * Appends new model items to the end of the content list.
+     * @param items New items to add.
+     */
     push(...items: T[]) {
         items = items.filter(ele => ele !== undefined);
         const h = modelToDescriptionHandler(this.data("item"), this.originalTagName);
@@ -56,6 +77,11 @@ export class ListComponent<T = any> extends DataComponent<IListComponentData<T>,
         this.childrenAccess.append(...items.map(h));
     }
 
+    /**
+     * Removes a specific item.
+     * @param model The item to remove.
+     * @returns A value indicating whether remove succeeded; or false, if does not exist.
+     */
     remove(model: T | BaseComponent) {
         const i = this.indexOf(model);
         if (i < 0) return false;
@@ -63,6 +89,11 @@ export class ListComponent<T = any> extends DataComponent<IListComponentData<T>,
         return true;
     }
 
+    /**
+     * Removes an item by given index.
+     * @param index The index of item to remove.
+     * @returns A value indicating whether remove succeeded; or false, if does not exist.
+     */
     removeAt(index: number) {
         if (!this.childrenAccess.remove(index)) return false;
         const removed = this.internal.source.splice(index, 1);
@@ -91,8 +122,13 @@ export class ListComponent<T = any> extends DataComponent<IListComponentData<T>,
         return this.internal.source.map(ele => ele.model).filter(predicate, thisArg);
     }
 
+    /**
+     * Gets the item model of the specific index.
+     * @param index The index to get model.
+     * @returns The model item; or undefined, if the index is out of range.
+     */
     get(index: number) {
-        return this.internal.source.map(ele => ele.model)[index];
+        return index >= 0 ? this.internal.source[index]?.model : undefined;
     }
 
     first() {

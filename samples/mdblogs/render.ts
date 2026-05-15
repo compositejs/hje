@@ -157,7 +157,7 @@ namespace DeepX.MdBlogs {
                         name: "blog-search",
                         value: q || "",
                         maxLength: 60,
-                        placeholder: this.string("search", options)
+                        placeholder: getLocalOptions(config, "search", "search", options),
                     },
                     on: {
                         input(ev) {
@@ -186,7 +186,7 @@ namespace DeepX.MdBlogs {
             if (links.length > 0) {
                 main.push({
                     tagName: "h2",
-                    children: info.options?.linksTitle || this.string("otherLinks", options)
+                    children: getLocalOptions(config, "linksTitle", "otherLinks", options)
                 }, {
                     tagName: "section",
                     className: "link-tile-wide",
@@ -369,7 +369,7 @@ namespace DeepX.MdBlogs {
                     tagName: "h2",
                     children: [{
                         tagName: "span",
-                        children: getLocaleProp(info.options, "galleryTitle", options) || this.string("relatedGallery", options),
+                        children: getLocalOptions(info.options, "galleryTitle", "relatedGallery", options),
                     }]
                 }, {
                     tagName: "div",
@@ -378,10 +378,10 @@ namespace DeepX.MdBlogs {
                         const name = getLocaleProp(gallery, null, mktOptions);
                         if (!name || getLocaleProp(gallery, "disable", mktOptions)) return undefined;
                         const elementItems: Hje.DescriptionContract[] = [];
-                        if (gallery.logo) elementItems.push({
+                        if (gallery.icon) elementItems.push({
                             tagName: "img",
                             props: {
-                                src: info.relative(gallery.logo)?.toString(),
+                                src: info.relative(gallery.icon)?.toString(),
                                 alt: name
                             }
                         });
@@ -421,9 +421,9 @@ namespace DeepX.MdBlogs {
                 });
             }
 
-            fillKeywords(article.keywords!, related, this.string("keywords", options), options);
-            if (!disableAuthors) fillContributors(article.authors, related, this.string("contentCreator", options), options);
-            fillRelatedLinks(article.related(options), related, this.string("seeAlso", options), options);
+            fillKeywords(article.keywords!, related, getLocalOptions(info.options, "keywordsTitle", "keywords", options), options);
+            if (!disableAuthors) fillContributors(article.authors, related, getLocalOptions(info.options, "contentCreatorTitle", "contentCreator", options), options);
+            fillRelatedLinks(article.related(options), related, getLocalOptions(info.options, "seeAlsoTitle", "seeAlso", options), options);
             if (related.length > 0) children.push({
                 tagName: "section",
                 className: "x-part-blog-related",
@@ -450,7 +450,7 @@ namespace DeepX.MdBlogs {
                     },
                     children: [
                         { "tagName": "span", children: "<" },
-                        { "tagName": "span", children: this.string("previous", options) },
+                        { "tagName": "span", children: getLocalOptions(info.options, "previous", "previous", options) },
                     ]
                 }, {
                     tagName: "a",
@@ -466,7 +466,7 @@ namespace DeepX.MdBlogs {
                         }
                     },
                     children: [
-                        { "tagName": "span", children: this.string("next", options) },
+                        { "tagName": "span", children: getLocalOptions(info.options, "next", "next", options) },
                         { "tagName": "span", children: ">" },
                     ]
                 }]
@@ -489,7 +489,7 @@ namespace DeepX.MdBlogs {
                     },
                     children: [
                         { "tagName": "span", children: "<" },
-                        { "tagName": "span", children: this.string("back", options) },
+                        { "tagName": "span", children: getLocalOptions(info.options, "back", "back", options) },
                     ]
                 }]
             });
@@ -599,7 +599,7 @@ namespace DeepX.MdBlogs {
             linksComponent.setChildren(linkModels);
             linksComponent.style(linksStyle);
             const linksTitleComponent = super.getChild("linksTitle") as Hje.ElementComponent;
-            linksTitleComponent.setChildren(articles.options?.linksTitle || this.string("otherLinks", options));
+            linksTitleComponent.setChildren(articles.options?.linksTitle || getLocalOptions(this.internal.info.options, "otherLinksTitle", "otherLinks", options));
             linksTitleComponent.style(linksStyle);
             let article: ArticleInfo | null | undefined;
             if (select) article = this.select(select);
@@ -647,7 +647,7 @@ namespace DeepX.MdBlogs {
                 if (!searchResult || searchResult.length < 1) ul.children.push({
                     tagName: "li",
                     className: "grouping-header",
-                    children: this.string("empty", options)
+                    children: getLocalOptions(info.options, "empty", "empty", options)
                 });
                 else this.genMenu(ul.children, searchResult, 0);
             } else {
@@ -828,6 +828,12 @@ namespace DeepX.MdBlogs {
 
         component.setChildren(children);
         component.style({});
+    }
+
+    function getLocalOptions(config: Articles["options"], key: keyof Articles["options"], resKey: Parameters<typeof getLocaleString>[0], options?: {
+        mkt?: string | boolean;
+    }) {
+        return getLocaleProp(config, key, options) || getLocaleString(resKey, options?.mkt);
     }
 
     function getMembersModel(authors: IContributorInfo[], role: NameValueModel | null, options?: {

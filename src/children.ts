@@ -104,6 +104,21 @@ export class ComponentChildren {
     }
 
     /**
+     * Gets the indexof the last occurrence of  of the given child item.
+     * @param child The item to test.
+     * @returns The index; or -1, if non-exists.
+     */
+    lastIndexOf(child: BaseComponent) {
+        if (!child || !(child instanceof BaseComponent)) return -1;
+        const list = this.__innerStore.items;
+        for (let i = list.length - 1; i >= 0; i--) {
+            const item = list[i];
+            if (item.component === child) return i;
+        }
+        return -1;
+    }
+
+    /**
      * Checks if has the index or contains the child context key.
      * @param key The index of child, or the key of child declared in description.
      */
@@ -377,6 +392,10 @@ export class ComponentDataUpdateInfo<T = Record<string, any>> {
         const v = this.__innerStore.delta[key];
         if (v !== undefined) return v;
         return this.__innerStore.old[key];
+    }
+
+    typeOf<P extends keyof T>(key: P) {
+        return typeof this.__innerStore.delta[key];
     }
 
     oldValue<P extends keyof T>(key: P) {

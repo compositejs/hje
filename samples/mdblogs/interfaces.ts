@@ -127,7 +127,7 @@ namespace DeepX.MdBlogs {
          */
         disable?: boolean;
         /**
-         * The name.
+         * The display name.
          */
         name: string;
         /**
@@ -138,10 +138,25 @@ namespace DeepX.MdBlogs {
          * The options.
          */
         options?: {
+            /**
+             * The string case of display name.
+             */
             nameCase?: ITitleCaseKind;
+            /**
+             * The string case of subtitle.
+             */
             subtitleCase?: ITitleCaseKind;
+            /**
+             * The default name for each image.
+             */
             defaultItemName?: string | boolean;
+            /**
+             * The image ratio.
+             */
             ratio?: IImageRatio;
+            /**
+             * A value indicating whether each image has a thumbnail.
+             */
             thumb?: boolean;
             [property: string]: any;
         };
@@ -537,6 +552,42 @@ namespace DeepX.MdBlogs {
              * The tips to display under gallery collection.
              */
             galleryTips?: string;
+            /**
+             * The title of keywords section.
+             */
+            keywordsTitle?: string;
+            /**
+             * The title of content creator section.
+             */
+            contentCreatorTitle?: string;
+            /**
+             * The title of see also section.
+             */
+            seeAlsoTitle?: string;
+            /**
+             * The title of other links section.
+             */
+            otherLinksTitle?: string;
+            /**
+             * The text of search. 
+             */
+            search?: string;
+            /**
+             * The text of going to previous article.
+             */
+            previous?: string;
+            /**
+             * The text of going to next article.
+             */
+            next?: string;
+            /**
+             * The text of turning back.
+             */
+            back?: string;
+            /**
+             * The text of empty.
+             */
+            empty?: string;
         };
         /**
          * The definitions.

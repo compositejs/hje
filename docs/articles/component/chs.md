@@ -1,6 +1,6 @@
 # 组件
 
-你可以继承 `BaseComponent` 基类来实现更高级封装的富交互组件。
+你可以继承 `BaseComponent` 或 `DataComponent` 基类来实现更高级封装的富交互组件。
 
 以下是个示例，用于展示标题和列表。
 
@@ -10,28 +10,43 @@ export interface ISampleComponentData {
     list?: string[];
 }
 
-export class SampleComponent extends Hje.BaseComponent {
+export class SampleComponent extends Hje.DataComponent<ISampleComponentData> {
     constructor(args: any) {
         super(args);
-        const { title, list } = super.data();
-        if (title) this.currentModel.children.push({ key: "title", tagName: "h1", children: title });
-        if (list instanceof Array && list.length > 0) {
+        this.childrenAccess.append({ key: "title", tagName: "h1" }, { key: "list", tagName: "ul" });
+    }
+
+    protected onDataChange(info: ComponentDataUpdateInfo<ISampleComponentData>) {
+        this.onDataChange(info);
+
+        if (info.typeOf("title") !== "undefined") {
+            this.childrenAccess.update("title", {
+                children: info.delta.title
+            });
+        }
+
+        if (info.typeOf("list") !== "undefined") {
             const list: Hje.DescriptionContract[] = [];
-            this.currentModel.children.push({ tagName: "ul", children: list });
-            for (let i = 0; i < list.length; i++) {
-                list.push({ tagName: "li", children: list[i] });
+            if (list instanceof Array && list.length > 0) {
+                for (let i = 0; i < list.length; i++) {
+                    list.push({ tagName: "li", children: list[i] });
+                }
             }
+
+            this.childrenAccess.update("list", { children: list });
         }
     }
 
     get title() {
-        return super.childModel("title").children;
+        return this.data("title");
     }
 
-    set title(newValue?: string) {
-        super.refreshChild("title", context => {
-            context.model().children = newValue;
-        });
+    set title(newValue: string) {
+        return this.data("title", newValue);
+    }
+
+    get list() {
+        return this.data("list");
     }
 }
 ```

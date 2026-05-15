@@ -20,15 +20,20 @@ Hje.render("container-main", {
     on: {
       click(ev) { console.log("title clicked", ev); }
     },
-    children: "Alphabet"
+    children: "Alphabet",
   }, {
     tagName: "ul",
+    component: Hje.ListComponent<string>,
     className: "list-alphabet",
     props: {
       type: "circle",
     },
-    children: ["ABCDEFG", "HIJKLMN", "OPQ RST", "UVW XYZ"]
-      .map(ele => ({ tag: "li", children: ele }))
+    data: {
+      source: ["ABCDEFG", "HIJKLMN", "OPQ RST", "UVW XYZ"],
+      item(item) {
+        return { tag: "li", children: ele };
+      },
+    },
   }]
 });
 ```
