@@ -161,6 +161,25 @@
                 "description": "A value indicating whether each image has a thumbnail",
                 "type": "boolean"
               }
+            },
+            "patternProperties": {
+              "^nameCase#": {
+                "$ref": "#/$defs/titleCaseKind"
+              },
+              "^subtitleCase#": {
+                "$ref": "#/$defs/titleCaseKind"
+              },
+              "^defaultItemName#": {
+                "description": "The default name for each image",
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "boolean"
+                  }
+                ]
+              }
             }
           },
           "icon": {
@@ -241,7 +260,13 @@
                       "type": "object"
                     }
                   },
-                  "required": ["id", "year"]
+                  "required": ["id", "year"],
+                  "patternProperties": {
+                    "^name#": {
+                      "description": "The display name",
+                      "type": "string"
+                    }
+                  }
                 }
               }
             ]
@@ -251,7 +276,21 @@
             "description": "The data"
           }
         },
-        "required": ["id", "name", "year", "items"]
+        "required": ["id", "name", "year", "items"],
+        "patternProperties": {
+          "^name#": {
+            "description": "The display name",
+            "type": "string"
+          },
+          "^subtitle#": {
+            "description": "The subtitle",
+            "type": "string"
+          },
+          "^intro#": {
+            "description": "The introduction",
+            "type": "string"
+          }
+        }
       }
     },
     "links": {

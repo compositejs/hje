@@ -145,6 +145,7 @@ declare namespace Hje {
         constructor(delta: Partial<T>, old: T);
         get delta(): Partial<T>;
         get<P extends keyof T>(key: P): T[P];
+        typeOf<P extends keyof T>(key: P): "string" | "number" | "bigint" | "boolean" | "symbol" | "undefined" | "object" | "function";
         oldValue<P extends keyof T>(key: P): T[P];
         info(key: string, value?: any): any;
     }
