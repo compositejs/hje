@@ -207,7 +207,10 @@ namespace DeepX.MdBlogs {
                 store: this.data("store"),
                 defs(key) {
                     return self.defs(key);
-                }
+                },
+                relative(path: string | Hje.RelativePathInfo) {
+                    return info.relative(path).value;
+                },
             });
             this.refreshMenu();
             if (!already) this.lifecycle()?.onhome?.(this);
@@ -500,6 +503,9 @@ namespace DeepX.MdBlogs {
                 store: self.data("store"),
                 defs(key) {
                     return self.defs(key);
+                },
+                relative(path: string | Hje.RelativePathInfo) {
+                    return info.relative(path).value;
                 },
                 insertChildren(position, ...models) {
                     if (typeof position === "number") {

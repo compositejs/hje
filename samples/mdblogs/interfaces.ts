@@ -17,6 +17,7 @@ namespace DeepX.MdBlogs {
         mkt: string | boolean | undefined;
         store: any;
         defs(key: string): any;
+        relative(path: string | Hje.RelativePathInfo): string;
         insertChildren(position: "last" | "end" | "start" | number | undefined, ...models: Hje.DescriptionContract[]): void;
     }
 
@@ -25,6 +26,7 @@ namespace DeepX.MdBlogs {
         mkt: string | boolean | undefined;
         store: any;
         defs(key: string): any;
+        relative(path: string | Hje.RelativePathInfo): string;
     }
 
     export interface IArticlesPartDataFetchParams {

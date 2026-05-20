@@ -9,6 +9,44 @@
     <link href="https://cdn.jsdelivr.net/npm/hje@2.4.6/docs/css/site.org.css" rel="stylesheet" />
     <link rel="icon" type="image/png" href="https://cdn.jsdelivr.net/npm/hje@2.0.0/docs/images/logos/hje.png" />
     <link href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.11.1/build/styles/vs2015.min.css" rel="stylesheet" />
+    <style type="text/css" >
+    body > header:first-child + section {
+        min-height: calc(100vh - 100px);
+    }
+    #demo-container > ul {
+        color: #CCC; padding: 0; margin: 10px 0; list-style-position: inside;
+    }
+    #demo-container > ul > li {
+        height: 20px; padding: 9px 19px; margin: 10px 0; border: 1px solid rgba(128, 128, 128, 0.16); border-radius: 4px; background-color: rgba(128, 128, 128, 0.06); position: relative;
+    }
+    #demo-container > ul > li:hover {
+        border-bottom-color: rgba(128, 128, 128, 0.24);
+    }
+    #demo-container button {
+        color: #CCC; line-height: 18px; padding: 4px 9px; margin: 0 4px 0 0; border: 1px solid rgba(128, 128, 128, 0.16); border-radius: 4px; background-color: rgba(128, 128, 128, 0.06);
+    }
+    #demo-container button:hover {
+        color: #EEE; border-color: rgba(128, 128, 128, 0.24); background-color: rgba(128, 128, 128, 0.12);
+    }
+    #demo-container > div > input[type="text"] {
+        color: #EEE; line-height: 18px; padding: 4px 9px; margin: 0 4px 0 0; border: 1px solid rgba(128, 128, 128, 0.08); background-color: rgba(128, 128, 128, 0.04);
+    }
+    #demo-container > div > input[type="text"]:hover {
+        border-color: rgba(128, 128, 128, 0.16);
+    }
+    #demo-container > div > input[type="text"]:focus {
+        border-bottom-color: rgba(128, 128, 128, 0.42);
+    }
+    #demo-container > div > svg {
+        fill: #999;
+    }
+    #demo-container > ul > li > button {
+        color: red; width: 28px; padding: 4px 0; margin: 0; border: 0 none transparent; border-radius: 4px; background-color: rgba(128, 128, 128, 0.16); position: absolute; top: 6px; right: 6px;
+    }
+    #demo-container > ul > li > button:hover {
+        border-color: transparent; background-color: rgba(128, 128, 128, 0.24);
+    }
+    </style>
     <script src="https://cdn.jsdelivr.net/npm/datasense@3.2.0/dist/index.js" ></script>
     <script src="../js/dist/index.js" ></script>
 </head>
@@ -134,6 +172,7 @@
                 }, {
                     tagName: "input",
                     props: {
+                        type: "text",
                         value: store.createPropObservable("value"),
                     },
                     on: {
