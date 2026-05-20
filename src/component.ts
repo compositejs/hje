@@ -187,9 +187,20 @@ export class BaseComponent {
     /**
      * Gets a specific child item.
      * @param index The index or key of the child item.
+     * @returns The child item component; or undefined, if does not exist.
      */
     getChild(index: number | string) {
         return this.childrenAccess.get(index);
+    }
+
+    /**
+     * Gets the specific child item if it is an element component.
+     * @param index The index or key of the child item.
+     * @returns The child item element component; or undefined, if does not exist, or it is not an element component.
+     */
+    getChildAsElementComponent(index: number | string) {
+        const c = this.childrenAccess.get(index);
+        return c instanceof ElementComponent ? c : undefined;
     }
 
     /**

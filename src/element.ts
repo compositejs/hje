@@ -23,11 +23,20 @@ export class ElementComponent extends DataComponent<Record<string, any>> {
 
     /**
      * Sets the child items.
-     * @param models The models to set.
+     * @param models The models or text to set.
      * @returns The count of items added.
      */
     setChildren(models: DescriptionContract[] | null | string | number) {
         this.childrenAccess.set(models);
+    }
+
+    /**
+     * Sets the child items.
+     * @param model The model to set.
+     * @returns The count of items added.
+     */
+    setChildItems(...model: DescriptionContract[]) {
+        this.childrenAccess.set(model);
     }
 
     /**
@@ -38,6 +47,7 @@ export class ElementComponent extends DataComponent<Record<string, any>> {
     appendChild(...models: DescriptionContract[]) {
         return this.childrenAccess.append(...models);
     }
+
     /**
      * Inserts the child items at the specific position.
      * @param index The index to insert.

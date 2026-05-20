@@ -225,8 +225,15 @@ declare namespace Hje {
         /**
          * Gets a specific child item.
          * @param index The index or key of the child item.
+         * @returns The child item component; or undefined, if does not exist.
          */
         getChild(index: number | string): BaseComponent | undefined;
+        /**
+         * Gets the specific child item if it is an element component.
+         * @param index The index or key of the child item.
+         * @returns The child item element component; or undefined, if does not exist, or it is not an element component.
+         */
+        getChildAsElementComponent(index: number | string): ElementComponent | undefined;
         /**
          * Checks if has the index or contains the child context key.
          * @param key The index of child, or the key of child declared in description.
@@ -452,10 +459,16 @@ declare namespace Hje {
         text(text?: string | number | null): string | undefined;
         /**
          * Sets the child items.
-         * @param models The models to set.
+         * @param models The models or text to set.
          * @returns The count of items added.
          */
         setChildren(models: DescriptionContract[] | null | string | number): void;
+        /**
+         * Sets the child items.
+         * @param model The model to set.
+         * @returns The count of items added.
+         */
+        setChildItems(...model: DescriptionContract[]): void;
         /**
          * Appends the child items.
          * @param models The models to append.
