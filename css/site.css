@@ -777,7 +777,7 @@ section.x-part-blog-related > ul.link-tile-compact, section.x-part-blog-related 
 }
 #blog_content > article > section.x-part-blog-next > a:first-child,
 #blog_content > article > section.x-part-blog-next > a:first-child:visited {
-    background-image: url(../images/ele/left_pos_white.png);
+    background-image: url(../images/icons/left_pos_white.png);
     background-repeat: no-repeat;
     background-size: 16px;
     background-position: left 40px center;
@@ -786,7 +786,7 @@ section.x-part-blog-related > ul.link-tile-compact, section.x-part-blog-related 
 }
 #blog_content > article > section.x-part-blog-next > a:last-child,
 #blog_content > article > section.x-part-blog-next > a:last-child:visited {
-    background-image: url(../images/ele/right_pos_white.png);
+    background-image: url(../images/icons/right_pos_white.png);
     background-repeat: no-repeat;
     background-size: 16px;
     background-position: right 12px center;
@@ -795,7 +795,7 @@ section.x-part-blog-related > ul.link-tile-compact, section.x-part-blog-related 
 }
 #blog_content > article > section.x-part-blog-back > a:first-child,
 #blog_content > article > section.x-part-blog-back > a:first-child:visited {
-    background-image: url(../images/ele/left_pos_white.png);
+    background-image: url(../images/icons/left_pos_white.png);
     background-repeat: no-repeat;
     background-size: 16px;
     background-position: left 12px center;
