@@ -20,4 +20,4 @@ async function mergeFiles(input, output, comment) {
     }
 }
 
-mergeFiles(["./dist/index.js", "./dist/mdblogs.js"], "./docs/js/mdblogs.js", "Hje + MdBlogs");
+mergeFiles(["./dist/index.js", "./dist/mdblogs.js"], "./dist/mdblogs.bundle.js", "Hje + MdBlogs");

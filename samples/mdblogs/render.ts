@@ -121,13 +121,13 @@ namespace DeepX.MdBlogs {
                 });
             }
 
-            const { banner, supplement, onhome } = this.data("banner", "supplement") as IArticlesPartData;
+            const { banner, supplement, onhome } = this.data(["banner", "supplement", "onhome"]) as IArticlesPartData;
             if (banner) children.push(banner);
             const part = info.home(options);
             if (part) children.push({
                 tagName: "main",
                 lifecycle: {
-                    init(c) {
+                    load(c) {
                         if (part.contentCache) renderMd(c.element, part.contentCache, info.string("renderFailed", options));
                         else part.getContent(options).then(r => {
                             renderMd(c.element, r, info.string("renderFailed", options));

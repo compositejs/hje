@@ -28,7 +28,7 @@
   },
   "homepage": "https://hje.js.org/",
   "devDependencies": {
-    "typescript": "^5.9.2",
-    "terser": "^5.46.1"
+    "typescript": "^6.0.3",
+    "terser": "^5.51.2"
   }
 }

@@ -1,6 +1,7 @@
 {
     "compilerOptions": {
         "strict": true,
+        "ignoreDeprecations": "6.0",
         "forceConsistentCasingInFileNames": true,
         "outFile": "../../dist/mdblogs.js",
         "noImplicitAny": true,

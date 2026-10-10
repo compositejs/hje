@@ -2,7 +2,7 @@ body {
     color: #DDD;
     font-family: 'Segoe UI', 'Microsoft Yahei', 'Microsoft JhengHei', Tahoma, "Helvetica Neue", Arial, Geneva, Verdana, sans-serif, "Segoe UI Emoji", "Segoe UI Symbol";
     font-size: 14px;
-    background-image: url(https://cdn.jsdelivr.net/npm/hje@2.2.0/docs/images/bg/org/title-shadow.png);
+    background-image: url(../images/bg/net/title-shadow.png);
     background-position: center 60px;
     background-repeat: no-repeat;
     background-color: #222;
@@ -47,7 +47,7 @@ input[type=checkbox] {
     border: 1px solid #999;
     border-radius: 4px;
     background-color: rgba(128, 128, 128, 0.1);
-    background-image: url(https://cdn.jsdelivr.net/npm/hje@2.2.0/docs/images/ele/check_mark_white.png);
+    background-image: url(../images/ele/check_mark_white.png);
     background-repeat: no-repeat;
     background-size: 12px;
     background-position: left 16px center;
@@ -96,7 +96,7 @@ input[type=number]:focus-visible, input[type=search]:focus-visible, input[type=u
 body > header:first-child {
     height: 60px;
     background-color: #333;
-    background-image: url(https://cdn.jsdelivr.net/npm/hje@2.2.0/docs/images/bg/org/title.jpg);
+    background-image: url(../images/bg/net/title.jpg);
     background-position: center top;
     background-repeat: no-repeat;
     white-space: nowrap;
@@ -200,7 +200,7 @@ body > header:first-child + header {
         display: block;
     }
     body > header:first-child > section:first-child > h1 + ul {
-        background-image: url(https://cdn.jsdelivr.net/npm/hje@2.2.0/docs/images/bg/title-menu.jpg);
+        background-image: url(../images/bg/title-menu.jpg);
         background-repeat: repeat-x;
         height: 50px;
         max-width: none;
@@ -230,7 +230,7 @@ body > script + footer {
     height: 340px;
     margin: 0;
     background-color: #333;
-    background-image: url(https://cdn.jsdelivr.net/npm/hje@2.2.0/docs/images/bg/org/bottom.jpg);
+    background-image: url(../images/bg/net/bottom.jpg);
     background-position: center;
     background-repeat: no-repeat;
 }
@@ -353,17 +353,17 @@ body > section > ul > li {
     background-color: transparent;
 }
 section.x-bg-motley, div.x-bg-motley {
-    background-image: url(https://cdn.jsdelivr.net/npm/hje@2.2.0/docs/images/bg/jc/motley_222.jpg);
+    background-image: url(../images/bg/jc/motley_222.jpg);
     background-repeat: repeat;
     background-position: top center;
 }
 section.x-bg-stars, div.x-bg-stars {
-    background-image: url(https://cdn.jsdelivr.net/npm/hje@2.2.0/docs/images/bg/jc/star_plus.jpg);
+    background-image: url(../images/bg/jc/star_plus.jpg);
     background-repeat: repeat;
     background-position: top center;
 }
 section.x-bg-motley-light, div.x-bg-motley-light {
-    background-image: url(https://cdn.jsdelivr.net/npm/hje@2.2.0/docs/images/bg/jc/motley_333.jpg);
+    background-image: url(../images/bg/jc/motley_333.jpg);
     background-repeat: repeat;
     background-position: top center;
 }
@@ -395,7 +395,7 @@ section.x-bg-motley-light, div.x-bg-motley-light {
 /* Links */
 a.x-link-more > span:last-child, a.x-link-more:visited > span:last-child {
     padding-right: 20px;
-    background-image: url(https://cdn.jsdelivr.net/npm/hje@2.2.0/docs/images/ele/right_pos_gray.png);
+    background-image: url(../images/ele/right_pos_gray.png);
     background-size: 12px;
     background-repeat: no-repeat;
     background-position: right 2px center;
@@ -900,8 +900,8 @@ section.x-part-blog-related > ul.link-tile-compact, section.x-part-blog-related 
     cursor: default;
     user-select: text;
 }
-section ul.link-item-bloglink-tile-compact,
-section ul.link-item-bloglink-tile-compact > li,
+#blog_content > ul.link-tile-compact,
+#blog_content > ul.link-tile-compact > li,
 #blog_content > article > main > ul.link-tile-compact,
 #blog_content > article > main > ul.link-tile-compact > li,
 #blog_content > article > section > ul.link-tile-compact,
@@ -1188,7 +1188,7 @@ section ul.link-item-bloglink-tile-compact > li,
 }
 #blog_content > article > section.x-part-blog-next > a:first-child,
 #blog_content > article > section.x-part-blog-next > a:first-child:visited {
-    background-image: url(https://cdn.jsdelivr.net/npm/hje@2.2.0/docs/images/ele/left_pos_white.png);
+    background-image: url(../images/ele/left_pos_white.png);
     background-repeat: no-repeat;
     background-size: 16px;
     background-position: left 40px center;
@@ -1197,7 +1197,7 @@ section ul.link-item-bloglink-tile-compact > li,
 }
 #blog_content > article > section.x-part-blog-next > a:last-child,
 #blog_content > article > section.x-part-blog-next > a:last-child:visited {
-    background-image: url(https://cdn.jsdelivr.net/npm/hje@2.2.0/docs/images/ele/right_pos_white.png);
+    background-image: url(../images/ele/right_pos_white.png);
     background-repeat: no-repeat;
     background-size: 16px;
     background-position: right 12px center;
@@ -1206,7 +1206,7 @@ section ul.link-item-bloglink-tile-compact > li,
 }
 #blog_content > article > section.x-part-blog-back > a:first-child,
 #blog_content > article > section.x-part-blog-back > a:first-child:visited {
-    background-image: url(https://cdn.jsdelivr.net/npm/hje@2.2.0/docs/images/ele/left_pos_white.png);
+    background-image: url(../images/ele/left_pos_white.png);
     background-repeat: no-repeat;
     background-size: 16px;
     background-position: left 12px center;
