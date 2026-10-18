@@ -213,6 +213,7 @@ namespace DeepX.MdBlogs {
 
         getRoutePath(options?: {
             mkt?: string | boolean;
+            disableId?: boolean;
         }) {
             const data = this._inner.data;
             let dir = this.getDirPath(options);
@@ -308,6 +309,14 @@ namespace DeepX.MdBlogs {
                     return Promise.reject(new Error("empty"));
                 }
 
+                if (path.value.endsWith(".d.ts"))
+                    return "```typescript\n" + md + "\n```";
+                if (path.value.endsWith(".json"))
+                    return "```json\n" + md + "\n```";
+                if (path.value.endsWith(".yml") || path.value.endsWith(".yaml"))
+                    return "```yaml\n" + md + "\n```";
+                if (path.value.endsWith(".xml") || path.value.endsWith(".config"))
+                    return "```xml\n" + md + "\n```";
                 if (end.start) {
                     let endTag = "<!-- " + (end.start === true ? "Start" : end) + " -->\n";
                     let endIndex = md.indexOf(endTag);
@@ -341,11 +350,12 @@ namespace DeepX.MdBlogs {
                     .replace(/\]\(..\/..\/..\/..\//g, "](..4./")
                     .replace(/\]\(..\/..\/..\//g, "](..3./")
                     .replace(/\]\(..\/..\//g, "](..2./")
-                    .replace(/\]\(..\//g, "](" + path.relative("../").value)
+                    .replace(/\]\(..\//g, "](..1./")
+                    .replace(/\]\(.\//g, "](" + path.relative("./").value)
                     .replace(/\]\(..4.\//g, "](" + path.relative("../../../../").value)
                     .replace(/\]\(..3.\//g, "](" + path.relative("../../../").value)
                     .replace(/\]\(..2.\//g, "](" + path.relative("../../").value)
-                    .replace(/\]\(.\//g, "](" + path.relative("./").value);
+                    .replace(/\]\(..1.\//g, "](" + path.relative("../").value);
                 this._inner.content = md;
                 return md;
             });

@@ -520,6 +520,21 @@ declare namespace Hje {
          * @param thisArg An object to which the this keyword can refer in the callbackfn function. If thisArg is omitted, undefined is used as the this value.
          */
         forEachChild(callbackfn: (value: BaseComponent, index: number, array: BaseComponent[]) => void, thisArg?: any): void;
+        /**
+         * Filters the child items based on the specified predicate function.
+         * @param predicate A function that accepts up to three arguments. filter calls the predicate function one time for each component in the children.
+         * @param thisArg An object to which the this keyword can refer in the predicate function. If thisArg is omitted, undefined is used as the this value.
+         * @returns An array containing all child items that pass the test implemented by the predicate function.
+         */
+        filterChild(predicate: (value: BaseComponent, index: number, array: BaseComponent[]) => boolean, thisArg?: any): BaseComponent[];
+        /**
+         * Maps the child items based on the specified callback function.
+         * @typeParam T The type of the value returned by the callback function.
+         * @param callbackfn A function that accepts up to three arguments. map calls the callbackfn function one time for each component in the children.
+         * @param thisArg An object to which the this keyword can refer in the callbackfn function. If thisArg is omitted, undefined is used as the this value.
+         * @returns An array containing the results of calling the callback function on each child item.
+         */
+        mapChild<T>(callbackfn: (value: BaseComponent, index: number, array: BaseComponent[]) => T, thisArg?: any): T[];
     }
 }
 declare namespace Hje {

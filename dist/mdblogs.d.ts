@@ -168,6 +168,7 @@ declare namespace DeepX.MdBlogs {
             disableAuthors?: boolean;
             disableMenu?: boolean;
             disableSearch?: boolean;
+            home?: string;
             linksTitle?: string;
             galleryTitle?: string;
             galleryTips?: string;
@@ -291,6 +292,7 @@ declare namespace DeepX.MdBlogs {
         hasGallery(value: string): boolean;
         getRoutePath(options?: {
             mkt?: string | boolean;
+            disableId?: boolean;
         }): string | undefined;
         is(name: string, options?: {
             mkt?: string | boolean;
@@ -774,10 +776,6 @@ declare namespace DeepX.MdBlogs {
          */
         description?: string;
         /**
-         * The relative URL of home markdown file.
-         */
-        home?: string;
-        /**
          * All blog info.
          */
         blog?: IArticleInfo[] | IArticleBlogConfig;
@@ -837,6 +835,10 @@ declare namespace DeepX.MdBlogs {
              * A flag to indicate whether need disable search functionality.
              */
             disableSearch?: boolean;
+            /**
+             * The relative URL of home markdown file.
+             */
+            home?: string;
             /**
              * The title of links.
              */

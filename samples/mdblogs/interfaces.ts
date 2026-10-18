@@ -478,10 +478,6 @@ namespace DeepX.MdBlogs {
          */
         description?: string;
         /**
-         * The relative URL of home markdown file.
-         */
-        home?: string;
-        /**
          * All blog info.
          */
         blog?: IArticleInfo[] | IArticleBlogConfig;
@@ -542,6 +538,10 @@ namespace DeepX.MdBlogs {
              * A flag to indicate whether need disable search functionality.
              */
             disableSearch?: boolean;
+            /**
+             * The relative URL of home markdown file.
+             */
+            home?: string;
             /**
              * The title of links.
              */

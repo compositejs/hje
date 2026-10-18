@@ -20,10 +20,6 @@
       "description": "The description of the website",
       "type": "string"
     },
-    "home": {
-      "description": "The relative URL of home markdown file",
-      "type": "string"
-    },
     "blog": {
       "description": "All blogs info",
       "anyOf": [
@@ -324,32 +320,36 @@
           "description": "A flag to indicate whether need disable search functionality",
           "type": "boolean"
         },
+        "home": {
+          "description": "The relative URL of home markdown file",
+          "type": "string"
+        },
         "linksTitle": {
-          "description": "The title of links",
+          "description": "The title of links section",
           "type": "string"
         },
         "galleryTitle": {
-          "description": "The title of ",
+          "description": "The title of gallery section",
           "type": "string"
         },
         "galleryTips": {
-          "description": "The title of ",
+          "description": "The tips of gallery section",
           "type": "string"
         },
         "keywordsTitle": {
-          "description": "The title of ",
+          "description": "The title of keywords section",
           "type": "string"
         },
         "contentCreatorTitle": {
-          "description": "The title of ",
+          "description": "The title of content creator section",
           "type": "string"
         },
         "seeAlsoTitle": {
-          "description": "The title of ",
+          "description": "The title of see also section",
           "type": "string"
         },
         "otherLinksTitle": {
-          "description": "The title of content creator section",
+          "description": "The title of other links section",
           "type": "string"
         },
         "search": {

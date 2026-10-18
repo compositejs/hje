@@ -82,7 +82,7 @@ namespace DeepX.MdBlogs {
             const specificMkt = options?.mkt && options.mkt !== true;
             if (this._inner.home && !options?.reload && !specificMkt) return this._inner.home;
             if (this._inner.home === null) return undefined;
-            const url = getLocaleProp(this._inner.data, "home", options);
+            const url = getLocaleProp(this._inner.data?.options, "home", options);
             if (!url || typeof url !== "string") {
                 this._inner.home = null;
                 return undefined;

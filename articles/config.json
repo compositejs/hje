@@ -54,6 +54,16 @@
             "dir": "mdblogs",
             "file": true,
             "end": "End of Article"
+        },
+        {
+            "disable": "label",
+            "name": ".d.ts"
+        },
+        {
+            "id": "def",
+            "name": "Hje",
+            "dir": "../dist",
+            "file": "index.d.ts"
         }
     ],
     "hiddenArticles": [
