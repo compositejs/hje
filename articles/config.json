@@ -60,10 +60,14 @@
             "name": ".d.ts"
         },
         {
-            "id": "def",
             "name": "Hje",
             "dir": "../dist",
             "file": "index.d.ts"
+        },
+        {
+            "name": "MdBlogs",
+            "dir": "../dist",
+            "file": "mdblogs.d.ts"
         }
     ],
     "hiddenArticles": [
